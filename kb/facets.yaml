@@ -1,0 +1,77 @@
+# kb/facets.yaml
+schema: kb.facets.v1
+version: kb-2026.08
+reviewed: true
+config:
+  # Spec §4.2: when both directions on one facet score >= this, report a tension
+  # instead of averaging it away.
+  tension_threshold: 0.4
+dimensions:
+  core_essence:
+    label: "Core essence"
+    order: 1
+    facets:
+      self_image:      {label: "Self-image",        high: "self-assured",   low: "self-questioning"}
+      archetype_force: {label: "Archetypal force",  high: "singular",       low: "adaptive"}
+      visibility:      {label: "Visibility",        high: "outward",        low: "inward"}
+  drive:
+    label: "Drive & motivation"
+    order: 2
+    facets:
+      initiative:      {label: "Initiative",        high: "self-starting",  low: "responsive"}
+      intensity:       {label: "Intensity",         high: "high-burn",      low: "steady-burn"}
+      novelty_seeking: {label: "Novelty seeking",   high: "novelty-seeking", low: "depth-seeking"}
+      recognition:     {label: "Recognition need",  high: "needs-recognition", low: "self-validating"}
+  decision_making:
+    label: "Decision-making style"
+    order: 3
+    facets:
+      gut_vs_deliberation: {label: "Gut vs deliberation", high: "gut", low: "deliberation"}
+      timing:              {label: "Decision timing",     high: "immediate",  low: "needs-time"}
+      pressure_response:   {label: "Under pressure",      high: "thrives",    low: "dislikes-pressure"}
+      risk_appetite:       {label: "Risk appetite",       high: "risk-taking", low: "risk-averse"}
+  communication:
+    label: "Communication style"
+    order: 4
+    facets:
+      directness:      {label: "Directness",        high: "direct",         low: "indirect"}
+      pace:            {label: "Pace",              high: "fast",           low: "measured"}
+      register:        {label: "Register",          high: "expressive",     low: "reserved"}
+      listening:       {label: "Listening",         high: "absorbing",      low: "asserting"}
+  emotional:
+    label: "Emotional landscape"
+    order: 5
+    facets:
+      processing:      {label: "Processing style",  high: "in-the-open",    low: "internal"}
+      volatility:      {label: "Emotional weather", high: "wave-like",      low: "even"}
+      sensitivity:     {label: "Sensitivity",       high: "highly-sensitive", low: "thick-skinned"}
+  relational:
+    label: "Relational style"
+    order: 6
+    facets:
+      bonding:         {label: "Bonding",           high: "fast-bonding",   low: "slow-bonding"}
+      autonomy:        {label: "Autonomy need",     high: "independent",    low: "interdependent"}
+      conflict:        {label: "Conflict style",    high: "engages",        low: "avoids"}
+      loyalty:         {label: "Loyalty",           high: "committed",      low: "free-ranging"}
+  work_energy:
+    label: "Work & energy style"
+    order: 7
+    facets:
+      rhythm:          {label: "Sustainable rhythm", high: "sprint",        low: "marathon"}
+      structure:       {label: "Structure need",     high: "structured",    low: "improvisational"}
+      role_shape:      {label: "Role shape",         high: "leading",       low: "supporting"}
+      endurance:       {label: "Endurance",          high: "high-capacity", low: "needs-recovery"}
+  growth_edges:
+    label: "Growth edges"
+    order: 8
+    facets:
+      control:         {label: "Control",           high: "grips",          low: "drifts"}
+      self_worth:      {label: "Self-worth",        high: "over-proves",    low: "under-claims"}
+      patience:        {label: "Patience",          high: "impatient",      low: "over-waiting"}
+  life_themes:
+    label: "Life themes & purpose"
+    order: 9
+    facets:
+      seeking:         {label: "Central seeking",   high: "meaning",        low: "mastery"}
+      service:         {label: "Service orientation", high: "outward-serving", low: "self-realizing"}
+      transformation:  {label: "Transformation arc", high: "reinvention",   low: "continuity"}

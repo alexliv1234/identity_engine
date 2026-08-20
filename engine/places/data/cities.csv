@@ -1,0 +1,95 @@
+name,ascii,country_code,country_name,admin1,lat,lon,tz,population
+Chongqing,Chongqing,CN,China,CQ,29.4316,106.9123,Asia/Shanghai,32054159
+Shanghai,Shanghai,CN,China,SH,31.2304,121.4737,Asia/Shanghai,24870000
+Beijing,Beijing,CN,China,BJ,39.9042,116.4074,Asia/Shanghai,21540000
+Shenzhen,Shenzhen,CN,China,GD,22.5431,114.0579,Asia/Shanghai,17494398
+Delhi,Delhi,IN,India,DL,28.7041,77.1025,Asia/Kolkata,16787941
+Guangzhou,Guangzhou,CN,China,GD,23.1291,113.2644,Asia/Shanghai,16096724
+Istanbul,Istanbul,TR,Turkey,34,41.0082,28.9784,Europe/Istanbul,15462452
+Karachi,Karachi,PK,Pakistan,SD,24.8607,67.0011,Asia/Karachi,14910352
+Lagos,Lagos,NG,Nigeria,LA,6.5244,3.3792,Africa/Lagos,14862000
+Tokyo,Tokyo,JP,Japan,13,35.6895,139.6917,Asia/Tokyo,13960000
+Moscow,Moscow,RU,Russia,MOW,55.7558,37.6173,Europe/Moscow,12506468
+Mumbai,Mumbai,IN,India,MH,19.076,72.8777,Asia/Kolkata,12442373
+São Paulo,Sao Paulo,BR,Brazil,SP,-23.5505,-46.6333,America/Sao_Paulo,12325232
+Wuhan,Wuhan,CN,China,HB,30.5928,114.3055,Asia/Shanghai,11081000
+Jakarta,Jakarta,ID,Indonesia,JK,-6.2088,106.8456,Asia/Jakarta,10562088
+Seoul,Seoul,KR,South Korea,11,37.5665,126.978,Asia/Seoul,9776000
+Lima,Lima,PE,Peru,15,-12.0464,-77.0428,America/Lima,9674755
+Cairo,Cairo,EG,Egypt,C,30.0444,31.2357,Africa/Cairo,9500000
+Ciudad de México,Ciudad de Mexico,MX,Mexico,CMX,19.4326,-99.1332,America/Mexico_City,9209944
+Hồ Chí Minh,Ho Chi Minh,VN,Vietnam,SG,10.8231,106.6297,Asia/Ho_Chi_Minh,9077158
+Tehran,Tehran,IR,Iran,23,35.6892,51.389,Asia/Tehran,9038000
+London,London,GB,United Kingdom,ENG,51.5074,-0.1278,Europe/London,8982000
+Dhaka,Dhaka,BD,Bangladesh,13,23.8103,90.4125,Asia/Dhaka,8906039
+Bengaluru,Bengaluru,IN,India,KA,12.9716,77.5946,Asia/Kolkata,8443675
+New York,New York,US,United States,NY,40.7128,-74.006,America/New_York,8336817
+Bangkok,Bangkok,TH,Thailand,10,13.7563,100.5018,Asia/Bangkok,8305218
+Hà Nội,Ha Noi,VN,Vietnam,HN,21.0278,105.8342,Asia/Ho_Chi_Minh,8053663
+Riyadh,Riyadh,SA,Saudi Arabia,01,24.7136,46.6753,Asia/Riyadh,7676654
+Hong Kong,Hong Kong,HK,Hong Kong,NA,22.3193,114.1694,Asia/Hong_Kong,7491609
+Bogotá,Bogota,CO,Colombia,DC,4.711,-74.0721,America/Bogota,7412566
+Baghdad,Baghdad,IQ,Iraq,44,33.3152,44.3661,Asia/Baghdad,7180889
+Rio de Janeiro,Rio de Janeiro,BR,Brazil,RJ,-22.9068,-43.1729,America/Sao_Paulo,6747815
+Singapore,Singapore,SG,Singapore,01,1.3521,103.8198,Asia/Singapore,5703600
+Santiago,Santiago,CL,Chile,RM,-33.4489,-70.6693,America/Santiago,5614000
+Sydney,Sydney,AU,Australia,NSW,-33.8688,151.2093,Australia/Sydney,5312000
+Melbourne,Melbourne,AU,Australia,VIC,-37.8136,144.9631,Australia/Melbourne,5078193
+Chennai,Chennai,IN,India,TN,13.0827,80.2707,Asia/Kolkata,4646732
+Kolkata,Kolkata,IN,India,WB,22.5726,88.3639,Asia/Kolkata,4496694
+Nairobi,Nairobi,KE,Kenya,30,-1.2921,36.8219,Africa/Nairobi,4397073
+Los Angeles,Los Angeles,US,United States,CA,34.0522,-118.2437,America/Los_Angeles,3898747
+Berlin,Berlin,DE,Germany,BE,52.52,13.405,Europe/Berlin,3645000
+Dubai,Dubai,AE,United Arab Emirates,DU,25.2048,55.2708,Asia/Dubai,3331420
+Madrid,Madrid,ES,Spain,MD,40.4168,-3.7038,Europe/Madrid,3223000
+Kyiv,Kyiv,UA,Ukraine,30,50.4501,30.5234,Europe/Kyiv,2952301
+Buenos Aires,Buenos Aires,AR,Argentina,C,-34.6037,-58.3816,America/Argentina/Buenos_Aires,2890151
+Roma,Roma,IT,Italy,RM,41.9028,12.4964,Europe/Rome,2872800
+Chicago,Chicago,US,United States,IL,41.8781,-87.6298,America/Chicago,2746388
+Toronto,Toronto,CA,Canada,ON,43.6532,-79.3832,America/Toronto,2731571
+Osaka,Osaka,JP,Japan,27,34.6937,135.5023,Asia/Tokyo,2691742
+Taipei,Taipei,TW,Taiwan,TPE,25.033,121.5654,Asia/Taipei,2646204
+Houston,Houston,US,United States,TX,29.7604,-95.3698,America/Chicago,2304580
+Paris,Paris,FR,France,IDF,48.8566,2.3522,Europe/Paris,2148271
+Wien,Wien,AT,Austria,9,48.2082,16.3738,Europe/Vienna,1897000
+Manila,Manila,PH,Philippines,00,14.5995,120.9842,Asia/Manila,1846513
+Hamburg,Hamburg,DE,Germany,HH,53.5511,9.9937,Europe/Berlin,1845229
+Kuala Lumpur,Kuala Lumpur,MY,Malaysia,14,3.139,101.6869,Asia/Kuala_Lumpur,1808000
+Warszawa,Warszawa,PL,Poland,14,52.2297,21.0122,Europe/Warsaw,1790658
+Montréal,Montreal,CA,Canada,QC,45.5017,-73.5673,America/Toronto,1762949
+Budapest,Budapest,HU,Hungary,BU,47.4979,19.0402,Europe/Budapest,1752286
+Auckland,Auckland,NZ,New Zealand,E7,-36.8485,174.7633,Pacific/Auckland,1657200
+Barcelona,Barcelona,ES,Spain,CT,41.3874,2.1686,Europe/Madrid,1620343
+München,Munchen,DE,Germany,BY,48.1351,11.582,Europe/Berlin,1484226
+Milano,Milano,IT,Italy,MI,45.4642,9.19,Europe/Rome,1371498
+Praha,Praha,CZ,Czechia,10,50.0755,14.4378,Europe/Prague,1335084
+Brussels,Brussels,BE,Belgium,BRU,50.8503,4.3517,Europe/Brussels,1208542
+Stockholm,Stockholm,SE,Sweden,AB,59.3293,18.0686,Europe/Stockholm,975551
+Johannesburg,Johannesburg,ZA,South Africa,GT,-26.2041,28.0473,Africa/Johannesburg,957441
+Jerusalem,Jerusalem,IL,Israel,JM,31.7683,35.2137,Asia/Jerusalem,936425
+San Francisco,San Francisco,US,United States,CA,37.7749,-122.4194,America/Los_Angeles,873965
+Amsterdam,Amsterdam,NL,Netherlands,NH,52.3676,4.9041,Europe/Amsterdam,872680
+Zagreb,Zagreb,HR,Croatia,01,45.815,15.9819,Europe/Zagreb,806341
+Seattle,Seattle,US,United States,WA,47.6062,-122.3321,America/Los_Angeles,737015
+Denver,Denver,US,United States,CO,39.7392,-104.9903,America/Denver,715522
+Oslo,Oslo,NO,Norway,03,59.9139,10.7522,Europe/Oslo,697010
+Washington,Washington,US,United States,DC,38.9072,-77.0369,America/New_York,689545
+Boston,Boston,US,United States,MA,42.3601,-71.0589,America/New_York,675647
+Athina,Athina,GR,Greece,I,37.9838,23.7275,Europe/Athens,664046
+Helsinki,Helsinki,FI,Finland,18,60.1699,24.9384,Europe/Helsinki,658864
+København,Kobenhavn,DK,Denmark,84,55.6761,12.5683,Europe/Copenhagen,638117
+Vancouver,Vancouver,CA,Canada,BC,49.2827,-123.1207,America/Vancouver,631486
+Dublin,Dublin,IE,Ireland,L,53.3498,-6.2603,Europe/Dublin,554554
+Lisboa,Lisboa,PT,Portugal,11,38.7223,-9.1393,Europe/Lisbon,544851
+Tel Aviv-Yafo,Tel Aviv-Yafo,IL,Israel,TA,32.0853,34.7818,Asia/Jerusalem,460613
+Miami,Miami,US,United States,FL,25.7617,-80.1918,America/New_York,442241
+Zürich,Zurich,CH,Switzerland,ZH,47.3769,8.5417,Europe/Zurich,434335
+Cape Town,Cape Town,ZA,South Africa,WC,-33.9249,18.4241,Africa/Johannesburg,433688
+London,London,CA,Canada,ON,42.9849,-81.2453,America/Toronto,422324
+Wellington,Wellington,NZ,New Zealand,G4,-41.2865,174.7762,Pacific/Auckland,212700
+Springfield,Springfield,US,United States,MO,37.209,-93.2923,America/Chicago,169176
+Springfield,Springfield,US,United States,MA,42.1015,-72.5898,America/New_York,155929
+Reykjavík,Reykjavik,IS,Iceland,1,64.1466,-21.9426,Atlantic/Reykjavik,131136
+Springfield,Springfield,US,United States,IL,39.7817,-89.6501,America/Chicago,114394
+Springfield,Springfield,US,United States,OR,44.0462,-123.022,America/Los_Angeles,62178
+Springfield,Springfield,US,United States,OH,39.9242,-83.8088,America/New_York,58662

@@ -1,0 +1,129 @@
+schema: kb.mapping.v1
+system: numerology
+element: expression
+reviewed: true
+source: >-
+  Pythagorean tradition, common contemporary synthesis. Interpretive choice:
+  the Expression (Destiny) number sums the Pythagorean letter values of every
+  letter in the full Latin name, then reduces once, preserving 11/22/33.
+  Describes the outward capability the name pattern suggests, not a
+  prediction of achievement.
+entries:
+  "1":
+    label: "Expression 1"
+    text: >-
+      Capable of leading from the front and making a call when no one else
+      will. Left unchecked this becomes an unwillingness to share credit or
+      control.
+    tags:
+      - {facet: drive.initiative, weight: 0.8, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.6, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: high}
+  "2":
+    label: "Expression 2"
+    text: >-
+      Capable of holding a room together and mediating between opposing
+      views. Left unchecked this becomes an inability to state a position
+      plainly.
+    tags:
+      - {facet: communication.listening, weight: 0.8, direction: high}
+      - {facet: relational.conflict, weight: 0.6, direction: low}
+      - {facet: communication.directness, weight: 0.5, direction: low}
+  "3":
+    label: "Expression 3"
+    text: >-
+      Capable of making an idea land through how it's said, not just what it
+      is. Left unchecked this becomes style outrunning substance.
+    tags:
+      - {facet: communication.register, weight: 0.9, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: communication.pace, weight: 0.5, direction: high}
+  "4":
+    label: "Expression 4"
+    text: >-
+      Capable of turning a rough plan into a working system with real parts.
+      Left unchecked this becomes an intolerance for ambiguity that stalls
+      early-stage work.
+    tags:
+      - {facet: work_energy.structure, weight: 0.9, direction: high}
+      - {facet: decision_making.timing, weight: 0.5, direction: low}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "5":
+    label: "Expression 5"
+    text: >-
+      Capable of adapting quickly when circumstances shift underfoot. Left
+      unchecked this becomes an inconsistency that erodes others' trust in
+      follow-through.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.5, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: high}
+  "6":
+    label: "Expression 6"
+    text: >-
+      Capable of noticing what a group needs before it's asked for and
+      quietly providing it. Left unchecked this becomes over-functioning for
+      people who never requested the help.
+    tags:
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}
+  "7":
+    label: "Expression 7"
+    text: >-
+      Capable of sustained, precise analysis that others give up on too
+      early. Left unchecked this becomes a perfectionism that never ships.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: low}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  "8":
+    label: "Expression 8"
+    text: >-
+      Capable of organizing resources and people toward a concrete, scaled
+      outcome. Left unchecked this becomes treating relationships as
+      instrumental to the outcome.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.8, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.4, direction: low}
+  "9":
+    label: "Expression 9"
+    text: >-
+      Capable of speaking to a wide audience and framing a cause in terms
+      that travel. Left unchecked this becomes a vagueness that avoids the
+      specific and personal.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+      - {facet: core_essence.visibility, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.4, direction: low}
+  "11":
+    label: "Expression 11 (master)"
+    text: >-
+      Capable of articulating what a group is only half-aware it's feeling.
+      Left unchecked this becomes overwhelm from carrying that awareness
+      without a place to put it down.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.8, direction: high}
+      - {facet: communication.register, weight: 0.6, direction: high}
+      - {facet: emotional.volatility, weight: 0.5, direction: high}
+  "22":
+    label: "Expression 22 (master)"
+    text: >-
+      Capable of designing something at institutional scale and staying
+      close enough to the detail to build it. Left unchecked this becomes
+      an exhausting refusal to delegate.
+    tags:
+      - {facet: work_energy.structure, weight: 0.8, direction: high}
+      - {facet: work_energy.endurance, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+  "33":
+    label: "Expression 33 (master)"
+    text: >-
+      Capable of teaching or mentoring in a way that changes how people see
+      themselves. Left unchecked this becomes self-neglect in service of
+      everyone else's growth.
+    tags:
+      - {facet: life_themes.service, weight: 0.9, direction: high}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: low}
