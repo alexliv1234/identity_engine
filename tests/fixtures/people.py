@@ -85,4 +85,36 @@ FIXTURES: dict[str, BirthInput] = {
         tz="Europe/Moscow",
         hebrew_name=None,
     ),
+    "polar_latitude": BirthInput(
+        # Tromso, Norway sits above the Placidus polar limit (POLAR_LIMIT_DEG
+        # = 66.0 in engine/ephemeris/skyfield_adapter.py). Birth time IS
+        # known here, so this exercises a degradation path no other fixture
+        # reaches: astrology stays at confidence 1.0 (placements are exact)
+        # but houses/angles are dropped for a latitude reason, not a missing-
+        # time reason -- the "different note, same shape" branch covered at
+        # unit level in tests/test_astrology.py but never before exercised
+        # through build_profile()/the golden suite.
+        full_name="Elin Solberg",
+        birth_date=dt.date(1990, 6, 15),
+        birth_time=dt.time(14, 0),
+        lat=69.6492,
+        lon=18.9553,
+        tz="Europe/Oslo",
+        hebrew_name=None,
+    ),
+    "non_latin_name_no_birth_time": BirthInput(
+        # The composed-degradation cell spec §10 implies but no fixture
+        # covered: a non-Latin name (numerology transliterates, reduced
+        # confidence) AND a missing birth time (astrology loses houses/
+        # angles at reduced confidence, Human Design and Gene Keys excluded
+        # outright) at once. "non_latin_name" above has a known birth time;
+        # "no_birth_time" above has a Latin name. Neither reaches this cell.
+        full_name="Ольга Смирнова",
+        birth_date=dt.date(1965, 2, 20),
+        birth_time=None,
+        lat=59.9343,
+        lon=30.3351,
+        tz="Europe/Moscow",
+        hebrew_name=None,
+    ),
 }
