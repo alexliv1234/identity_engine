@@ -22,7 +22,7 @@ import yaml
 
 from engine.ephemeris import get_ephemeris
 from engine.kb.loader import load_kb
-from engine.systems.hd_wheel import Activation, activations, design_julian_day
+from engine.systems.hd_wheel import Activation, activations, cached_design_julian_day
 from engine.types import BirthInput, InputField, SystemOutput, TraitTag
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -203,7 +203,7 @@ class HumanDesignCalculator:
 
         eph = get_ephemeris()
         natal_jd = eph.julian_day(inp.utc_datetime)
-        design_jd = design_julian_day(eph, natal_jd)
+        design_jd = cached_design_julian_day(eph, natal_jd)
 
         personality = activations(eph, natal_jd)
         design = activations(eph, design_jd)

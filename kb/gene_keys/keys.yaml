@@ -1,0 +1,590 @@
+schema: kb.mapping.v1
+system: gene_keys
+element: keys
+reviewed: true
+source: >-
+  Shadow / Gift / Siddhi keywords per Richard Rudd's published Gene Keys
+  system ("The Gene Keys: Embracing Your Higher Purpose", first published
+  2009), which maps the same 64 I Ching hexagrams Human Design uses onto a
+  three-level spectrum of consciousness. The 64 keyword triples in the
+  `label` field below are drawn from that published work, cross-checked
+  against Rudd's own Gene Keys Living Library (genekeys.com) for accuracy --
+  these are not generic or anonymous keywords, they are a named author's
+  specific published terminology. Interpretive choices made in this file,
+  not Rudd's: the `label` field encodes the three spectrum words as
+  'Shadow|Gift|Siddhi', pipe-separated in that order, which the calculator
+  parses structurally; and the `text` field is this project's own
+  tendency-and-cost description in this KB's house style (not a quotation
+  of Rudd's book), grounded in the Shadow/Gift pairing rather than the
+  Siddhi, since the Siddhi names a transcendent state this engine makes no
+  claim to assess. Entries describe a tendency and its cost, not a
+  prediction, a diagnosis, or a guarantee.
+entries:
+  "1":
+    label: "Entropy|Freshness|Beauty"
+    text: >-
+      A restless creative force that stalls the moment it waits for
+      permission; freshness returns fastest by starting again rather than
+      trying to repair what already exists.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.7, direction: high}
+      - {facet: drive.initiative, weight: 0.6, direction: high}
+  "2":
+    label: "Dislocation|Orientation|Unity"
+    text: >-
+      A search for one's own direction that can feel like drifting until it
+      is trusted rather than second-guessed; the compass works, but only
+      once the map others hand over is set aside.
+    tags:
+      - {facet: core_essence.self_image, weight: 0.6, direction: low}
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+  "3":
+    label: "Chaos|Innovation|Innocence"
+    text: >-
+      Comfortable inventing something new out of a situation with no clear
+      shape yet; the cost is treating every fresh start as license to
+      abandon what was already working.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.structure, weight: 0.6, direction: low}
+  "4":
+    label: "Intolerance|Understanding|Forgiveness"
+    text: >-
+      Quick to see the flaw in an argument or a person, and quick to say so;
+      the growth edge is extending the same patience to a mind still working
+      something out that this one already has answers for.
+    tags:
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: growth_edges.patience, weight: 0.6, direction: high}
+  "5":
+    label: "Impatience|Patience|Timelessness"
+    text: >-
+      Wants the outcome now and reads any delay as a problem to fix; the
+      cost is forcing a timeline onto a process that needed to unfold at its
+      own pace.
+    tags:
+      - {facet: growth_edges.patience, weight: 0.8, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: high}
+  "6":
+    label: "Conflict|Diplomacy|Peace"
+    text: >-
+      Feels interpersonal tension before anyone names it, and often ends up
+      the one who has to resolve it; the cost is absorbing conflict that was
+      never this person's to carry.
+    tags:
+      - {facet: relational.conflict, weight: 0.6, direction: high}
+      - {facet: emotional.sensitivity, weight: 0.5, direction: high}
+  "7":
+    label: "Division|Guidance|Virtue"
+    text: >-
+      A natural sense of which direction a group should take; the cost is
+      assuming that direction is obvious to everyone else too, and pushing
+      it through without consent.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "8":
+    label: "Mediocrity|Style|Exquisiteness"
+    text: >-
+      Has a distinct way of doing things and a discomfort with blending in;
+      the cost is shrinking that distinctiveness to avoid being singled out,
+      then resenting the invisibility.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}
+  "9":
+    label: "Inertia|Determination|Invincibility"
+    text: >-
+      Focuses on small, precise details rather than the sweeping plan; the
+      cost is getting stuck refining a minor point while the larger project
+      waits.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "10":
+    label: "Self-Obsession|Naturalness|Being"
+    text: >-
+      Values being exactly itself over performing a role that fits better;
+      the cost is a self-focus that reads as indifference to what anyone
+      else needs in the moment.
+    tags:
+      - {facet: core_essence.self_image, weight: 0.6, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+  "11":
+    label: "Obscurity|Idealism|Light"
+    text: >-
+      Ideas arrive faster than they can be built; the gift is holding a
+      vision without demanding it arrive on schedule.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.8, direction: high}
+      - {facet: growth_edges.patience, weight: 0.6, direction: high}
+  "12":
+    label: "Vanity|Discrimination|Purity"
+    text: >-
+      Discerning about quality and unwilling to settle for less; the cost is
+      treating a personal standard as a universal one and judging others by
+      it.
+    tags:
+      - {facet: core_essence.self_image, weight: 0.6, direction: high}
+      - {facet: communication.directness, weight: 0.5, direction: high}
+  "13":
+    label: "Discord|Discernment|Empathy"
+    text: >-
+      Hears what is unresolved beneath a conversation before the words catch
+      up; the cost is absorbing other people's discord as though it were
+      this listener's own.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.7, direction: high}
+      - {facet: communication.listening, weight: 0.7, direction: high}
+  "14":
+    label: "Compromise|Competence|Bounteousness"
+    text: >-
+      Genuinely capable across a wide range of tasks and generous with that
+      capability; the cost is becoming the default person everyone defers
+      to, whether asked or not.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.6, direction: high}
+      - {facet: life_themes.service, weight: 0.6, direction: high}
+  "15":
+    label: "Dullness|Magnetism|Florescence"
+    text: >-
+      Draws attention without trying to; the cost is swinging between full
+      engagement and total withdrawal, with little steady middle ground.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.7, direction: high}
+      - {facet: emotional.volatility, weight: 0.5, direction: high}
+  "16":
+    label: "Indifference|Versatility|Mastery"
+    text: >-
+      Picks up new skills quickly and enjoys the early stage of learning
+      most; the cost is moving on before any one skill is taken past
+      competence into mastery.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.7, direction: high}
+      - {facet: work_energy.structure, weight: 0.5, direction: low}
+  "17":
+    label: "Opinion|Far-sightedness|Omniscience"
+    text: >-
+      Sees where a pattern is heading well before it plays out; the cost is
+      stating that forecast as settled fact rather than as one reading among
+      several.
+    tags:
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "18":
+    label: "Judgment|Integrity|Perfection"
+    text: >-
+      Notices exactly where something falls short of what it could be; the
+      cost is a running critique -- of self and others -- that rarely pauses
+      to note what already works.
+    tags:
+      - {facet: growth_edges.control, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.6, direction: high}
+  "19":
+    label: "Co-Dependence|Sensitivity|Sacrifice"
+    text: >-
+      Reads a group's mood accurately and adjusts to keep belonging intact;
+      the cost is trading away a personal need each time to preserve that
+      fit.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.7, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: low}
+  "20":
+    label: "Superficiality|Self-Assurance|Presence"
+    text: >-
+      Grounded in what is happening right now rather than in analysis of it;
+      the cost is staying at the surface of a situation that actually needed
+      a second look.
+    tags:
+      - {facet: core_essence.self_image, weight: 0.6, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: high}
+  "21":
+    label: "Control|Authority|Valour"
+    text: >-
+      Takes charge of a situation without being asked, and usually improves
+      it; the cost is directing people who never agreed to be directed.
+    tags:
+      - {facet: growth_edges.control, weight: 0.8, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.6, direction: high}
+  "22":
+    label: "Dishonour|Graciousness|Grace"
+    text: >-
+      Socially attuned and easy to be around when treated well; the cost is
+      a mood that tracks how respectfully the room is behaving, rather than
+      staying steady regardless.
+    tags:
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: high}
+  "23":
+    label: "Complexity|Simplicity|Quintessence"
+    text: >-
+      Cuts straight to the essential point others took paragraphs to reach;
+      the cost is a delivery so compressed it reads as curt or dismissive.
+    tags:
+      - {facet: communication.directness, weight: 0.6, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: low}
+  "24":
+    label: "Addiction|Invention|Silence"
+    text: >-
+      Returns to the same unresolved idea again and again until it finally
+      clicks into something new; the cost is a compulsive loop that looks
+      like it isn't going anywhere, right up until it does.
+    tags:
+      - {facet: drive.intensity, weight: 0.6, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: low}
+  "25":
+    label: "Constriction|Acceptance|Universal Love"
+    text: >-
+      Takes people and situations as they are, without needing them to be
+      otherwise; the cost is including everything so readily that a
+      personal boundary never quite forms.
+    tags:
+      - {facet: relational.bonding, weight: 0.6, direction: high}
+      - {facet: core_essence.self_image, weight: 0.5, direction: low}
+  "26":
+    label: "Pride|Artfulness|Invisibility"
+    text: >-
+      Persuasive and self-selling; the growth edge is knowing when the pitch
+      has become the point.
+    tags:
+      - {facet: communication.register, weight: 0.8, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.7, direction: high}
+  "27":
+    label: "Selfishness|Altruism|Selflessness"
+    text: >-
+      Instinctively looks after the people nearby; the cost is depleting
+      that care account for others while rarely refilling it for self.
+    tags:
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: low}
+  "28":
+    label: "Purposelessness|Totality|Immortality"
+    text: >-
+      Commits completely once a purpose feels real, holding nothing back;
+      the cost is treating the stakes as all-or-nothing even when a smaller,
+      safer step would do.
+    tags:
+      - {facet: decision_making.risk_appetite, weight: 0.7, direction: high}
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+  "29":
+    label: "Half-Heartedness|Commitment|Devotion"
+    text: >-
+      Says yes and means it, following through past the point most people
+      would stop; the cost is saying yes before weighing what it will
+      actually cost, then resenting the bill later.
+    tags:
+      - {facet: relational.loyalty, weight: 0.7, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: high}
+  "30":
+    label: "Desire|Lightness|Rapture"
+    text: >-
+      Pulled hard toward whatever feels most alive in the moment; the cost
+      is chasing the feeling itself past the point it was pointing toward
+      anything real.
+    tags:
+      - {facet: drive.intensity, weight: 0.7, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: high}
+  "31":
+    label: "Arrogance|Leadership|Humility"
+    text: >-
+      Becomes the natural spokesperson in a group without seeking the role;
+      the cost is speaking for people who never actually signed off on being
+      represented.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.8, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+  "32":
+    label: "Failure|Preservation|Veneration"
+    text: >-
+      Careful about what is worth carrying forward and what should be let
+      go; the cost is a fear of failing publicly that keeps a good attempt
+      from ever starting.
+    tags:
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: low}
+      - {facet: growth_edges.patience, weight: 0.5, direction: low}
+  "33":
+    label: "Forgetting|Mindfulness|Revelation"
+    text: >-
+      Needs to withdraw and reflect before an experience makes sense; the
+      cost is retreating so far into that reflection that the moment for
+      engaging has passed.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: emotional.processing, weight: 0.6, direction: low}
+  "34":
+    label: "Force|Strength|Majesty"
+    text: >-
+      Brings real physical and practical power to whatever it takes on; the
+      cost is applying that force to a situation that actually needed
+      patience or finesse.
+    tags:
+      - {facet: drive.intensity, weight: 0.7, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.6, direction: high}
+  "35":
+    label: "Hunger|Adventure|Boundlessness"
+    text: >-
+      Restless for the next experience once the current one has been
+      understood; the cost is leaving before something had the chance to
+      mature into anything lasting.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: relational.loyalty, weight: 0.5, direction: low}
+  "36":
+    label: "Turbulence|Humanity|Compassion"
+    text: >-
+      Feels the full range of human experience firsthand, including its
+      harder edges; the cost is emotional turbulence that others read as
+      instability rather than depth.
+    tags:
+      - {facet: emotional.volatility, weight: 0.7, direction: high}
+      - {facet: emotional.sensitivity, weight: 0.6, direction: high}
+  "37":
+    label: "Weakness|Equality|Tenderness"
+    text: >-
+      Values the warmth of family and close community above almost
+      everything; the cost is avoiding a conflict that needed to happen in
+      order to keep that warmth intact.
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: relational.conflict, weight: 0.6, direction: low}
+  "38":
+    label: "Struggle|Perseverance|Honour"
+    text: >-
+      Fights hard for what it believes matters, and rarely backs down early;
+      the cost is treating an ordinary disagreement as a battle worth that
+      much resistance.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.7, direction: high}
+      - {facet: relational.conflict, weight: 0.5, direction: high}
+  "39":
+    label: "Provocation|Dynamism|Liberation"
+    text: >-
+      Says the thing that pushes a stuck situation to finally move; the cost
+      is being remembered as the one who caused the friction, not the one
+      who resolved it.
+    tags:
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: drive.intensity, weight: 0.5, direction: high}
+  "40":
+    label: "Exhaustion|Resolve|Divine Will"
+    text: >-
+      Capable of sustained, solitary effort toward a goal; the cost is
+      refusing help until the reserves that made the effort possible are
+      already gone.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.9, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+  "41":
+    label: "Fantasy|Anticipation|Emanation"
+    text: >-
+      Imagines how a new beginning could unfold in vivid detail; the cost is
+      living inside that anticipation longer than the actual opening stays
+      available.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.5, direction: high}
+  "42":
+    label: "Expectation|Detachment|Celebration"
+    text: >-
+      Good at closing a chapter cleanly once it has run its course; the cost
+      is impatience for the ending, leaving before the chapter has actually
+      finished.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  "43":
+    label: "Deafness|Insight|Epiphany"
+    text: >-
+      Arrives at the answer in a sudden leap rather than a visible chain of
+      steps; the cost is expecting other people to just follow, without
+      walking them through how it got there.
+    tags:
+      - {facet: communication.directness, weight: 0.5, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: high}
+  "44":
+    label: "Interference|Teamwork|Synarchy"
+    text: >-
+      Reads people accurately based on how similar situations have gone
+      before; the cost is pre-judging someone by that old pattern before
+      they get a chance to be different.
+    tags:
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "45":
+    label: "Dominance|Synergy|Communion"
+    text: >-
+      Organizes shared resources so a group can function as one; the cost is
+      deciding what's best for that group without actually checking with it
+      first.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.8, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+  "46":
+    label: "Seriousness|Delight|Ecstasy"
+    text: >-
+      Takes real delight in the body and the physical world; the cost is
+      losing access to that delight entirely under stress, going fully
+      serious instead.
+    tags:
+      - {facet: emotional.processing, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  "47":
+    label: "Oppression|Transmutation|Transfiguration"
+    text: >-
+      Turns a difficult past experience into real insight, eventually; the
+      cost is staying gripped by the old story for far longer than the
+      insight took to arrive.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.8, direction: high}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+  "48":
+    label: "Inadequacy|Resourcefulness|Wisdom"
+    text: >-
+      Holds a genuinely deep well of knowledge and skill; the cost is a
+      chronic sense of not being prepared enough, no matter how much
+      preparation has already happened.
+    tags:
+      - {facet: growth_edges.self_worth, weight: 0.7, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+  "49":
+    label: "Reaction|Revolution|Rebirth"
+    text: >-
+      Willing to overhaul an arrangement that has stopped serving anyone
+      well; the cost is rejecting it the moment it stops feeling right,
+      before checking whether it can be repaired instead.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.7, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: high}
+  "50":
+    label: "Corruption|Equilibrium|Harmony"
+    text: >-
+      Upholds the standards that keep a group functioning fairly; the cost
+      is enforcing the rule so rigidly that the individual case it was never
+      meant for gets crushed by it.
+    tags:
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "51":
+    label: "Agitation|Initiative|Awakening"
+    text: >-
+      Jolts a complacent situation into motion, including its own; the cost
+      is manufacturing a crisis just to feel that jolt when nothing external
+      supplied one.
+    tags:
+      - {facet: drive.initiative, weight: 0.9, direction: high}
+      - {facet: drive.intensity, weight: 0.6, direction: high}
+  "52":
+    label: "Stress|Restraint|Stillness"
+    text: >-
+      Capable of real stillness and focused restraint under pressure; the
+      cost is stress that accumulates quietly from holding so much in
+      rather than releasing it.
+    tags:
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: low}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+  "53":
+    label: "Immaturity|Expansion|Superabundance"
+    text: >-
+      Good at starting things and getting early momentum; the cost is
+      expanding faster than the foundation underneath can actually support.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: work_energy.structure, weight: 0.6, direction: low}
+  "54":
+    label: "Greed|Aspiration|Ascension"
+    text: >-
+      Driven to keep improving its position rather than settle where it is;
+      the cost is a moving goalpost that never quite allows the improvement
+      already made to count.
+    tags:
+      - {facet: drive.recognition, weight: 0.7, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+  "55":
+    label: "Victimisation|Freedom|Freedom"
+    text: >-
+      Highly sensitive to the emotional undercurrent of a day or a room; the
+      cost is narrating a bad stretch as something being done to this
+      person, rather than something moving through them.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.8, direction: high}
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+  "56":
+    label: "Distraction|Enrichment|Intoxication"
+    text: >-
+      A natural storyteller who can make an ordinary account compelling; the
+      cost is chasing distraction for its own sake the moment life feels the
+      least bit ordinary.
+    tags:
+      - {facet: communication.register, weight: 0.6, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+  "57":
+    label: "Unease|Intuition|Clarity"
+    text: >-
+      Picks up an accurate intuitive read on a situation almost instantly;
+      the cost is anxious static drowning that read out whenever it isn't
+      trusted.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.7, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: high}
+  "58":
+    label: "Dissatisfaction|Vitality|Bliss"
+    text: >-
+      Energized by making something better than it currently is; the cost is
+      a running dissatisfaction that nothing yet is good enough to actually
+      enjoy.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.5, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  "59":
+    label: "Dishonesty|Intimacy|Transparency"
+    text: >-
+      Seeks real closeness rather than polite distance; the cost is forcing
+      that closeness -- through oversharing or through withholding -- faster
+      than trust has actually been built.
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.5, direction: low}
+  "60":
+    label: "Limitation|Realism|Justice"
+    text: >-
+      Works well inside real constraints instead of fighting them; the cost
+      is accepting a limit as fixed before it has actually been tested.
+    tags:
+      - {facet: work_energy.structure, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: low}
+  "61":
+    label: "Psychosis|Inspiration|Sanctity"
+    text: >-
+      Drawn to the root cause underneath a question rather than its surface;
+      the cost is disappearing into private theorizing that never quite gets
+      shared.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+      - {facet: emotional.processing, weight: 0.6, direction: low}
+  "62":
+    label: "Intellect|Precision|Impeccability"
+    text: >-
+      Precise about detail and careful with the facts of a matter; the cost
+      is burying the actual point under so much supporting detail that it
+      gets lost.
+    tags:
+      - {facet: communication.pace, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: low}
+  "63":
+    label: "Doubt|Inquiry|Truth"
+    text: >-
+      Questions everything relentlessly rather than taking it on faith; the
+      cost is a doubt that never quite resolves into a conclusion worth
+      standing on.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+  "64":
+    label: "Confusion|Imagination|Illumination"
+    text: >-
+      Synthesizes scattered information into a picture no one else had
+      assembled yet; the cost is real confusion while the pieces are still
+      being sorted, before the picture resolves.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.5, direction: high}
+      - {facet: life_themes.transformation, weight: 0.6, direction: high}

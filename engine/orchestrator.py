@@ -18,6 +18,7 @@ from engine.names import NameQuality, normalize
 from engine.synthesis import synthesize
 from engine.systems.astrology import AstrologyCalculator
 from engine.systems.chinese_zodiac import ChineseZodiacCalculator
+from engine.systems.gene_keys import GeneKeysCalculator
 from engine.systems.human_design import HumanDesignCalculator
 from engine.systems.numerology import NumerologyCalculator
 from engine.types import BirthInput, SystemCalculator, SystemOutput, TraitTag
@@ -35,6 +36,7 @@ SYSTEM_REGISTRY: dict[str, SystemCalculator] = {
         NumerologyCalculator(),
         ChineseZodiacCalculator(),
         HumanDesignCalculator(),
+        GeneKeysCalculator(),
     )
 }
 

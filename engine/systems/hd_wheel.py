@@ -22,6 +22,7 @@ possible.
 
 from __future__ import annotations
 
+import functools
 from dataclasses import dataclass
 
 from engine.ephemeris import Body
@@ -86,6 +87,12 @@ def design_julian_day(eph: Ephemeris, natal_jd: float) -> float:
     [natal - 95d, natal - 82d] always contains the root (the Sun covers
     88 degrees in roughly 88 days, with several days of margin either side
     for its fastest and slowest points in the year).
+
+    Deliberately uncached: `cached_design_julian_day` below is the memoized
+    entry point real calculators use. This function stays a plain, direct
+    solve so a test can monkeypatch module internals (e.g. _DESIGN_MAX_ITER)
+    and observe the effect on a single call without a stale cached result
+    from an earlier, unpatched call masking it.
     """
     target = norm360(eph.position(natal_jd, Body.SUN).longitude - SOLAR_ARC)
 
@@ -117,6 +124,31 @@ def design_julian_day(eph: Ephemeris, natal_jd: float) -> float:
         f"natal_jd={natal_jd}. Refusing to return an unconverged design "
         "moment; this should not happen for any real birth date."
     )
+
+
+# Human Design and Gene Keys both solve the design moment for the same
+# (eph, natal_jd) pair when computing a single profile, and the bisection in
+# design_julian_day costs roughly 40 ephemeris evaluations (~45ms) to do it.
+# Memoizing here means a full profile pays that cost once, not twice.
+#
+# Keyed on (eph, natal_jd): `eph` is normally the process-wide
+# get_ephemeris() singleton (itself an lru_cache(maxsize=1)), so in practice
+# the key is just natal_jd, and cache hits only ever occur for the exact
+# same birth moment. A bounded maxsize (not an unbounded dict) is deliberate:
+# a long-running process serving many distinct people must not accumulate
+# one entry per birth instant forever, which is why this is
+# functools.lru_cache with a cap rather than a plain module-level dict - the
+# same convention engine/kb/loader.py and engine/kb/version.py already use
+# for their own process-lifetime caches.
+_DESIGN_JD_CACHE_SIZE = 512
+
+
+@functools.lru_cache(maxsize=_DESIGN_JD_CACHE_SIZE)
+def cached_design_julian_day(eph: Ephemeris, natal_jd: float) -> float:
+    """Memoized `design_julian_day`. Use this from calculators; use the
+    plain function directly only when a test needs to observe a single,
+    unmemoized solve."""
+    return design_julian_day(eph, natal_jd)
 
 
 def activations(eph: Ephemeris, jd: float) -> dict[str, Activation]:
