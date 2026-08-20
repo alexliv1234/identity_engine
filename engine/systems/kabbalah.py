@@ -2,13 +2,20 @@
 
 The least standardized of the six systems, so every interpretive choice is
 recorded: mispar hechrechi (standard values) with final forms taking their base
-values; sefirah assigned from the reduced gematria of the Hebrew name; Hebrew
-date via pyluach with no sunset adjustment (the birth *date* is taken as given).
+values; sefirah assigned from the standard (unreduced) gematria of the Hebrew
+name — digit-summing first would land on 1-9 and make Malkhut (10)
+structurally unreachable, so the sefirah lookup deliberately uses the same
+unreduced value the equivalences table already compares against, while
+`raw.gematria.reduced` stays a plain digit sum exactly as specified for
+display; Hebrew date via pyluach with no sunset adjustment (the birth *date*
+is taken as given — see kb/kabbalah/hebrew_months.yaml's source header for the
+same note recorded at the KB layer).
 """
 
 from __future__ import annotations
 
 from pyluach import dates as luach
+from pyluach import hebrewcal
 
 from engine.kb.loader import load_kb
 from engine.names import NameQuality, normalize
@@ -89,17 +96,30 @@ def gematria_reduced(value: int) -> int:
 
 
 def sefirah_for(value: int) -> str:
-    """Keter at 1 through Malkhut at 10; values above 10 reduce first."""
-    normalized = value if 1 <= value <= 10 else gematria_reduced(value)
-    return SEFIROT[(normalized - 1) % 10]
+    """Keter at 1 through Malkhut at 10, cycling by ``(value - 1) % 10``.
+
+    Deliberately takes the standard (unreduced) gematria value, not a
+    digit-summed one: digit-summing to a single digit can only ever land on
+    1-9, which would make Malkhut (10) structurally unreachable. See
+    kb/kabbalah/sefirot.yaml's source header for the full reasoning.
+    """
+    return SEFIROT[(value - 1) % 10]
 
 
 def _hebrew_date(date) -> dict:
     hd = luach.HebrewDate.from_pydate(date)
+    month_name = HEBREW_MONTH_NAMES.get(hd.month, str(hd.month))
+    # Adar is split into Adar I / Adar II only in a leap year; HEBREW_MONTH_NAMES
+    # labels month 12 "Adar" (correct for a regular year, where it is the only
+    # Adar), so a leap year needs the label corrected to "Adar I". The tag
+    # lookup below is keyed by month *number*, so this relabeling never affects
+    # which KB entry is used -- it only affects the user-visible name.
+    if hd.month == 12 and hebrewcal.Year(hd.year).leap:
+        month_name = "Adar I"
     return {
         "year": hd.year,
         "month": hd.month,
-        "month_name": HEBREW_MONTH_NAMES.get(hd.month, str(hd.month)),
+        "month_name": month_name,
         "day": hd.day,
         "day_of_week": hd.weekday(),
     }
@@ -115,7 +135,7 @@ class KabbalahCalculator:
 
         standard = gematria(name.hebrew)
         reduced = gematria_reduced(standard) if standard else 0
-        sefirah = sefirah_for(reduced) if reduced else ""
+        sefirah = sefirah_for(standard) if standard else ""
         hebrew_date = _hebrew_date(inp.birth_date)
 
         kb = load_kb()
@@ -134,6 +154,8 @@ class KabbalahCalculator:
         if sefirah:
             tags.extend(kb.tags_for(self.key, "sefirot", sefirah.lower()))
         tags.extend(kb.tags_for(self.key, "hebrew_months", str(hebrew_date["month"])))
+        for eq_key in equivalences:
+            tags.extend(kb.tags_for(self.key, "equivalences", eq_key))
 
         notes: list[str] = []
         confidence = 1.0
@@ -152,6 +174,10 @@ def _matching_equivalences(kb, standard: int) -> list[str]:
 
     The equivalences file stores its numeric value in each entry's `label`. A
     missing file is not an error — the table is curated and deliberately small.
+    Every match's tags are also emitted into `SystemOutput.tags` by the caller
+    (`compute`) — an entry with tags that never reach synthesis is dead weight,
+    so a matched equivalence contributes to the profile the same way any other
+    KB element does.
     """
     kb_file = kb.files.get(("kabbalah", "equivalences"))
     if kb_file is None:

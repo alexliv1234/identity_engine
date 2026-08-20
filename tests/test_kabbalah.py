@@ -102,3 +102,30 @@ def test_output_is_deterministic():
     a = KabbalahCalculator().compute(make_input())
     b = KabbalahCalculator().compute(make_input())
     assert a.raw == b.raw
+
+
+def test_sefirah_uses_standard_gematria_so_malkhut_is_reachable():
+    """Regression for the Malkhut-unreachable defect: sefirah must be derived
+    from the standard (unreduced) gematria, not the digit-summed 'reduced'
+    value -- a digit sum can only ever land on 1-9, which would make Malkhut
+    (10) permanently unreachable from compute(). A single kaf (standard=20)
+    lands on Malkhut via (20 - 1) % 10 == 9; the old reduced-value wiring
+    would have reduced 20 to 2 and produced Chokhmah instead.
+    """
+    out = KabbalahCalculator().compute(make_input(hebrew_name="כ"))
+    assert out.raw["gematria"]["standard"] == 20
+    assert out.raw["sefirah"] == "Malkhut"
+
+
+def test_equivalence_match_emits_tags_and_equivalence():
+    """A Hebrew name whose gematria lands on a curated equivalence (chai=18)
+    must both report the match in raw.equivalences and emit that entry's
+    tags into SystemOutput.tags -- the tags are meant to reach synthesis,
+    not sit inert in the KB file.
+    """
+    out = KabbalahCalculator().compute(make_input(hebrew_name="חי"))
+    assert out.raw["gematria"]["standard"] == 18
+    assert out.raw["equivalences"] == ["chai"]
+    equivalence_tags = [t for t in out.tags if t.element == "equivalences"]
+    assert equivalence_tags
+    assert all(t.system == "kabbalah" for t in equivalence_tags)

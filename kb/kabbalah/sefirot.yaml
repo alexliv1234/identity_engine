@@ -5,9 +5,16 @@ reviewed: true
 source: >-
   Lurianic-derived popular Kabbalah as commonly presented in contemporary
   English-language sources. This is the least standardized of the six systems;
-  the correspondence used here assigns a sefirah from the reduced standard
-  gematria (mispar hechrechi) of the Hebrew name, with Keter at 1 and Malkhut
-  at 10. Other traditions assign differently, order the sefirot differently, or
+  the correspondence used here assigns a sefirah from the standard gematria
+  (mispar hechrechi) of the Hebrew name, cycled mod 10 with Keter at 1 and
+  Malkhut at 10. The value is used unreduced on purpose: digit-summing it to a
+  single digit first (the way `raw.gematria.reduced` is computed for display)
+  can only ever land on 1-9, which would make Malkhut structurally
+  unreachable no matter whose name is used — using the standard value keeps
+  all ten sefirot, including Malkhut, actually reachable, and matches how
+  kb/kabbalah/equivalences.yaml already compares against the unreduced value.
+  Do not change this back to a reduced lookup without re-reading this note.
+  Other traditions assign differently, order the sefirot differently, or
   reject numeric assignment to a name altogether — that choice is recorded here
   on purpose rather than presented as the only reading. Entries describe a
   tendency and its cost, not a spiritual rank or a destiny claim.

@@ -14,7 +14,12 @@ source: >-
   calendar month number starting from Nisan (1) through Adar II (13); month 13
   exists only in a Hebrew leap year (see engine/systems/kabbalah.py for how a
   regular year is handled — the entry is simply never looked up that year).
-  Entries describe a tendency and its cost, not a prediction.
+  Separately, the Hebrew day traditionally begins at sunset, so a birth in the
+  evening technically falls on the following Hebrew date; this system is given
+  only a birth date, not a birth time, so no sunset adjustment is ever applied
+  — the Gregorian calendar date is converted to a Hebrew date as-is. That is a
+  recorded limitation, not an oversight. Entries describe a tendency and its
+  cost, not a prediction.
 entries:
   "1":
     label: "Nisan"
