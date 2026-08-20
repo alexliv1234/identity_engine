@@ -1,0 +1,82 @@
+schema: kb.mapping.v1
+system: kabbalah
+element: sefirot
+reviewed: true
+source: >-
+  Lurianic-derived popular Kabbalah as commonly presented in contemporary
+  English-language sources. This is the least standardized of the six systems;
+  the correspondence used here assigns a sefirah from the reduced standard
+  gematria (mispar hechrechi) of the Hebrew name, with Keter at 1 and Malkhut
+  at 10. Other traditions assign differently, order the sefirot differently, or
+  reject numeric assignment to a name altogether — that choice is recorded here
+  on purpose rather than presented as the only reading. Entries describe a
+  tendency and its cost, not a spiritual rank or a destiny claim.
+entries:
+  keter:
+    label: "Keter"
+    text: "An orientation toward the not-yet-formed; comfortable with what has no shape yet, less so with committing it to one."
+    tags:
+      - {facet: life_themes.seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.structure, weight: 0.6, direction: low}
+  chokhmah:
+    label: "Chokhmah"
+    text: "Insight arrives whole rather than assembled; the work is trusting the flash before it can be justified."
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.8, direction: high}
+      - {facet: communication.pace, weight: 0.6, direction: high}
+  binah:
+    label: "Binah"
+    text: "Understanding built through patient structuring; takes a raw insight and works out what it actually means before acting on it. The cost is a deliberateness that can look like hesitation to someone waiting on an answer."
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: low}
+      - {facet: decision_making.timing, weight: 0.6, direction: low}
+      - {facet: work_energy.structure, weight: 0.5, direction: high}
+  chesed:
+    label: "Chesed"
+    text: "An expansive generosity; gives time, resources, and benefit of the doubt freely. The cost is a difficulty naming a limit once it has already been passed."
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}
+  gevurah:
+    label: "Gevurah"
+    text: "A disciplined severity; draws a boundary and holds it even under pressure to soften. The cost is a rigidity that reads as harshness to someone asking for flexibility."
+    tags:
+      - {facet: work_energy.structure, weight: 0.8, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.7, direction: high}
+      - {facet: relational.conflict, weight: 0.6, direction: high}
+  tiferet:
+    label: "Tiferet"
+    text: "A pull toward balance; mediates between extremes and looks for the move that harmonizes them. The cost is a reluctance to pick a side when a side is actually what the moment needs."
+    tags:
+      - {facet: relational.conflict, weight: 0.6, direction: low}
+      - {facet: emotional.volatility, weight: 0.5, direction: low}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  netzach:
+    label: "Netzach"
+    text: "A persistence that outlasts obstacles; keeps moving toward a goal long after initial enthusiasm alone would have quit. The cost is an endurance that overrides its own signs of exhaustion."
+    tags:
+      - {facet: work_energy.endurance, weight: 0.9, direction: high}
+      - {facet: drive.initiative, weight: 0.6, direction: high}
+      - {facet: drive.intensity, weight: 0.5, direction: high}
+  hod:
+    label: "Hod"
+    text: "Splendor expressed through precision and detail; communicates by getting the particulars exactly right rather than through display. The cost is a self-effacement that undersells real expertise."
+    tags:
+      - {facet: communication.register, weight: 0.6, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: low}
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+  yesod:
+    label: "Yesod"
+    text: "A connector and translator; carries what others produce into a form that can actually land."
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.6, direction: low}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+  malkhut:
+    label: "Malkhut"
+    text: "Oriented toward the concrete and the already-real; values what can be touched, used, or delivered over what remains theoretical. The cost is a skepticism toward ideas that have not yet proven themselves."
+    tags:
+      - {facet: work_energy.structure, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: low}
+      - {facet: life_themes.seeking, weight: 0.5, direction: low}

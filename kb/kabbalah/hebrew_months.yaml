@@ -1,0 +1,96 @@
+schema: kb.mapping.v1
+system: kabbalah
+element: hebrew_months
+reviewed: true
+source: >-
+  Traditional Jewish associations for each month of the Hebrew calendar, drawn
+  from classical sources (Sefer Yetzirah's month correspondences, the Talmud's
+  treatment of the festivals and fasts that fall in each month) as popularly
+  summarized in contemporary Jewish teaching. Kabbalistic literature also
+  assigns each month a zodiac sign, a Hebrew letter, and a tribe; this file
+  uses only the broad thematic character of the month, the layer with the
+  widest agreement across sources, and does not adjudicate between the more
+  granular (and more contested) letter/tribe/zodiac schemes. Keys are the
+  calendar month number starting from Nisan (1) through Adar II (13); month 13
+  exists only in a Hebrew leap year (see engine/systems/kabbalah.py for how a
+  regular year is handled — the entry is simply never looked up that year).
+  Entries describe a tendency and its cost, not a prediction.
+entries:
+  "1":
+    label: "Nisan"
+    text: "Nisan carries the traditional theme of redemption and departure — the readiness to leave a known situation the moment it stops working, echoing the Exodus this month commemorates. The cost is a restlessness that leaves before something has had time to prove itself."
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.7, direction: high}
+      - {facet: life_themes.transformation, weight: 0.7, direction: high}
+  "2":
+    label: "Iyar"
+    text: "Iyar's traditional theme is healing through counting — steady, incremental attention day by day rather than one dramatic fix, echoing the Counting of the Omer observed this month. The cost is impatience with anything that genuinely cannot be rushed."
+    tags:
+      - {facet: work_energy.rhythm, weight: 0.6, direction: low}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  "3":
+    label: "Sivan"
+    text: "Sivan's traditional theme is revelation and acceptance — receiving something significant and binding oneself to it, echoing the giving of the Torah this month commemorates. The cost is an all-or-nothing commitment that leaves little room to revise the terms later."
+    tags:
+      - {facet: relational.loyalty, weight: 0.7, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  "4":
+    label: "Tammuz"
+    text: "Tammuz is traditionally associated with breach — the fast marking the first crack in Jerusalem's walls falls this month — and with a watchfulness for where things might give way. The cost is a wariness that can tip into expecting the worst by default."
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.6, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: low}
+  "5":
+    label: "Av"
+    text: "Av's traditional arc runs from mourning toward consolation, anchored by Tisha B'Av's fast — sitting with a loss long enough that it becomes bearable rather than being rushed past. The cost is a slowness to let go that can draw the grieving out longer than it needs to run."
+    tags:
+      - {facet: emotional.processing, weight: 0.7, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  "6":
+    label: "Elul"
+    text: "Elul's traditional theme is self-accounting — a deliberate stocktaking in the run-up to the new year, the month traditionally given to teshuva (return). The cost is a self-scrutiny that tips into rumination rather than settling anything."
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "7":
+    label: "Tishrei"
+    text: "Tishrei concentrates judgment and renewal into a single stretch — Rosh Hashanah and Yom Kippur both fall here — taking stock of the whole picture at once rather than piecemeal across the year. The cost is a periodic overwhelm when everything gets weighed at the same time."
+    tags:
+      - {facet: life_themes.transformation, weight: 0.8, direction: high}
+      - {facet: emotional.volatility, weight: 0.5, direction: high}
+  "8":
+    label: "Cheshvan"
+    text: "Cheshvan is traditionally the one month with no festival at all (sometimes called Mar Cheshvan, 'bitter Cheshvan') — showing up without ceremony or an external marker of progress. The cost is a flatness that can read as low motivation when nothing is being celebrated."
+    tags:
+      - {facet: work_energy.rhythm, weight: 0.6, direction: low}
+      - {facet: drive.recognition, weight: 0.5, direction: low}
+  "9":
+    label: "Kislev"
+    text: "Kislev's traditional theme, carried by Chanukah, is light added gradually against deepening darkness — one more small, consistent act rather than a single large gesture. The cost is an attachment to gradualism even in a moment that calls for something faster."
+    tags:
+      - {facet: work_energy.endurance, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  "10":
+    label: "Tevet"
+    text: "Tevet continues the siege of Jerusalem marked the previous month — traditionally a season of holding a position through an unresolved stretch, without the visible light Kislev had. The cost is a stoicism that suppresses signals actually worth attending to."
+    tags:
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: work_energy.endurance, weight: 0.5, direction: high}
+  "11":
+    label: "Shevat"
+    text: "Shevat's traditional theme, carried by Tu BiShvat (the new year of the trees), is growth that hasn't surfaced yet — sap rising before any change is visible above ground. The cost is other people (and sometimes the self) mistaking invisible progress for none."
+    tags:
+      - {facet: growth_edges.patience, weight: 0.5, direction: low}
+      - {facet: life_themes.transformation, weight: 0.5, direction: low}
+  "12":
+    label: "Adar"
+    text: "Adar's traditional theme, carried by Purim, is reversal and hidden identity — what looks like one thing turning out to be another, met with humor rather than alarm. The cost is a tendency to deflect with a joke when something plainer is actually needed."
+    tags:
+      - {facet: communication.register, weight: 0.7, direction: high}
+      - {facet: emotional.volatility, weight: 0.4, direction: high}
+  "13":
+    label: "Adar II"
+    text: "Adar II exists only in a Hebrew leap year, inserted to keep the lunar calendar aligned with the solar seasons — traditionally read as a second pass, a chance to let something already begun land better the second time around. The cost is a reliance on a do-over that is not always coming."
+    tags:
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+      - {facet: life_themes.transformation, weight: 0.5, direction: high}
