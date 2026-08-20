@@ -1,6 +1,8 @@
 import datetime as dt
 import json
 
+import pytest
+
 from engine import __version__
 from engine.canonical import canonical_json
 from engine.kb.version import kb_version
@@ -135,3 +137,21 @@ def test_synthesize_never_raises_with_a_gated_system_present(monkeypatch):
 
     monkeypatch.setitem(SYSTEM_REGISTRY, "fake_system", _NeverAvailable())
     build_profile(make_input(hebrew_name=None))  # must not raise
+
+
+def test_raw_key_colliding_with_an_engine_owned_key_fails_loudly(monkeypatch):
+    """The raw slot is `{**output.raw, "confidence": ..., "notes": ...}`, so a
+    calculator raw key of either name would be silently overwritten. A future
+    calculator must break the build, not lose data quietly."""
+
+    class _Collides:
+        key = "collider"
+        required_inputs = set()
+
+        def compute(self, inp: BirthInput) -> SystemOutput:
+            return SystemOutput(raw={"notes": ["mine, not the engine's"]}, tags=[], confidence=1.0)
+
+    monkeypatch.setitem(SYSTEM_REGISTRY, "collider", _Collides())
+
+    with pytest.raises(AssertionError, match="engine-owned key"):
+        build_profile(make_input(), systems=["collider"])

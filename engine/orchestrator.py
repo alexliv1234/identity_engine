@@ -66,6 +66,16 @@ def _build_raw_and_confidences(
         missing = set(calc.required_inputs) - inp.available_fields
         output = _unavailable(calc, missing) if missing else calc.compute(inp)
 
+        # The raw slot is the calculator's own dict plus two engine-owned keys.
+        # If a future calculator ever emits its own "confidence" or "notes" raw
+        # key, the spread below would silently discard it -- data loss with no
+        # symptom. Fail loudly at the collision instead; the calculator should
+        # name its key something else.
+        assert not {"confidence", "notes"} & set(output.raw), (
+            f"{key}: raw output collides with an engine-owned key "
+            f"({sorted({'confidence', 'notes'} & set(output.raw))}); "
+            "the engine sets confidence and notes from SystemOutput"
+        )
         raw[key] = {
             **output.raw,
             "confidence": output.confidence,

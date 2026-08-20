@@ -48,7 +48,11 @@ class BirthInput(BaseModel):
     @field_validator("birth_date")
     @classmethod
     def _date_in_range(cls, v: dt.date) -> dt.date:
-        if v < MIN_BIRTH_DATE or v > dt.date.today():
+        # UTC, not the server's local date: `dt.date.today()` is server-local,
+        # so a birth "today" at UTC+14 is a future date to a UTC server and gets
+        # rejected. The supported range is a property of the input, not of where
+        # the process happens to run.
+        if v < MIN_BIRTH_DATE or v > dt.datetime.now(dt.UTC).date():
             raise ValueError(
                 f"{ErrorCode.INVALID_BIRTH_DATE}: birth_date must be between "
                 f"{MIN_BIRTH_DATE.isoformat()} and today"
@@ -77,6 +81,24 @@ class BirthInput(BaseModel):
         except (ZoneInfoNotFoundError, ValueError) as exc:
             raise ValueError(f"{ErrorCode.UNKNOWN_TIMEZONE}: {v!r} is not an IANA zone") from exc
         return v
+
+    @field_validator("hebrew_name")
+    @classmethod
+    def _hebrew_name_stripped_or_none(cls, v: str | None) -> str | None:
+        """Strip, and treat a blank string as absent.
+
+        `full_name` is already stripped and rejected when blank; leaving
+        `hebrew_name` unnormalized made "   " count as present in
+        `available_fields` while `normalize()` correctly treated it as absent
+        and derived one. A later Kabbalah module declares `hebrew_name` a
+        required input and would pass that availability gate on whitespace.
+        Blank normalizes to None rather than raising: hebrew_name is optional,
+        so "not supplied" is the honest reading of an empty value.
+        """
+        if v is None:
+            return None
+        stripped = v.strip()
+        return stripped or None
 
     @property
     def available_fields(self) -> set[InputField]:

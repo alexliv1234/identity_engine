@@ -7,15 +7,26 @@ import yaml
 from engine.kb.facets import load_taxonomy
 from engine.kb.loader import load_kb
 
-KB_DIR = Path("kb")
+# Anchored on this file, not on the cwd: a relative Path("kb") resolves to
+# nothing when pytest is invoked from anywhere but the repo root, and every
+# test below would then iterate an empty list and pass while checking nothing.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+KB_DIR = REPO_ROOT / "kb"
 
 
 def kb_files():
-    return [
+    files = [
         p
         for p in sorted(KB_DIR.rglob("*.yaml"))
         if p.name not in ("facets.yaml", "manifest.yaml") and not p.name.endswith(".draft.yaml")
     ]
+    assert files, f"no KB files discovered under {KB_DIR}; the review gate would pass vacuously"
+    return files
+
+
+def test_kb_files_are_actually_discovered():
+    """The reviewed: true gate (spec §4.3) is only as strong as its file list."""
+    assert kb_files()
 
 
 def test_shipped_kb_loads_clean():

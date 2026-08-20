@@ -61,10 +61,29 @@ def test_unknown_timezone_rejected():
 
 
 def test_utc_datetime_applies_historical_offset():
-    # London 1815 predates standard time zones; tzdb uses LMT (-00:01:15).
+    # London 1815 predates standard time zones; tzdb uses LMT (-00:01:15), so
+    # 13:00 local is 13:01:15 UTC. Assert the exact instant: `utc_datetime` is
+    # the input to every ephemeris call, where a dropped offset would silently
+    # shift the whole chart, and asserting only the date would pass even if the
+    # offset were ignored entirely.
     inp = make_input()
     assert inp.utc_datetime.tzinfo is dt.UTC
-    assert inp.utc_datetime.date() == dt.date(1815, 12, 10)
+    assert inp.utc_datetime == dt.datetime(1815, 12, 10, 13, 1, 15, tzinfo=dt.UTC)
+    assert (inp.utc_datetime.hour, inp.utc_datetime.minute, inp.utc_datetime.second) == (13, 1, 15)
+
+
+def test_hebrew_name_is_stripped():
+    assert make_input(hebrew_name="  ABRAHAM  ").hebrew_name == "ABRAHAM"
+
+
+def test_blank_hebrew_name_normalizes_to_none():
+    # Whitespace is not a Hebrew name. Left un-normalized it counts as present
+    # in available_fields while normalize() treats it as absent and derives one
+    # -- and a later Kabbalah module declaring hebrew_name a required input
+    # would pass its availability gate on nothing but spaces.
+    inp = make_input(hebrew_name="   ")
+    assert inp.hebrew_name is None
+    assert InputField.HEBREW_NAME not in inp.available_fields
 
 
 def test_utc_datetime_is_none_without_birth_time():
