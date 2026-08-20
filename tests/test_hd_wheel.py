@@ -1,5 +1,6 @@
+import ast
 import datetime as dt
-import re
+import inspect
 
 import pytest
 
@@ -106,6 +107,33 @@ def test_design_solver_at_other_dates_also_converges(eph):
     assert arc_between((design_sun + 88.0) % 360.0, natal_sun) < 0.001
 
 
+def test_design_solver_handles_a_search_bracket_that_straddles_zero_aries(eph):
+    """1990-06-19 is deliberately special, not an arbitrary second date: for
+    this birth date the *solver's own bisection bracket*
+    (natal_jd - 95 .. natal_jd - 82), not just the natal-vs-target
+    subtraction, straddles the 0/360 seam. The Sun's longitude runs from
+    ~355.1 deg at the low end of the bracket to ~8.0 deg at the high end -
+    i.e. `low < high` in julian-day terms but the corresponding Sun
+    longitudes decrease then wrap. A bisection that compared raw longitudes
+    instead of a signed arc in (-180, 180] would misjudge which half of the
+    bracket contains the root right at this seam and either converge to the
+    wrong moment or fail to converge at all.
+
+    Do not swap this for an "ordinary" date if simplifying this test file -
+    this is the one case in the suite that actually exercises the wrap.
+    """
+    natal = eph.julian_day(dt.datetime(1990, 6, 19, 0, 0, tzinfo=dt.UTC))
+    low_sun = eph.position(natal - 95.0, Body.SUN).longitude
+    high_sun = eph.position(natal - 82.0, Body.SUN).longitude
+    assert low_sun > 300.0  # confirms the bracket really does straddle 0 deg
+    assert high_sun < 60.0
+
+    design = design_julian_day(eph, natal)
+    natal_sun = eph.position(natal, Body.SUN).longitude
+    design_sun = eph.position(design, Body.SUN).longitude
+    assert arc_between((design_sun + 88.0) % 360.0, natal_sun) < 0.001
+
+
 def test_activations_include_the_derived_points(eph):
     jd = eph.julian_day(dt.datetime(1990, 5, 5, 3, 0, tzinfo=dt.UTC))
     acts = activations(eph, jd)
@@ -130,19 +158,38 @@ def test_activations_are_deterministic(eph):
     assert activations(eph, jd) == activations(eph, jd)
 
 
+def _imports_module_rooted_at(source: str, root: str) -> bool:
+    """Whether `source` contains any import statement that pulls in a module
+    named `root`, either as the imported module itself (`import root...`,
+    `from root...`) or as a name imported out of a package
+    (`from pkg import root`).
+
+    Uses `ast` rather than a line-anchored regex: a regex like
+    `^\\s*(import|from)\\s+.*human_design` misses a parenthesised
+    multi-line import (`from pkg import (\\n    human_design,\\n)`) because
+    the target name never sits on the line the regex anchors on. Parsing
+    the real grammar has no such blind spot. Mirrors the equivalent guard
+    in tests/test_ephemeris.py for the skyfield import.
+    """
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name == root or alias.name.startswith(root + ".") for alias in node.names):
+                return True
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module == root or module.startswith(root + "."):
+                return True
+            if any(alias.name == root for alias in node.names):
+                return True
+    return False
+
+
 def test_hd_wheel_does_not_import_human_design():
     """Spec §3.3: Gene Keys builds on this module without pulling in the
     Human Design bodygraph calculator. Keeping the wheel free of that import
-    is what makes that possible.
-
-    Matches on actual import statements (mirroring the skyfield-confinement
-    test in test_ephemeris.py) rather than a bare substring, so mentioning
-    "human_design.py" in a comment or docstring is not a false positive.
-    """
-    import inspect
-
+    is what makes that possible."""
     import engine.systems.hd_wheel as hd_wheel
 
-    text = inspect.getsource(hd_wheel)
-    pattern = re.compile(r"^\s*(import|from)\s+.*human_design", re.M)
-    assert not pattern.search(text)
+    source = inspect.getsource(hd_wheel)
+    assert not _imports_module_rooted_at(source, "human_design")

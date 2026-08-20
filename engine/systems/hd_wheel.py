@@ -98,9 +98,15 @@ def design_julian_day(eph: Ephemeris, natal_jd: float) -> float:
     low, high = natal_jd - 95.0, natal_jd - 82.0
     for _ in range(_DESIGN_MAX_ITER):
         mid = (low + high) / 2.0
-        if abs(signed_arc_remaining(mid)) < _DESIGN_TOLERANCE_DEG:
+        # One ephemeris evaluation per iteration: the residual computed here
+        # is reused for both the convergence check and the bisection-
+        # direction check below, rather than calling signed_arc_remaining
+        # twice (which would silently double the per-solve ephemeris cost
+        # this loop exists to keep down).
+        residual = signed_arc_remaining(mid)
+        if abs(residual) < _DESIGN_TOLERANCE_DEG:
             return mid
-        if signed_arc_remaining(mid) > 0.0:
+        if residual > 0.0:
             low = mid
         else:
             high = mid
@@ -126,7 +132,8 @@ def activations(eph: Ephemeris, jd: float) -> dict[str, Activation]:
     step that does not commute with "add 180 and wrap", so rounding first
     would silently turn an exact 180.0 degree separation into 179.999998 or
     similar. The engine never fakes precision, and it should not destroy
-    real precision either.
+    real precision either. Quantisation for display/serialisation belongs
+    at the boundary in engine/canonical.py, not in this substrate module.
     """
     result: dict[str, Activation] = {}
     positions = eph.positions(jd, list(Body))

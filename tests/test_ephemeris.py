@@ -1,5 +1,5 @@
+import ast
 import datetime as dt
-import re
 from pathlib import Path
 
 import pytest
@@ -340,6 +340,33 @@ def test_ephemeris_data_missing_names_the_setup_command(monkeypatch, tmp_path):
     assert ".venv" in message
 
 
+def _imports_module_rooted_at(source: str, root: str) -> bool:
+    """Whether `source` contains any import statement that pulls in a module
+    named `root`, either as the imported module itself (`import root...`,
+    `from root...`) or as a name imported out of a package
+    (`from pkg import root`).
+
+    Uses `ast` rather than a line-anchored regex: a regex like
+    `^\\s*(import|from)\\s+skyfield\\b` misses a parenthesised multi-line
+    import (`from pkg import (\\n    root,\\n)`) or a backslash-continued
+    one, because the module/name token does not sit on the line the regex
+    anchors on. Parsing the real grammar has no such blind spot.
+    """
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name == root or alias.name.startswith(root + ".") for alias in node.names):
+                return True
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module == root or module.startswith(root + "."):
+                return True
+            # `from pkg import root` imports the submodule `root` as a name.
+            if any(alias.name == root for alias in node.names):
+                return True
+    return False
+
+
 def test_skyfield_is_imported_in_exactly_one_module():
     """Spec §9: the ephemeris library stays swappable, so confine the import.
 
@@ -347,8 +374,9 @@ def test_skyfield_is_imported_in_exactly_one_module():
     Path("engine") relative to the process cwd, which breaks when pytest (or
     anything else) is invoked from a different working directory.
     """
-    pattern = re.compile(r"^\s*(import|from)\s+skyfield\b", re.M)
     offenders = sorted(
-        p.name for p in _ENGINE_DIR.rglob("*.py") if pattern.search(p.read_text(encoding="utf-8"))
+        p.name
+        for p in _ENGINE_DIR.rglob("*.py")
+        if _imports_module_rooted_at(p.read_text(encoding="utf-8"), "skyfield")
     )
     assert offenders == ["skyfield_adapter.py"], offenders
