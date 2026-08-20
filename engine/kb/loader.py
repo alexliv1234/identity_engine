@@ -92,6 +92,8 @@ def _validate_and_build(path: Path, doc: dict, taxonomy) -> KBFile:
 
     entries: dict[str, KBEntry] = {}
     for key, raw in (doc.get("entries") or {}).items():
+        if not isinstance(raw, dict):
+            fail(f"entry {key!r}: must be a mapping, got {raw!r}")
         label, text = (raw.get("label") or "").strip(), (raw.get("text") or "").strip()
         if not label:
             fail(f"entry {key!r}: label must not be empty")
@@ -99,15 +101,28 @@ def _validate_and_build(path: Path, doc: dict, taxonomy) -> KBFile:
             fail(f"entry {key!r}: text must not be empty")
         specs: list[TagSpec] = []
         for tag in raw.get("tags") or []:
+            if not isinstance(tag, dict):
+                fail(f"entry {key!r}: each tag must be a mapping, got {tag!r}")
             facet = tag.get("facet")
+            if not facet:
+                fail(f"entry {key!r}: tag is missing 'facet'")
             if not taxonomy.has(facet):
-                fail(f"entry {key!r}: unknown facet {facet!r}")
-            weight = float(tag.get("weight", 0.0))
+                fail(f"entry {key!r}, facet {facet!r}: unknown facet")
+            if "weight" not in tag:
+                fail(f"entry {key!r}, facet {facet!r}: tag is missing 'weight'")
+            raw_weight = tag.get("weight")
+            try:
+                weight = float(raw_weight)
+            except (TypeError, ValueError):
+                fail(f"entry {key!r}, facet {facet!r}: weight {raw_weight!r} is not a number")
             if not 0.0 <= weight <= 1.0:
-                fail(f"entry {key!r}: weight {weight} outside 0..1")
+                fail(f"entry {key!r}, facet {facet!r}: weight {weight} outside 0..1")
             direction = tag.get("direction")
             if direction not in ("high", "low"):
-                fail(f"entry {key!r}: direction must be 'high' or 'low', got {direction!r}")
+                fail(
+                    f"entry {key!r}, facet {facet!r}: direction must be "
+                    f"'high' or 'low', got {direction!r}"
+                )
             specs.append(TagSpec(facet=facet, weight=weight, direction=direction))
         entries[key] = KBEntry(key=key, label=label, text=text, tags=tuple(specs))
 

@@ -106,3 +106,64 @@ def test_empty_text_is_rejected(tmp_path):
     root = write_kb(tmp_path, "demo.yaml", body)
     with pytest.raises(KBValidationError, match="text"):
         load_kb(root)
+
+
+def test_missing_system_is_rejected(tmp_path):
+    body = "\n".join(line for line in VALID.splitlines() if not line.startswith("system:")) + "\n"
+    assert "system:" not in body  # sanity: the filter actually matched
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="system"):
+        load_kb(root)
+
+
+def test_missing_element_is_rejected(tmp_path):
+    body = "\n".join(line for line in VALID.splitlines() if not line.startswith("element:")) + "\n"
+    assert "element:" not in body  # sanity: the filter actually matched
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="element"):
+        load_kb(root)
+
+
+def test_empty_label_is_rejected(tmp_path):
+    body = VALID.replace('label: "Alpha"', 'label: ""')
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="label"):
+        load_kb(root)
+
+
+def test_missing_weight_is_rejected(tmp_path):
+    body = VALID.replace("weight: 0.9, ", "")
+    assert "weight: 0.9" not in body  # sanity: the replace actually matched
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="weight"):
+        load_kb(root)
+
+
+def test_non_numeric_weight_is_rejected(tmp_path):
+    body = VALID.replace("weight: 0.9", "weight: high")
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="weight"):
+        load_kb(root)
+
+
+def test_missing_facet_is_rejected(tmp_path):
+    body = VALID.replace("facet: drive.initiative, ", "")
+    assert "facet: drive.initiative" not in body  # sanity: the replace actually matched
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="facet"):
+        load_kb(root)
+
+
+def test_null_entry_body_is_rejected(tmp_path):
+    body = """\
+schema: kb.mapping.v1
+system: demo
+element: demo_element
+reviewed: true
+source: "Test fixture"
+entries:
+  alpha:
+"""
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="mapping"):
+        load_kb(root)
