@@ -1,0 +1,146 @@
+schema: kb.mapping.v1
+system: astrology
+element: ascendants
+reviewed: true
+source: >-
+  Tropical zodiac, common contemporary synthesis of the Ascendant (rising
+  sign) as the style someone leads with in a first encounter, before anyone
+  present knows them well — distinct from the Sun's underlying drive or the
+  Moon's private emotional processing. Interpretive choice: every entry is
+  weighted primarily onto `core_essence.visibility` (how outward or inward
+  the first impression reads) and `communication.*` (the register, pace, and
+  directness of that first impression), since those are the dimensions this
+  angle governs.
+entries:
+  aries:
+    label: "Ascendant in Aries"
+    text: >-
+      Comes across immediately assertive, leading with action or opinion
+      before there has been much time to weigh it. The cost is reading as
+      confrontational in a first meeting when urgency was all that was meant.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.8, direction: high}
+      - {facet: communication.pace, weight: 0.5, direction: high}
+      - {facet: drive.initiative, weight: 0.4, direction: high}
+  taurus:
+    label: "Ascendant in Taurus"
+    text: >-
+      Reads as calm and unhurried, a steady presence that does not need to
+      fill a silence. The cost is coming across as harder to read or reach
+      than is actually intended.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: communication.pace, weight: 0.7, direction: low}
+      - {facet: communication.register, weight: 0.5, direction: low}
+      - {facet: work_energy.rhythm, weight: 0.4, direction: low}
+  gemini:
+    label: "Ascendant in Gemini"
+    text: >-
+      Reads as quick, curious, and talkative from the first exchange. The
+      cost is a first impression that can feel light or non-committal to
+      someone expecting more weight up front.
+    tags:
+      - {facet: communication.pace, weight: 0.8, direction: high}
+      - {facet: core_essence.visibility, weight: 0.6, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.4, direction: high}
+  cancer:
+    label: "Ascendant in Cancer"
+    text: >-
+      Comes across gentle and watchful, sizing up a room before offering
+      much of itself to it. The cost is reading as guarded to people who
+      have not yet earned the warmth that is actually there underneath.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.7, direction: low}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: low}
+      - {facet: relational.bonding, weight: 0.4, direction: low}
+  leo:
+    label: "Ascendant in Leo"
+    text: >-
+      Enters a room with warmth and visible presence, comfortable being
+      looked at. The cost is a first impression that can overshadow quieter
+      people before they get a chance to register at all.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.9, direction: high}
+      - {facet: communication.register, weight: 0.7, direction: high}
+      - {facet: drive.recognition, weight: 0.5, direction: high}
+      - {facet: communication.directness, weight: 0.4, direction: high}
+  virgo:
+    label: "Ascendant in Virgo"
+    text: >-
+      Reads as attentive and precise, noticing a small detail before anyone
+      else has. The cost is a first impression that can land as critical
+      when it was actually just observant.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: communication.register, weight: 0.6, direction: low}
+      - {facet: communication.listening, weight: 0.5, direction: high}
+      - {facet: work_energy.structure, weight: 0.4, direction: high}
+  libra:
+    label: "Ascendant in Libra"
+    text: >-
+      Comes across easy to talk to, matching the room's tone to keep the
+      exchange smooth. The cost is a first impression so accommodating that
+      what it actually wants stays unclear.
+    tags:
+      - {facet: communication.listening, weight: 0.7, direction: high}
+      - {facet: core_essence.visibility, weight: 0.5, direction: high}
+      - {facet: relational.conflict, weight: 0.5, direction: low}
+      - {facet: communication.register, weight: 0.4, direction: high}
+  scorpio:
+    label: "Ascendant in Scorpio"
+    text: >-
+      Reads as intense and hard to read at the same time, giving away little
+      on a first meeting. The cost is a first impression that reads as
+      unapproachable before there has been any real reason to think so.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.8, direction: low}
+      - {facet: communication.directness, weight: 0.6, direction: low}
+      - {facet: core_essence.archetype_force, weight: 0.5, direction: high}
+      - {facet: communication.register, weight: 0.4, direction: low}
+  sagittarius:
+    label: "Ascendant in Sagittarius"
+    text: >-
+      Comes across open and enthusiastic, quick to say what it actually
+      thinks. The cost is a bluntness in a first meeting that lands as
+      careless before there has been time to build any context.
+    tags:
+      - {facet: communication.directness, weight: 0.8, direction: high}
+      - {facet: core_essence.visibility, weight: 0.6, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: high}
+      - {facet: communication.pace, weight: 0.4, direction: high}
+  capricorn:
+    label: "Ascendant in Capricorn"
+    text: >-
+      Reads as composed and businesslike, taking its time before showing any
+      real warmth. The cost is a first impression so contained that people
+      assume there is less feeling present than there actually is.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.7, direction: low}
+      - {facet: communication.register, weight: 0.7, direction: low}
+      - {facet: communication.pace, weight: 0.4, direction: low}
+      - {facet: work_energy.structure, weight: 0.4, direction: high}
+  aquarius:
+    label: "Ascendant in Aquarius"
+    text: >-
+      Comes across original and a little detached, easy to notice but hard
+      to place. The cost is a first impression that reads as aloof when the
+      distance is really just an unconventional angle on things.
+    tags:
+      - {facet: core_essence.archetype_force, weight: 0.6, direction: high}
+      - {facet: core_essence.visibility, weight: 0.5, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: low}
+      - {facet: relational.autonomy, weight: 0.4, direction: high}
+  pisces:
+    label: "Ascendant in Pisces"
+    text: >-
+      Reads as soft-edged and easy to project onto, absorbing a room's mood
+      before saying much itself. The cost is a first impression so pliable
+      that other people fill it in with whatever they expect to see.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: communication.directness, weight: 0.5, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.4, direction: high}

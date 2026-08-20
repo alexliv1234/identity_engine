@@ -1,0 +1,147 @@
+schema: kb.mapping.v1
+system: astrology
+element: sun_signs
+reviewed: true
+source: >-
+  Tropical zodiac, common contemporary synthesis of the twelve solar
+  archetypes (element x modality: cardinal/fixed/mutable crossed with
+  fire/earth/air/water). Interpretive choice: the Sun is read narrowly as
+  core drive and self-direction — how a person initiates, decides, and
+  sustains effort — not as personality in total. Emotional processing is
+  deliberately left to the Moon file and first-impression style to the
+  Ascendant file, so the three angles do not restate each other under
+  different labels.
+entries:
+  aries:
+    label: "Sun in Aries"
+    text: >-
+      Moves first and figures out the rest on the way; comfortable starting
+      something with no guarantee it will land. The cost is outrunning other
+      people's pace and reading their hesitation as an obstacle rather than
+      information.
+    tags:
+      - {facet: drive.initiative, weight: 0.9, direction: high}
+      - {facet: decision_making.timing, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  taurus:
+    label: "Sun in Taurus"
+    text: >-
+      Builds toward what it wants at one unhurried pace and does not enjoy
+      being rushed off it. The cost is a stubbornness that resists changing
+      course even once the original plan has stopped working.
+    tags:
+      - {facet: work_energy.rhythm, weight: 0.8, direction: low}
+      - {facet: decision_making.timing, weight: 0.7, direction: low}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  gemini:
+    label: "Sun in Gemini"
+    text: >-
+      Thinks out loud, keeps several threads running at once, and follows
+      whatever is newly interesting. The cost is a trail of half-finished
+      starts once the novelty has worn off.
+    tags:
+      - {facet: communication.pace, weight: 0.8, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.structure, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.4, direction: high}
+  cancer:
+    label: "Sun in Cancer"
+    text: >-
+      Organizes its effort around protecting people and places it has
+      claimed as its own. The cost is treating any distance from that circle
+      as a threat, even when the distance is ordinary and temporary.
+    tags:
+      - {facet: relational.loyalty, weight: 0.8, direction: high}
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: low}
+      - {facet: relational.bonding, weight: 0.4, direction: high}
+  leo:
+    label: "Sun in Leo"
+    text: >-
+      Leads with warmth and puts real effort where it can be seen and
+      credited. The cost is taking a lack of acknowledgment personally, even
+      when nothing about the work itself has changed.
+    tags:
+      - {facet: drive.recognition, weight: 0.9, direction: high}
+      - {facet: core_essence.visibility, weight: 0.8, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.7, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+  virgo:
+    label: "Sun in Virgo"
+    text: >-
+      Holds its own work to a high, specific standard and keeps refining it
+      past the point most people would call it done. The cost is turning
+      that same scrutiny inward until nothing feels finished enough to show.
+    tags:
+      - {facet: work_energy.structure, weight: 0.8, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+      - {facet: communication.register, weight: 0.4, direction: low}
+  libra:
+    label: "Sun in Libra"
+    text: >-
+      Weighs a decision from every side it can find before committing, and
+      would rather the exchange stay fair than win it outright. The cost is
+      leaving a choice open so long that circumstance ends up making it.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: low}
+      - {facet: relational.conflict, weight: 0.7, direction: low}
+      - {facet: decision_making.timing, weight: 0.5, direction: low}
+      - {facet: communication.listening, weight: 0.5, direction: high}
+  scorpio:
+    label: "Sun in Scorpio"
+    text: >-
+      Goes straight past small talk to what is actually going on, and commits
+      hard once trust has been earned. The cost is withholding its own
+      position until it feels certain, which reads to others as guardedness.
+    tags:
+      - {facet: core_essence.archetype_force, weight: 0.8, direction: high}
+      - {facet: growth_edges.control, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.5, direction: low}
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+  sagittarius:
+    label: "Sun in Sagittarius"
+    text: >-
+      Chases the bigger picture and says plainly what it currently thinks is
+      true. The cost is committing to the next horizon before the current
+      one is actually finished, and bluntness that outruns tact.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+      - {facet: work_energy.structure, weight: 0.5, direction: low}
+  capricorn:
+    label: "Sun in Capricorn"
+    text: >-
+      Builds toward a long-term standing through consistent, unglamorous
+      delivery. The cost is measuring its own worth almost entirely by
+      output, which leaves little room to simply rest.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.8, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: high}
+      - {facet: core_essence.visibility, weight: 0.4, direction: low}
+  aquarius:
+    label: "Sun in Aquarius"
+    text: >-
+      Thinks in systems and principles and holds its own independence of
+      thought as non-negotiable. The cost is intellectualizing feeling until
+      people it cares about experience it as distance.
+    tags:
+      - {facet: relational.autonomy, weight: 0.8, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.6, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: low}
+  pisces:
+    label: "Sun in Pisces"
+    text: >-
+      Imagines past the literal facts of a situation and absorbs the
+      emotional tenor of whoever else is in the room. The cost is losing
+      track of its own priorities among everyone else's.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}

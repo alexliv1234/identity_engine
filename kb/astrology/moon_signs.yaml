@@ -1,0 +1,146 @@
+schema: kb.mapping.v1
+system: astrology
+element: moon_signs
+reviewed: true
+source: >-
+  Tropical zodiac, common contemporary synthesis of the Moon as the habitual,
+  largely automatic style of emotional processing — how a feeling gets
+  handled once it has already arrived, as distinct from the Sun's drive or
+  the Ascendant's outward presentation. Interpretive choice: every entry is
+  weighted primarily onto the `emotional.*` facets, since that is the
+  dimension this angle governs; other dimensions appear only where the
+  emotional pattern visibly spills into behaviour (e.g. how conflict or
+  bonding is handled once a feeling has surfaced).
+entries:
+  aries:
+    label: "Moon in Aries"
+    text: >-
+      Reacts to a feeling the instant it lands and moves through it fast.
+      The cost is a short fuse that flares before there has been time to
+      check whether the reaction fits what actually happened.
+    tags:
+      - {facet: emotional.volatility, weight: 0.7, direction: high}
+      - {facet: emotional.processing, weight: 0.7, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  taurus:
+    label: "Moon in Taurus"
+    text: >-
+      Needs physical calm and familiar surroundings to feel settled, and is
+      slow to be stirred out of that steadiness. The cost is a reluctance to
+      let a real feeling move once it has finally taken hold.
+    tags:
+      - {facet: emotional.volatility, weight: 0.8, direction: low}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+      - {facet: growth_edges.control, weight: 0.4, direction: high}
+  gemini:
+    label: "Moon in Gemini"
+    text: >-
+      Processes a feeling by talking it through and naming it out loud, more
+      than by sitting with it. The cost is staying so much in the account of
+      the feeling that the feeling itself never fully lands.
+    tags:
+      - {facet: emotional.processing, weight: 0.8, direction: high}
+      - {facet: communication.pace, weight: 0.5, direction: high}
+      - {facet: emotional.sensitivity, weight: 0.4, direction: low}
+      - {facet: drive.novelty_seeking, weight: 0.4, direction: high}
+  cancer:
+    label: "Moon in Cancer"
+    text: >-
+      Feels first and thinks second, and keeps a detailed emotional record
+      of the people closest to it. The cost is reopening old hurt long after
+      the person who caused it has moved on.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.9, direction: high}
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  leo:
+    label: "Moon in Leo"
+    text: >-
+      Needs a feeling to be witnessed to feel fully real, and is warm and
+      generous once that recognition is there. The cost is treating an
+      unnoticed feeling as an unfelt one and pressing harder to be seen.
+    tags:
+      - {facet: emotional.processing, weight: 0.7, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: high}
+      - {facet: core_essence.visibility, weight: 0.4, direction: high}
+  virgo:
+    label: "Moon in Virgo"
+    text: >-
+      Soothes an unsettled feeling by fixing or organizing something nearby
+      rather than sitting with the feeling itself. The cost is a private
+      undertow of worry that the tidying never actually resolves.
+    tags:
+      - {facet: emotional.processing, weight: 0.7, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.5, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+      - {facet: work_energy.structure, weight: 0.4, direction: high}
+  libra:
+    label: "Moon in Libra"
+    text: >-
+      Feels unsettled by discord and works to smooth the room before it
+      names what is actually wrong. The cost is deferring its own upset long
+      enough that it stops being clear the upset was ever there.
+    tags:
+      - {facet: relational.conflict, weight: 0.8, direction: low}
+      - {facet: emotional.volatility, weight: 0.5, direction: low}
+      - {facet: communication.listening, weight: 0.5, direction: high}
+      - {facet: growth_edges.patience, weight: 0.4, direction: low}
+  scorpio:
+    label: "Moon in Scorpio"
+    text: >-
+      Feels everything at close to full intensity and shows almost none of
+      it on the surface. The cost is a grip on control that makes real
+      vulnerability feel like exposure rather than relief.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.8, direction: high}
+      - {facet: emotional.processing, weight: 0.8, direction: low}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+  sagittarius:
+    label: "Moon in Sagittarius"
+    text: >-
+      Handles a hard feeling by getting some distance and perspective on it,
+      often out loud and without much filter. The cost is treating patience
+      with a slow-moving feeling as optional.
+    tags:
+      - {facet: emotional.processing, weight: 0.5, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.4, direction: high}
+      - {facet: emotional.volatility, weight: 0.4, direction: low}
+  capricorn:
+    label: "Moon in Capricorn"
+    text: >-
+      Manages a difficult feeling by containing it and staying functional
+      through it. The cost is a composure so consistent that people close to
+      it stop being told when something is actually wrong.
+    tags:
+      - {facet: emotional.processing, weight: 0.8, direction: low}
+      - {facet: emotional.volatility, weight: 0.6, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+      - {facet: relational.autonomy, weight: 0.4, direction: high}
+  aquarius:
+    label: "Moon in Aquarius"
+    text: >-
+      Steps back to think about a feeling before it is allowed to fully
+      land. The cost is a detachment that can leave a feeling analyzed but
+      never quite metabolized.
+    tags:
+      - {facet: emotional.processing, weight: 0.7, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.5, direction: low}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.4, direction: low}
+  pisces:
+    label: "Moon in Pisces"
+    text: >-
+      Absorbs the emotional temperature of whoever is nearby, often before
+      registering its own. The cost is losing track of where someone else's
+      feeling ends and its own begins.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.9, direction: high}
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}

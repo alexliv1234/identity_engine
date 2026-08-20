@@ -14,3 +14,12 @@ files:
            "horse", "goat", "monkey", "rooster", "dog", "pig"]
   chinese_zodiac/elements:
     keys: ["wood", "fire", "earth", "metal", "water"]
+  astrology/sun_signs:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  astrology/moon_signs:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  astrology/ascendants:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
