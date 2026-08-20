@@ -6,6 +6,7 @@ from engine.systems.astrology import (
     SIGNS,
     AstrologyCalculator,
     aspects_between,
+    house_of,
     sign_of,
 )
 from engine.types import BirthInput, InputField
@@ -119,6 +120,19 @@ def test_aspect_list_is_sorted_and_deduplicated():
     assert keys == sorted(keys)
 
 
+def test_house_of_wraps_across_the_zero_boundary():
+    """Direct unit test for the cusp wrap (a reviewer verified this by hand
+    on a real chart's cusp set spanning 350 deg -> 20 deg). House 1 starts at
+    cusps[0] = 350 and house 2 starts at cusps[1] = 20, so house 1 straddles
+    the 0/360 seam and every longitude in [350, 360) union [0, 20) must land
+    in house 1, not fall through to house 12 or jump early to house 2."""
+    cusps = (350.0, 20.0, 50.0, 80.0, 110.0, 140.0, 170.0, 200.0, 230.0, 260.0, 290.0, 320.0)
+    assert house_of(355.0, cusps) == 1
+    assert house_of(5.0, cusps) == 1
+    assert house_of(20.0, cusps) == 2  # exactly on the cusp: belongs to the next house
+    assert house_of(349.999, cusps) == 12  # just short of the wrap: still the prior house
+
+
 def test_southern_hemisphere_chart_computes():
     raw = (
         AstrologyCalculator()
@@ -152,15 +166,14 @@ def test_polar_latitude_with_known_birth_time_degrades_houses_not_the_whole_prof
     produced, with full placements (sign + degree), but no houses/angles,
     and a note that names the real reason (latitude), not birth time -- the
     birth time IS known here."""
-    out = AstrologyCalculator().compute(
-        make_input(
-            lat=69.6492,
-            lon=18.9553,
-            tz="Europe/Oslo",
-            birth_date=dt.date(1990, 6, 15),
-            birth_time=dt.time(14, 0),
-        )
+    polar_kwargs = dict(
+        lat=69.6492,
+        lon=18.9553,
+        tz="Europe/Oslo",
+        birth_date=dt.date(1990, 6, 15),
+        birth_time=dt.time(14, 0),
     )
+    out = AstrologyCalculator().compute(make_input(**polar_kwargs))
     assert out.raw["houses_available"] is False
     assert out.raw["angles"] is None
     assert all("house" not in p for p in out.raw["placements"])
@@ -173,6 +186,26 @@ def test_polar_latitude_with_known_birth_time_degrades_houses_not_the_whole_prof
     # failure reasons and must not be conflated.
     assert any("latitude" in n.lower() or "polar" in n.lower() for n in out.notes)
     assert not any("birth time" in n.lower() for n in out.notes)
+
+    # Pin the confidence judgment itself, not just the shape around it: the
+    # birth time is fully known here and every placement (sign + degree) is
+    # exact, so overall confidence stays 1.0 even though houses/angles are
+    # lost. This is deliberate, not an oversight -- lowering it would
+    # double-penalise the profile. A missing Ascendant already reduces
+    # convergence on core_essence.visibility and communication.* in
+    # synthesis, because astrology still counts in the applicable-systems
+    # denominator for every facet, including the ones it stays silent on
+    # (engine/synthesis.py). Confidence tracks trust in what IS reported
+    # (which is exact here); completeness is handled by that convergence
+    # path, not by discounting confidence a second time. Contrast this with
+    # the no-birth-time case below, where confidence genuinely does drop,
+    # because there the reported placements themselves are less certain
+    # (a noon-approximation chart, possibly an ambiguous Moon sign) -- a
+    # different kind of loss than "we have exact data but no houses".
+    assert out.confidence == 1.0
+
+    no_time_out = AstrologyCalculator().compute(make_input(**{**polar_kwargs, "birth_time": None}))
+    assert no_time_out.confidence == 0.6
 
 
 def test_polar_latitude_without_birth_time_gives_one_coherent_note():
