@@ -8,6 +8,7 @@ so the profile can report reduced confidence rather than fake precision (§8).
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 
@@ -84,8 +85,38 @@ def latin_letters(text: str) -> str:
     return _SPACES.sub(" ", stripped).strip()
 
 
+def _is_latin_script(text: str) -> bool:
+    """True when every *letter* character in text belongs to the Latin script.
+
+    Non-letters (spaces, digits, punctuation, hyphens, apostrophes) are
+    ignored and never affect the result. Diacritics are Latin script (e.g.
+    "LATIN SMALL LETTER E WITH ACUTE" for the e in "Renee") — only a letter
+    from a genuinely different script (Cyrillic, CJK, Hebrew, Arabic, ...)
+    makes this false. This is a fixed rule over Unicode character names, with
+    no locale or heuristic component, and it never raises on a codepoint with
+    no assigned name (such a codepoint is simply treated as non-Latin).
+    """
+    saw_letter = False
+    for ch in text:
+        if not ch.isalpha():
+            continue
+        saw_letter = True
+        try:
+            char_name = unicodedata.name(ch)
+        except ValueError:
+            return False
+        if not char_name.startswith("LATIN"):
+            return False
+    return saw_letter
+
+
 def to_hebrew(latin: str) -> str:
-    """Fixed-table Latin -> Hebrew transliteration (deterministic, lossy)."""
+    """Fixed-table Latin -> Hebrew transliteration (deterministic, lossy).
+
+    Assumes `latin` has already had its internal whitespace collapsed (as
+    `latin_letters` does); irregular runs of whitespace in the input are
+    preserved verbatim in the output rather than being normalized.
+    """
     out: list[str] = []
     for word in latin.split(" "):
         i = 0
@@ -112,8 +143,7 @@ def normalize(full_name: str, hebrew_name: str | None) -> NormalizedName:
             field="full_name",
         )
 
-    already_latin = bool(re.fullmatch(r"[A-Za-z .'\-]+", full_name.strip()))
-    latin_quality = NameQuality.PROVIDED if already_latin else NameQuality.DERIVED
+    latin_quality = NameQuality.PROVIDED if _is_latin_script(full_name) else NameQuality.DERIVED
     if latin_quality is NameQuality.DERIVED:
         notes.append(
             "full_name is not Latin script: numerology uses a fixed-table "

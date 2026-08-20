@@ -49,3 +49,52 @@ def test_name_with_no_mappable_letters_raises():
     with pytest.raises(EngineError) as exc:
         normalize("123 !!!", hebrew_name=None)
     assert exc.value.code is ErrorCode.NAME_UNMAPPABLE
+
+
+# --- Accented/diacritic Latin names must be PROVIDED, not DERIVED (review Finding 1) ---
+
+
+def test_accented_latin_name_is_marked_provided():
+    result = normalize("Renée Zellweger", hebrew_name=None)
+    assert result.latin_quality is NameQuality.PROVIDED
+    assert not any("not latin script" in n.lower() for n in result.notes)
+
+
+def test_jose_garcia_is_marked_provided():
+    result = normalize("José García", hebrew_name=None)
+    assert result.latin_quality is NameQuality.PROVIDED
+
+
+def test_hyphenated_latin_name_is_marked_provided():
+    result = normalize("Jean-Luc Picard", hebrew_name=None)
+    assert result.latin_quality is NameQuality.PROVIDED
+
+
+def test_cyrillic_name_is_still_marked_derived():
+    # Regression guard: a genuinely different script must still be DERIVED.
+    result = normalize("Владимир Иванов", hebrew_name=None)
+    assert result.latin_quality is NameQuality.DERIVED
+    assert any("not latin script" in n.lower() for n in result.notes)
+
+
+def test_cjk_name_is_romanised_and_marked_derived():
+    # unidecode romanises CJK to Latin letters, so normalize() succeeds (no
+    # NAME_UNMAPPABLE) but the source script is not Latin, so it is DERIVED.
+    result = normalize("李小龍", hebrew_name=None)
+    assert result.latin == "LI XIAO LONG"
+    assert result.latin_quality is NameQuality.DERIVED
+    assert any("not latin script" in n.lower() for n in result.notes)
+
+
+# --- Pin LATIN_TO_HEBREW by value so a future swapped/confusable entry fails loudly ---
+
+
+def test_hebrew_table_pins_confusable_letters():
+    assert to_hebrew("G") == "ג"  # gimel, not nun
+    assert to_hebrew("N") == "נ"  # nun, not gimel
+    assert to_hebrew("H") == "ה"  # he, not chet/tav
+    assert to_hebrew("CH") == "ח"  # chet, not he/tav
+    assert to_hebrew("TH") == "ת"  # tav, not he/chet
+    assert to_hebrew("SH") == "ש"
+    assert to_hebrew("TZ") == "צ"
+    assert to_hebrew("GAN") == "גאנ"
