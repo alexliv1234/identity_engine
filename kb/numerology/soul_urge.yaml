@@ -1,0 +1,121 @@
+schema: kb.mapping.v1
+system: numerology
+element: soul_urge
+reviewed: true
+source: >-
+  Pythagorean tradition, common contemporary synthesis. Interpretive choice:
+  the Soul Urge (Heart's Desire) number sums the Pythagorean letter values of
+  the vowels only, where a vowel is A/E/I/O/U plus Y when neither neighbouring
+  letter in its word is itself a vowel; the sum reduces once, preserving
+  11/22/33. Describes an inward want, not an outward trait or a prediction.
+entries:
+  "1":
+    label: "Soul Urge 1"
+    text: >-
+      Wants to be the one who decides, not the one who is decided for. Sits
+      poorly with being managed closely, even by people it trusts.
+    tags:
+      - {facet: relational.autonomy, weight: 0.8, direction: high}
+      - {facet: drive.initiative, weight: 0.6, direction: high}
+      - {facet: core_essence.self_image, weight: 0.5, direction: high}
+  "2":
+    label: "Soul Urge 2"
+    text: >-
+      Wants closeness and agreement more than being right. Sits poorly with
+      open conflict, which it will often smooth over before it's resolved.
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: relational.conflict, weight: 0.6, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.5, direction: high}
+  "3":
+    label: "Soul Urge 3"
+    text: >-
+      Wants to be heard and to make people feel something. Sits poorly with
+      long stretches of quiet, routine work with no audience.
+    tags:
+      - {facet: communication.register, weight: 0.8, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: core_essence.visibility, weight: 0.5, direction: high}
+  "4":
+    label: "Soul Urge 4"
+    text: >-
+      Wants order and a plan that holds. Sits poorly with last-minute
+      changes and open-ended situations without a clear next step.
+    tags:
+      - {facet: work_energy.structure, weight: 0.8, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: low}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "5":
+    label: "Soul Urge 5"
+    text: >-
+      Wants freedom of movement and new experience over stability. Sits
+      poorly with being tied to one place, role, or routine for long.
+    tags:
+      - {facet: relational.autonomy, weight: 0.7, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.5, direction: high}
+  "6":
+    label: "Soul Urge 6"
+    text: >-
+      Wants to belong to something and to be needed within it. Sits poorly
+      with feeling like an outsider in a family, team, or close circle.
+    tags:
+      - {facet: relational.loyalty, weight: 0.8, direction: high}
+      - {facet: life_themes.service, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.6, direction: high}
+  "7":
+    label: "Soul Urge 7"
+    text: >-
+      Wants to understand the real mechanism underneath the surface
+      explanation. Sits poorly with surface-level small talk and being
+      rushed to a conclusion.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+      - {facet: emotional.processing, weight: 0.6, direction: low}
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+  "8":
+    label: "Soul Urge 8"
+    text: >-
+      Wants tangible proof of progress: rank, resources, results. Sits
+      poorly with effort that goes unrecognized or unmeasured.
+    tags:
+      - {facet: drive.recognition, weight: 0.7, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.6, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: high}
+  "9":
+    label: "Soul Urge 9"
+    text: >-
+      Wants what it does to matter beyond itself. Sits poorly with work
+      that feels purely self-interested, even when it pays well.
+    tags:
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+      - {facet: life_themes.service, weight: 0.7, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  "11":
+    label: "Soul Urge 11 (master)"
+    text: >-
+      Wants contact with something larger than the everyday: meaning,
+      insight, a sense of pattern. Sits poorly with a life that feels
+      purely transactional.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.8, direction: high}
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+      - {facet: emotional.volatility, weight: 0.5, direction: high}
+  "22":
+    label: "Soul Urge 22 (master)"
+    text: >-
+      Wants to leave something built and lasting, not just experienced.
+      Sits poorly with effort that dissolves without a durable result.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.7, direction: high}
+      - {facet: work_energy.structure, weight: 0.6, direction: high}
+      - {facet: life_themes.transformation, weight: 0.5, direction: low}
+  "33":
+    label: "Soul Urge 33 (master)"
+    text: >-
+      Wants to help others grow, even at real personal cost. Sits poorly
+      with drawing a firm boundary around its own time and needs.
+    tags:
+      - {facet: life_themes.service, weight: 0.9, direction: high}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: low}

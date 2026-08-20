@@ -1,0 +1,132 @@
+schema: kb.mapping.v1
+system: numerology
+element: life_path
+reviewed: true
+source: >-
+  Pythagorean tradition, common contemporary synthesis. Interpretive choices:
+  month, day, and year are each reduced separately (preserving 11/22/33) before
+  being summed, and that sum is reduced once more (also preserving masters).
+  Master numbers 11, 22 and 33 are never collapsed to a single digit. Entries
+  describe a tendency and its cost, not a prediction or a guarantee.
+entries:
+  "1":
+    label: "Life Path 1"
+    text: >-
+      A path of initiation and self-direction; comfortable going first, less
+      comfortable being led. The cost is a tendency to override input from
+      others when moving fast.
+    tags:
+      - {facet: drive.initiative, weight: 0.9, direction: high}
+      - {facet: relational.autonomy, weight: 0.7, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.6, direction: high}
+  "2":
+    label: "Life Path 2"
+    text: >-
+      A path of partnership and attunement; reads the room before moving and
+      works best in tandem. The cost is deferring a preference so often that
+      it becomes hard to name.
+    tags:
+      - {facet: drive.initiative, weight: 0.6, direction: low}
+      - {facet: relational.autonomy, weight: 0.7, direction: low}
+      - {facet: communication.listening, weight: 0.8, direction: high}
+      - {facet: emotional.sensitivity, weight: 0.6, direction: high}
+  "3":
+    label: "Life Path 3"
+    text: >-
+      A path of expression and play; ideas arrive fast and want an audience.
+      The cost is scattering energy across many starts instead of finishing
+      the one in front of them.
+    tags:
+      - {facet: communication.register, weight: 0.9, direction: high}
+      - {facet: communication.pace, weight: 0.7, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.7, direction: high}
+  "4":
+    label: "Life Path 4"
+    text: >-
+      A path of foundations and follow-through; steady effort applied over
+      long stretches. The cost is a rigidity that resists plans changing
+      mid-course, even when the change is an improvement.
+    tags:
+      - {facet: work_energy.structure, weight: 0.9, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.6, direction: low}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: low}
+  "5":
+    label: "Life Path 5"
+    text: >-
+      A path of movement and variety; drawn to change and restless under
+      routine. The cost is difficulty committing to a single track long
+      enough to see it through.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.9, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: high}
+  "6":
+    label: "Life Path 6"
+    text: >-
+      A path of responsibility and care; drawn to look after people and
+      situations close by. The cost is taking on more obligation than was
+      asked for and resenting it later.
+    tags:
+      - {facet: relational.loyalty, weight: 0.8, direction: high}
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+  "7":
+    label: "Life Path 7"
+    text: >-
+      A path of inquiry and solitude; energised by working a problem alone
+      until it makes sense. The cost is a withdrawal from other people that
+      reads as distance.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.7, direction: low}
+      - {facet: emotional.processing, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+  "8":
+    label: "Life Path 8"
+    text: >-
+      A path of scale and stewardship; oriented toward building something
+      substantial and measurable. The cost is measuring self-worth against
+      output rather than against anything steadier.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.8, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.6, direction: high}
+  "9":
+    label: "Life Path 9"
+    text: >-
+      A path of breadth and closure; drawn to causes larger than any one
+      relationship and to finishing chapters cleanly. The cost is holding
+      people at the arm's length a broad view requires.
+    tags:
+      - {facet: life_themes.service, weight: 0.7, direction: high}
+      - {facet: life_themes.seeking, weight: 0.7, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+  "11":
+    label: "Life Path 11 (master)"
+    text: >-
+      A master path of heightened perception; picks up on undercurrents
+      others miss and runs hot on that input. The cost is a nervous-system
+      load that needs deliberate recovery, not just willpower.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.9, direction: high}
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.6, direction: high}
+  "22":
+    label: "Life Path 22 (master)"
+    text: >-
+      A master path of large-scale building; pairs a big vision with the
+      practical follow-through to make it real. The cost is a self-imposed
+      pressure to make everything count.
+    tags:
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: work_energy.endurance, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+  "33":
+    label: "Life Path 33 (master)"
+    text: >-
+      A master path of devoted teaching and care, extended past the
+      immediate circle. The cost is neglecting personal needs while
+      attending to everyone else's.
+    tags:
+      - {facet: life_themes.service, weight: 0.9, direction: high}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.6, direction: low}
