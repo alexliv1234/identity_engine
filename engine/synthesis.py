@@ -16,6 +16,13 @@ from engine.types import TraitTag
 ROUND = 6
 SUMMARY_TAG_COUNT = 3
 
+# Spec §4.2 describes a tension as a *cross-system* disagreement ("tension:
+# astrology suggests X; Human Design suggests Y") and calls it the thing "a
+# single-system app cannot produce". One system disagreeing with itself is a
+# property of that system's KB entries, not a cross-system signal, so it must
+# not be reported as a tension.
+MIN_TENSION_SYSTEMS = 2
+
 
 @dataclass
 class _FacetAccumulator:
@@ -36,6 +43,18 @@ def synthesize(
 ) -> dict:
     tax = taxonomy or load_taxonomy()
     threshold = tax.tension_threshold
+
+    # Spec §4.2: "Convergence score per facet = share of *applicable* systems
+    # agreeing in direction." Applicable means the system actually ran and
+    # produced a usable result — confidence > 0. A system excluded by
+    # degradation (e.g. Human Design with no birth time, confidence 0.0) is
+    # not applicable and must not sit in the denominator; but a system that
+    # ran and simply had nothing to say about *this* facet is applicable, and
+    # its silence is exactly what stops a lone contributor from claiming full
+    # agreement. Using the contributing systems as the denominator instead
+    # would make every single-source facet score 1.0, which is no information
+    # at all.
+    applicable = {system for system, conf in confidences.items() if conf > 0.0}
 
     # Determinism must be structural, not an artifact of rounding: sort tags into
     # a single canonical order before any accumulation, so every facet's weight
@@ -69,8 +88,11 @@ def synthesize(
         score = {d: acc.weights[d] / total for d in ("high", "low")}
         dominant = "high" if score["high"] >= score["low"] else "low"
 
-        contributing = acc.systems["high"] | acc.systems["low"]
-        convergence = len(acc.systems[dominant]) / len(contributing)
+        # Numerator: distinct systems with at least one tag in the dominant
+        # direction. Denominator: applicable systems (see above). `applicable`
+        # is non-empty here by construction — a facet only accumulates from a
+        # system whose confidence cleared the > 0 guard.
+        convergence = len(acc.systems[dominant]) / len(applicable)
 
         facet = tax.get(facet_id)
         by_dimension[facet.dimension].append(
@@ -84,9 +106,10 @@ def synthesize(
             }
         )
 
-        if score["high"] >= threshold and score["low"] >= threshold:
-            high_systems = sorted(acc.systems["high"])
-            low_systems = sorted(acc.systems["low"])
+        high_systems = sorted(acc.systems["high"])
+        low_systems = sorted(acc.systems["low"])
+        is_cross_system = len(acc.systems["high"] | acc.systems["low"]) >= MIN_TENSION_SYSTEMS
+        if score["high"] >= threshold and score["low"] >= threshold and is_cross_system:
             tensions_by_dimension[facet.dimension].append(
                 {
                     "facet": facet_id,

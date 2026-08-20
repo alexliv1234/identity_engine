@@ -136,9 +136,10 @@ def test_provenance_order_for_same_system_and_element_is_canonical_not_input_ord
 
 
 def test_summary_tags_are_the_top_three_facet_directions():
-    # Each facet below gets exactly one tag, so every facet's score and
-    # convergence are both 1.0 (all its weight is in one direction, from one
-    # system). The sort key (-(score * convergence), facet_id) therefore ties
+    # Each facet below gets exactly one tag, and "astrology" is the only
+    # applicable system, so every facet's score and convergence are both 1.0
+    # (all its weight is in one direction, from the one applicable system).
+    # The sort key (-(score * convergence), facet_id) therefore ties
     # on the numeric part for all four facets and falls through to
     # alphabetical facet_id:
     #   decision_making.gut_vs_deliberation  -> "gut"
@@ -194,3 +195,92 @@ def test_missing_confidence_for_a_tagged_system_raises():
 
 def test_threshold_is_read_from_the_taxonomy():
     assert load_taxonomy().tension_threshold == 0.4
+
+
+# --- FIX 1: a tension must be cross-system -------------------------------
+
+
+def test_intra_system_split_at_fifty_fifty_is_not_a_tension():
+    """Spec 4.2 defines tension as cross-system ("astrology suggests X; Human
+    Design suggests Y") and calls it the thing a single-system app cannot
+    produce. One system disagreeing with itself is not that."""
+    result = synthesize(
+        [
+            tag("numerology", "high", 0.5, element="life_path"),
+            tag("numerology", "low", 0.5, element="soul_urge"),
+        ],
+        {"numerology": 1.0},
+    )
+    assert result["dimensions"]["decision_making"]["tensions"] == []
+
+
+def test_cross_system_split_at_the_same_scores_is_a_tension():
+    """Identical 50/50 scores to the test above; the only difference is that
+    two distinct systems are involved. That difference is the whole rule."""
+    result = synthesize(
+        [
+            tag("astrology", "high", 0.5, element="sun_sign"),
+            tag("numerology", "low", 0.5, element="soul_urge"),
+        ],
+        {"astrology": 1.0, "numerology": 1.0},
+    )
+    tensions = result["dimensions"]["decision_making"]["tensions"]
+    assert len(tensions) == 1
+    assert tensions[0]["high"]["systems"] == ["astrology"]
+    assert tensions[0]["low"]["systems"] == ["numerology"]
+
+
+def test_mixed_split_with_one_system_on_both_sides_is_still_a_tension():
+    """System A on the high side, systems A and B on the low side: two
+    distinct systems are involved, so it qualifies."""
+    result = synthesize(
+        [
+            tag("numerology", "high", 0.6, element="life_path"),
+            tag("numerology", "low", 0.2, element="soul_urge"),
+            tag("astrology", "low", 0.4, element="sun_sign"),
+        ],
+        {"numerology": 1.0, "astrology": 1.0},
+    )
+    tensions = result["dimensions"]["decision_making"]["tensions"]
+    assert len(tensions) == 1
+    assert tensions[0]["high"]["systems"] == ["numerology"]
+    assert tensions[0]["low"]["systems"] == ["astrology", "numerology"]
+
+
+# --- FIX 2: convergence is a share of *applicable* systems ---------------
+
+
+def test_single_system_facet_does_not_claim_full_convergence():
+    """Spec 4.2: convergence is the share of *applicable* systems agreeing.
+    One system out of six agreeing is not full agreement, and reporting 1.0
+    makes "high convergence => high confidence" false."""
+    confidences = {
+        "astrology": 1.0,
+        "human_design": 1.0,
+        "gene_keys": 1.0,
+        "numerology": 1.0,
+        "kabbalah": 1.0,
+        "chinese_zodiac": 1.0,
+    }
+    result = synthesize([tag("astrology", "high")], confidences)
+    assert only_facet(result)["convergence"] == round(1 / 6, 6)
+
+
+def test_unanimous_across_every_applicable_system_scores_exactly_one():
+    confidences = {"astrology": 1.0, "human_design": 1.0, "numerology": 1.0}
+    result = synthesize(
+        [tag("astrology", "high"), tag("human_design", "high"), tag("numerology", "high")],
+        confidences,
+    )
+    assert only_facet(result)["convergence"] == 1.0
+
+
+def test_zero_confidence_system_is_not_applicable_and_not_in_the_denominator():
+    """A system excluded by degradation (confidence 0.0, e.g. Human Design
+    with no birth time) is not an applicable system, so it must not drag
+    every facet's convergence down."""
+    result = synthesize(
+        [tag("astrology", "high")],
+        {"astrology": 1.0, "human_design": 0.0},
+    )
+    assert only_facet(result)["convergence"] == 1.0
