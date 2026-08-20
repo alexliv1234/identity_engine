@@ -12,6 +12,7 @@ from engine.systems.hd_wheel import (
     WHEEL,
     WHEEL_START,
     activations,
+    cached_design_julian_day,
     design_julian_day,
     gate_line,
 )
@@ -132,6 +133,65 @@ def test_design_solver_handles_a_search_bracket_that_straddles_zero_aries(eph):
     natal_sun = eph.position(natal, Body.SUN).longitude
     design_sun = eph.position(design, Body.SUN).longitude
     assert arc_between((design_sun + 88.0) % 360.0, natal_sun) < 0.001
+
+
+# --- cached_design_julian_day -----------------------------------------------
+#
+# Task 5 (Gene Keys) added this memoized wrapper so Human Design and Gene
+# Keys share one design-moment solve per profile. It is new production code
+# in this module that nothing above exercises directly -- the tests above
+# only ever call the uncached `design_julian_day`. Pin the wrapper's own
+# behavior here rather than relying on `compute()`-level coverage, which
+# only proves the two calculators land on the *same* answer, not that the
+# caching itself is correct (right key, no cross-input leakage, bounded
+# size).
+
+
+def test_cached_design_julian_day_matches_the_uncached_solve_exactly(eph):
+    """Not approximately equal -- the cache must return the identical float
+    the uncached solver would have produced, not a close one."""
+    natal = eph.julian_day(dt.datetime(1990, 5, 5, 3, 0, tzinfo=dt.UTC))
+    assert cached_design_julian_day(eph, natal) == design_julian_day(eph, natal)
+
+
+def test_cached_design_julian_day_keys_on_natal_jd(eph):
+    """Two distinct birth moments must not collide in the cache: each gets
+    its own entry, and neither's design moment leaks into the other's."""
+    cached_design_julian_day.cache_clear()
+
+    natal_a = eph.julian_day(dt.datetime(1990, 5, 5, 3, 0, tzinfo=dt.UTC))
+    natal_b = eph.julian_day(dt.datetime(2005, 11, 20, 18, 30, tzinfo=dt.UTC))
+    assert natal_a != natal_b
+
+    design_a = cached_design_julian_day(eph, natal_a)
+    design_b = cached_design_julian_day(eph, natal_b)
+
+    assert design_a != design_b
+    assert design_a == design_julian_day(eph, natal_a)
+    assert design_b == design_julian_day(eph, natal_b)
+
+    # Two distinct keys really did produce two distinct cache entries, not
+    # one call silently reusing (or overwriting) the other's slot.
+    info = cached_design_julian_day.cache_info()
+    assert info.currsize == 2
+    assert info.misses == 2
+
+    # A repeat call for either input is a hit, not a third miss -- confirms
+    # the memoization is actually happening, not just returning correct
+    # values by coincidence because both paths compute the same thing.
+    cached_design_julian_day(eph, natal_a)
+    assert cached_design_julian_day.cache_info().hits == 1
+
+
+def test_cached_design_julian_day_is_bounded():
+    """A bounded cache (functools.lru_cache with maxsize set), not an
+    unbounded dict -- maxsize=None would silently turn this into a
+    process-lifetime memory leak in a long-running service, and every other
+    test in this module would keep passing regardless."""
+    maxsize = cached_design_julian_day.cache_info().maxsize
+    assert maxsize is not None
+    assert isinstance(maxsize, int)
+    assert maxsize > 0
 
 
 def test_activations_include_the_derived_points(eph):
