@@ -9,6 +9,6 @@ from pathlib import Path
 KB_ROOT = Path(__file__).resolve().parents[2] / "kb"
 
 
-@functools.lru_cache
+@functools.cache
 def kb_version(root: Path | None = None) -> str:
     return (root or KB_ROOT).joinpath("VERSION").read_text(encoding="utf-8").strip()

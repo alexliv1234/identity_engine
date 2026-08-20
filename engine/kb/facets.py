@@ -53,7 +53,7 @@ class Taxonomy:
         return self.dimensions[self.get(facet_id).dimension]
 
 
-@functools.lru_cache
+@functools.cache
 def load_taxonomy(root: Path | None = None) -> Taxonomy:
     path = (root or KB_ROOT) / "facets.yaml"
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
