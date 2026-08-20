@@ -1,5 +1,6 @@
 import json
 
+import engine
 from engine.canonical import canonical_json, quantize
 
 
@@ -34,3 +35,11 @@ def test_canonical_json_keeps_non_ascii_literal():
 def test_canonical_json_round_trips():
     obj = {"a": [1, 2.5, "x", None, True]}
     assert json.loads(canonical_json(obj)) == obj
+
+
+def test_canonical_json_normalizes_negative_zero():
+    assert canonical_json({"x": -0.0}) == '{"x":0.0}'
+
+
+def test_engine_version():
+    assert engine.__version__ == "1.0.0"
