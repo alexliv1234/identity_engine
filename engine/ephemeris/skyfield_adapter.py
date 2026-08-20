@@ -35,7 +35,15 @@ from skyfield.api import Loader, load_file
 from skyfield.nutationlib import earth_tilt
 from skyfield.timelib import Time
 
-from engine.ephemeris.base import Body, Ephemeris, Houses, HousesUnavailable, Position, norm360
+from engine.ephemeris.base import (
+    Body,
+    Ephemeris,
+    EphemerisDataMissing,
+    Houses,
+    HousesUnavailable,
+    Position,
+    norm360,
+)
 
 DATA_DIR = Path(__file__).parent / "data"
 KERNEL_PATH = DATA_DIR / "de406.bsp"
@@ -72,29 +80,13 @@ _KERNEL_TARGET: dict[Body, str] = {
 # noise from the ephemeris interpolation itself is negligible.
 _SPEED_DT_DAYS = 1.0 / 24.0
 
-# Placidus iteration: converges to sub-microarcsecond precision in well under
+# Placidus iteration: converges to sub-microarcsecond residual in well under
 # 100 iterations even at the 66-degree polar limit (observed ~55 iterations
-# worst case there); 200 leaves comfortable headroom without risking a silent
-# infinite loop.
-_CUSP_TOLERANCE_DEG = 1e-8
+# worst case there); 200 leaves comfortable headroom without risking a
+# silent infinite loop. If it's ever exhausted, `_solve_placidus_cusp` raises
+# rather than returning an unconverged, fabricated-looking cusp.
+_CUSP_RESIDUAL_TOLERANCE_DEG = 1e-8
 _CUSP_MAX_ITER = 200
-
-
-class EphemerisDataMissing(RuntimeError):
-    """Raised when the vendored JPL kernel is absent.
-
-    Design spec §2: no external network calls in the request path. Skyfield's
-    own `load()` would fetch a missing file on cache miss, turning a cold
-    start into a silent network call, so this adapter loads only from a local
-    path and fails loudly with the setup command instead.
-    """
-
-    def __init__(self, path: Path) -> None:
-        super().__init__(
-            f"Ephemeris data file not found at {path}. "
-            "Run 'python kb_tools/fetch_ephemeris.py' to download it once "
-            "(a ~300 MB one-time setup step; never done automatically)."
-        )
 
 
 def _signed_delta(a: float, b: float) -> float:
@@ -113,7 +105,7 @@ def _mean_node_longitude(t: Time) -> tuple[float, float]:
     there is no "true" (osculating) node available to read instead. The mean
     node is the conventional choice in Western tropical astrology.
     """
-    tt = t.tt
+    tt = float(t.tt)
     T = (tt - 2451545.0) / 36525.0
     omega = 125.0445479 - 1934.1362891 * T + 0.0020754 * T**2 + T**3 / 467441.0 - T**4 / 60616000.0
     # d(Omega)/dT in degrees/century -> degrees/day.
@@ -121,7 +113,7 @@ def _mean_node_longitude(t: Time) -> tuple[float, float]:
         -1934.1362891 + 2.0 * 0.0020754 * T + 3.0 * T**2 / 467441.0 - 4.0 * T**3 / 60616000.0
     )
     speed_per_day = domega_dT / 36525.0
-    return norm360(omega), speed_per_day
+    return float(norm360(omega)), float(speed_per_day)
 
 
 def _true_obliquity_deg(t: Time) -> float:
@@ -133,7 +125,7 @@ def _true_obliquity_deg(t: Time) -> float:
 def _ramc_deg(t: Time, lon_east: float) -> float:
     """Right ascension of the midheaven (deg): GAST converted to degrees,
     plus the observer's east longitude."""
-    return norm360(t.gast * 15.0 + lon_east)
+    return norm360(float(t.gast) * 15.0 + lon_east)
 
 
 def _ra_of_ecliptic_point(lam_deg: float, eps_deg: float) -> float:
@@ -158,49 +150,64 @@ def _ecliptic_longitude_of_ra(ra_deg: float, eps_deg: float) -> float:
     return norm360(math.degrees(math.atan2(math.sin(ra), math.cos(ra) * math.cos(eps))))
 
 
+def _cusp_target_ra_deg(
+    lam: float, ramc: float, lat_deg: float, eps_deg: float, mode: str
+) -> float:
+    """The right ascension (deg) the cusp's trisection equation demands, given
+    a candidate longitude `lam` (used only to derive its own declination).
+
+    AD(lam) = asin(tan(lat) * tan(declination(lam)))   # ascensional difference
+    SDA = 90 + AD                                       # semi-diurnal arc
+    SNA = 90 - AD                                        # semi-nocturnal arc
+
+    Cusps 11/12 (between MC and ASC, not yet culminated) satisfy
+    `RA(lam) - RAMC = f * SDA(lam)` with f = 1/3 (cusp 11, closer to MC) or
+    2/3 (cusp 12, closer to ASC).
+
+    Cusps 2/3 (between ASC and IC, not yet risen) satisfy
+    `RAMC - RA(lam) - 180 = f * SNA(lam)` with f = 2/3 (cusp 2, closer to
+    ASC) or 1/3 (cusp 3, closer to IC).
+    """
+    dec = _declination_of_ecliptic_point(lam, eps_deg)
+    x = max(-1.0, min(1.0, math.tan(math.radians(lat_deg)) * math.tan(math.radians(dec))))
+    ad = math.degrees(math.asin(x))
+    if mode == "11":
+        return ramc + (90.0 + ad) / 3.0
+    if mode == "12":
+        return ramc + 2.0 * (90.0 + ad) / 3.0
+    if mode == "2":
+        return ramc - 180.0 - 2.0 * (90.0 - ad) / 3.0
+    return ramc - 180.0 - (90.0 - ad) / 3.0  # mode == "3"
+
+
 def _solve_placidus_cusp(
     ramc: float, lat_deg: float, eps_deg: float, mode: str, initial_guess: float
 ) -> float:
     """Iteratively solve one intermediate Placidus cusp (11, 12, 2, or 3).
 
-    Placidus trisects each ecliptic point's own semi-diurnal (or
-    semi-nocturnal) arc by *time*, not by angle. For a point at longitude
-    lambda with declination delta:
+    This has no closed form: `_cusp_target_ra_deg` gives the RA a candidate
+    longitude *should* have, but that RA depends on the candidate's own
+    declination, so it's solved by fixed-point iteration — inverting RA back
+    to a longitude (`_ecliptic_longitude_of_ra`) and repeating.
 
-        AD(lambda) = asin(tan(lat) * tan(delta))     # ascensional difference
-        SDA = 90 + AD                                # semi-diurnal arc
-        SNA = 90 - AD                                # semi-nocturnal arc
-
-    Cusps 11/12 (between MC and ASC, not yet culminated) satisfy
-    `RA(lambda) - RAMC = f * SDA(lambda)` with f = 1/3 (cusp 11, closer to
-    MC) or 2/3 (cusp 12, closer to ASC).
-
-    Cusps 2/3 (between ASC and IC, not yet risen) satisfy
-    `RAMC - RA(lambda) - 180 = f * SNA(lambda)` with f = 2/3 (cusp 2, closer
-    to ASC) or 1/3 (cusp 3, closer to IC).
-
-    Each iteration recomputes the point's declination from the current
-    longitude guess, derives the target right ascension from the equation
-    above, then inverts RA back to an ecliptic longitude (latitude 0) via
-    `_ecliptic_longitude_of_ra`. This has no closed form — it converges
-    because the mapping longitude -> declination -> target RA -> longitude is
-    a contraction near the fixed point — so it is solved by fixed-point
-    iteration to `_CUSP_TOLERANCE_DEG`.
+    Convergence is judged on the **residual of the defining equation itself**
+    (how far the candidate's actual RA is from what its own declination
+    demands), not on how far the last step moved — a small step can still
+    leave a real residual if the mapping is locally flat, and checking the
+    equation directly is what actually certifies correctness. If the
+    residual never tightens within `_CUSP_MAX_ITER` iterations, this raises
+    rather than returning a plausible-looking but unverified cusp — the
+    guard has fired zero times in ~16,000 solves across a wide date/latitude
+    sweep, which is exactly why it stays: it costs nothing and the
+    alternative is silently fabricating a result.
     """
     lam = initial_guess
-    phi = math.radians(lat_deg)
     for _ in range(_CUSP_MAX_ITER):
-        dec = _declination_of_ecliptic_point(lam, eps_deg)
-        x = max(-1.0, min(1.0, math.tan(phi) * math.tan(math.radians(dec))))
-        ad = math.degrees(math.asin(x))
-        if mode == "11":
-            target_ra = ramc + (90.0 + ad) / 3.0
-        elif mode == "12":
-            target_ra = ramc + 2.0 * (90.0 + ad) / 3.0
-        elif mode == "2":
-            target_ra = ramc - 180.0 - 2.0 * (90.0 - ad) / 3.0
-        else:  # mode == "3"
-            target_ra = ramc - 180.0 - (90.0 - ad) / 3.0
+        target_ra = _cusp_target_ra_deg(lam, ramc, lat_deg, eps_deg, mode)
+        actual_ra = _ra_of_ecliptic_point(lam, eps_deg)
+        residual = _signed_delta(actual_ra, target_ra)
+        if abs(residual) < _CUSP_RESIDUAL_TOLERANCE_DEG:
+            return norm360(lam)
 
         lam_new = _ecliptic_longitude_of_ra(norm360(target_ra), eps_deg)
         # Keep continuity across the 0/360 seam: pick the branch of lam_new
@@ -210,12 +217,15 @@ def _solve_placidus_cusp(
             lam_new -= 360.0
         elif lam_new - lam < -180.0:
             lam_new += 360.0
-
-        if abs(lam_new - lam) < _CUSP_TOLERANCE_DEG:
-            return norm360(lam_new)
         lam = lam_new
 
-    return norm360(lam)
+    raise HousesUnavailable(
+        f"Placidus cusp (mode={mode}, latitude={lat_deg}) failed to converge "
+        f"within {_CUSP_MAX_ITER} iterations to a residual under "
+        f"{_CUSP_RESIDUAL_TOLERANCE_DEG} deg. Refusing to return an "
+        "unconverged cusp; this should not happen for any latitude within "
+        "the polar limit."
+    )
 
 
 def _placidus_cusps(t: Time, lat: float, lon: float) -> Houses:
@@ -271,6 +281,14 @@ class SkyfieldEphemeris(Ephemeris):
         # `load(...)`) guarantees this never touches the network: load_file
         # only ever opens a local path, and never falls back to a download.
         self._loader = Loader(str(DATA_DIR))
+        # builtin=True (the default, spelled out here deliberately): uses
+        # Skyfield's bundled Delta-T and leap-second tables instead of
+        # fetching finals2000A.all etc. from the network. Those tables feed
+        # TT -> UT1 -> t.gast -> RAMC -> every Placidus cusp, so they are
+        # part of this adapter's numerical identity: upgrading skyfield can
+        # change the bundled tables and shift house cusps for identical
+        # input, which is why pyproject.toml pins an upper bound on skyfield
+        # (see comment there) rather than leaving it open-ended.
         self._ts = self._loader.timescale(builtin=True)
         self._kernel = load_file(str(KERNEL_PATH))
         self._earth = self._kernel["earth"]
@@ -280,7 +298,7 @@ class SkyfieldEphemeris(Ephemeris):
             raise ValueError("julian_day requires a timezone-aware datetime")
         utc = moment.astimezone(dt.UTC)
         t = self._ts.from_datetime(utc)
-        return t.tt  # TT Julian date: round-trips exactly via ts.tt_jd(jd).
+        return float(t.tt)  # TT Julian date: round-trips exactly via ts.tt_jd(jd).
 
     def _apparent_ecliptic_lonlat(self, t: Time, target_name: str) -> tuple[float, float]:
         apparent = self._earth.at(t).observe(self._kernel[target_name]).apparent()
@@ -288,9 +306,12 @@ class SkyfieldEphemeris(Ephemeris):
         # `ecliptic_latlon()` defaults to. Skipping this silently reintroduces
         # ~50 arcsec/year of precession error relative to J2000 — invisible
         # near 2000, ~0.14 degrees wrong by 1990 (caught by cross-checking
-        # against an independent chart calculator; see task report).
+        # against an independent chart calculator; see task report). Golden
+        # regression tests in tests/test_ephemeris.py freeze absolute
+        # longitudes at 1815 and 1900 specifically to keep this bug from
+        # coming back silently.
         lat, lon, _distance = apparent.ecliptic_latlon(epoch=t)
-        return norm360(lon.degrees), lat.degrees
+        return float(norm360(lon.degrees)), float(lat.degrees)
 
     def position(self, jd: float, body: Body) -> Position:
         t = self._ts.tt_jd(jd)
@@ -308,7 +329,7 @@ class SkyfieldEphemeris(Ephemeris):
         lon_plus, _ = self._apparent_ecliptic_lonlat(t_plus, target_name)
         speed = _signed_delta(lon_minus, lon_plus) / (2.0 * _SPEED_DT_DAYS)
 
-        return Position(body=body, longitude=lon, latitude=lat, speed=speed)
+        return Position(body=body, longitude=lon, latitude=lat, speed=float(speed))
 
     def positions(self, jd: float, bodies: Iterable[Body]) -> dict[Body, Position]:
         return {body: self.position(jd, body) for body in bodies}

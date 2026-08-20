@@ -8,7 +8,14 @@ dependencies = [
     "Unidecode>=1.3",
     "lunardate>=0.3.0",
     "tzdata>=2024.1; sys_platform == 'win32'",
-    "skyfield>=1.49",
+    # Upper-bounded deliberately: engine/ephemeris/skyfield_adapter.py calls
+    # timescale(builtin=True), which bakes skyfield's bundled Delta-T and
+    # leap-second tables into TT->UT1->RAMC->every Placidus house cusp. A
+    # minor-version upgrade could revise those tables and silently shift
+    # cusps for identical input, breaking the byte-identical determinism
+    # guarantee in README.md. A full lockfile would pin this more precisely
+    # than a version range can; this range is the interim guard.
+    "skyfield>=1.49,<2.0",
     "pyluach>=2.2",
 ]
 

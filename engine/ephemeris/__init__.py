@@ -7,6 +7,7 @@ import functools
 from engine.ephemeris.base import (
     Body,
     Ephemeris,
+    EphemerisDataMissing,
     Houses,
     HousesUnavailable,
     Position,
@@ -17,6 +18,7 @@ from engine.ephemeris.base import (
 __all__ = [
     "Body",
     "Ephemeris",
+    "EphemerisDataMissing",
     "Houses",
     "HousesUnavailable",
     "Position",
