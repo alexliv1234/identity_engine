@@ -1,0 +1,62 @@
+schema: kb.mapping.v1
+system: chinese_zodiac
+element: elements
+reviewed: true
+source: >-
+  Common contemporary synthesis of the five wuxing (five-phase) elements as
+  popularly applied to the Chinese zodiac, cycling every two years within the
+  sixty-year cycle: Wood, Fire, Earth, Metal, Water. Entries describe a
+  tendency and its cost, not a prediction or a guarantee.
+entries:
+  wood:
+    label: "Wood"
+    text: >-
+      Growth-oriented and generous with attention; tends to expand a plan,
+      a team, or a relationship rather than hold it steady. The cost is
+      over-committing to more growth than the surrounding structure can
+      actually support.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+  fire:
+    label: "Fire"
+    text: >-
+      Expressive and quick to warm to people and ideas; brings visible
+      enthusiasm into a room. The cost is a volatility that burns hot and
+      cools fast, leaving commitments half-finished.
+    tags:
+      - {facet: communication.register, weight: 0.8, direction: high}
+      - {facet: emotional.volatility, weight: 0.7, direction: high}
+      - {facet: drive.intensity, weight: 0.6, direction: high}
+  earth:
+    label: "Earth"
+    text: >-
+      Grounded and practical; oriented toward what can actually be
+      maintained rather than what merely sounds good. The cost is a
+      caution that arrives late to a change everyone else already made.
+    tags:
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: low}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+  metal:
+    label: "Metal"
+    text: >-
+      Precise and principled; holds a clear standard and expects others to
+      meet it. The cost is a rigidity that treats disagreement with the
+      standard as a personal affront.
+    tags:
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: growth_edges.control, weight: 0.6, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: low}
+  water:
+    label: "Water"
+    text: >-
+      Adaptable and perceptive; moves around an obstacle rather than
+      through it and reads undercurrents others miss. The cost is an
+      indirectness that leaves other people unsure where they actually
+      stand.
+    tags:
+      - {facet: communication.directness, weight: 0.6, direction: low}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: high}

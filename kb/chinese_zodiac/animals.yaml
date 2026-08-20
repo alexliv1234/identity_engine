@@ -1,0 +1,131 @@
+schema: kb.mapping.v1
+system: chinese_zodiac
+element: animals
+reviewed: true
+source: >-
+  Common contemporary synthesis of the twelve earthly-branch animal signs as
+  popularly interpreted in Chinese zodiac tradition. The year boundary is
+  Chinese New Year (lunisolar), not January 1 — see engine.systems.chinese_zodiac
+  for how that date is determined. Entries describe a tendency and its cost,
+  not a prediction or a guarantee.
+entries:
+  rat:
+    label: "Rat"
+    text: >-
+      Quick, resourceful, alert to opportunity; prefers to move before the
+      room catches up. The cost is a restlessness that treats a settled
+      situation as a problem still waiting to be solved.
+    tags:
+      - {facet: decision_making.timing, weight: 0.7, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: communication.pace, weight: 0.6, direction: high}
+  ox:
+    label: "Ox"
+    text: >-
+      Steady and dependable; builds by accumulation rather than by leap. The
+      cost is a stubbornness that keeps at a plan past the point it stopped
+      serving anyone.
+    tags:
+      - {facet: work_energy.rhythm, weight: 0.8, direction: low}
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: low}
+  tiger:
+    label: "Tiger"
+    text: >-
+      Bold and confrontational in the useful sense; energised by a challenge
+      worth taking on. The cost is an impatience with caution that reads as
+      recklessness to more careful people.
+    tags:
+      - {facet: drive.intensity, weight: 0.8, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.7, direction: high}
+      - {facet: relational.conflict, weight: 0.6, direction: high}
+  rabbit:
+    label: "Rabbit"
+    text: >-
+      Gentle and conflict-averse; keeps the peace and prefers a quiet, well-
+      kept life. The cost is avoiding a disagreement long enough that it
+      grows into something harder to repair.
+    tags:
+      - {facet: relational.conflict, weight: 0.7, direction: low}
+      - {facet: communication.register, weight: 0.5, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.5, direction: high}
+  dragon:
+    label: "Dragon"
+    text: >-
+      Confident and larger than the room; comfortable being watched and
+      expects to lead. The cost is a need for recognition that crowds out
+      quieter contributions from other people.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.8, direction: high}
+      - {facet: drive.recognition, weight: 0.7, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.6, direction: high}
+  snake:
+    label: "Snake"
+    text: >-
+      Perceptive and private; watches closely and reveals little until
+      certain. The cost is a guardedness that other people can mistake for
+      coldness or mistrust.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+      - {facet: communication.register, weight: 0.6, direction: low}
+  horse:
+    label: "Horse"
+    text: >-
+      Energetic and independent-minded; happiest in motion and impatient
+      with being managed. The cost is a difficulty settling into a
+      commitment that asks for a fixed pace.
+    tags:
+      - {facet: relational.autonomy, weight: 0.8, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.5, direction: high}
+  goat:
+    label: "Goat"
+    text: >-
+      Attentive and accommodating; reads what others need and adapts to
+      supply it. The cost is under-stating a preference so often that it
+      stops being asked for at all.
+    tags:
+      - {facet: communication.listening, weight: 0.7, direction: high}
+      - {facet: relational.autonomy, weight: 0.5, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}
+  monkey:
+    label: "Monkey"
+    text: >-
+      Clever and adaptable; finds an unconventional way through a problem
+      others treat as fixed. The cost is a cleverness that starts to look
+      like an unwillingness to sit still with anything hard.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.7, direction: high}
+      - {facet: communication.register, weight: 0.5, direction: high}
+  rooster:
+    label: "Rooster"
+    text: >-
+      Precise and outspoken; says plainly what others are still working up
+      to. The cost is a bluntness that lands as criticism even when it was
+      meant as observation.
+    tags:
+      - {facet: communication.directness, weight: 0.8, direction: high}
+      - {facet: work_energy.structure, weight: 0.5, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  dog:
+    label: "Dog"
+    text: >-
+      Loyal and fair-minded; shows up reliably and takes fairness
+      personally. The cost is a wariness of new people or plans that can
+      curdle into suspicion without cause.
+    tags:
+      - {facet: relational.loyalty, weight: 0.8, direction: high}
+      - {facet: emotional.volatility, weight: 0.4, direction: low}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: low}
+  pig:
+    label: "Pig"
+    text: >-
+      Warm and generous; takes people at their word and gives without
+      keeping score. The cost is a trust that is slow to notice when it is
+      being taken advantage of.
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: life_themes.service, weight: 0.5, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
