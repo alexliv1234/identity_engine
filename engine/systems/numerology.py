@@ -37,6 +37,12 @@ def is_vowel(word: str, index: int) -> bool:
         return True
     if ch != "Y":
         return False
+    # Neighbours are tested against the fixed BASE_VOWELS set, not by calling
+    # is_vowel() on them: is_vowel() is itself undefined for a neighbour that
+    # is a Y (that's exactly what we're trying to decide), so a recursive
+    # definition would be circular for a run like "AYY" — Y at index 1 would
+    # need to know whether Y at index 2 is a vowel, and vice versa. Anchoring
+    # both checks to the fixed AEIOU set breaks that cycle deterministically.
     prev_is_vowel = index > 0 and word[index - 1] in BASE_VOWELS
     next_is_vowel = index + 1 < len(word) and word[index + 1] in BASE_VOWELS
     return not (prev_is_vowel or next_is_vowel)
