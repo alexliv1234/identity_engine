@@ -37,11 +37,24 @@ def synthesize(
     tax = taxonomy or load_taxonomy()
     threshold = tax.tension_threshold
 
+    # Determinism must be structural, not an artifact of rounding: sort tags into
+    # a single canonical order before any accumulation, so every facet's weight
+    # summation happens in the same order regardless of the order the caller
+    # passed tags in. This also gives provenance entries a stable tertiary order
+    # (same system + element ties break on direction, then weight) instead of
+    # falling back to whatever order the caller happened to supply.
+    ordered_tags = sorted(tags, key=lambda t: (t.facet, t.system, t.element, t.direction, t.weight))
+
     accumulators: dict[str, _FacetAccumulator] = defaultdict(_FacetAccumulator)
-    for tag in tags:
+    for tag in ordered_tags:
         if not tax.has(tag.facet):
             continue  # KB validation already rejects these; belt and braces at runtime
-        confidence = confidences.get(tag.system, 1.0)
+        if tag.system not in confidences:
+            raise ValueError(
+                f"synthesize: no confidence supplied for system {tag.system!r} "
+                "(every system contributing a tag must have an explicit confidence entry)"
+            )
+        confidence = confidences[tag.system]
         if confidence <= 0.0:
             continue
         accumulators[tag.facet].add(tag, confidence)
