@@ -72,4 +72,17 @@ FIXTURES: dict[str, BirthInput] = {
         tz="Asia/Jerusalem",
         hebrew_name="אברהם כהן",
     ),
+    "non_latin_name": BirthInput(
+        # Cyrillic full_name with no hebrew_name: the fully composed
+        # degradation path of spec §8 — numerology runs on a fixed-table
+        # transliteration at reduced confidence, gematria's Hebrew name is
+        # derived, and input_quality must report both as not-provided.
+        full_name="Ирина Волкова",
+        birth_date=dt.date(1975, 3, 22),
+        birth_time=dt.time(8, 15),
+        lat=55.7558,
+        lon=37.6173,
+        tz="Europe/Moscow",
+        hebrew_name=None,
+    ),
 }
