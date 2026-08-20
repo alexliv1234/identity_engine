@@ -1,0 +1,108 @@
+schema: kb.mapping.v1
+system: human_design
+element: authorities
+reviewed: true
+source: >-
+  Human Design as taught in the mainstream Jovian-derived lineage. Authority
+  is the decision-making hierarchy: which internal signal, if any, is
+  reliable for a given chart, and how long it takes that signal to complete.
+  Interpretive choice: entries are weighted heavily toward the
+  decision_making.* facets (spec §4.1), since authority is specifically a
+  claim about how decisions are made, not about temperament in general.
+  Key derivation note: engine.systems.human_design.HumanDesignCalculator
+  looks these entries up by `authority.lower().replace(" ", "_")`, which
+  leaves the "Self-Projected" hyphen intact -- this file's key is
+  `self-projected`, not `self_projected`, to match the calculator exactly.
+entries:
+  emotional:
+    label: "Emotional"
+    text: >-
+      Clarity is only reliable after riding a full emotional wave from
+      initial reaction to a settled read, not at the peak of either high or
+      low. The cost is that decisions made under pressure to answer "now"
+      are frequently reversed once the wave passes.
+    tags:
+      - {facet: decision_making.timing, weight: 0.9, direction: low}
+      - {facet: emotional.volatility, weight: 0.8, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.6, direction: low}
+      - {facet: emotional.processing, weight: 0.5, direction: high}
+  sacral:
+    label: "Sacral"
+    text: >-
+      A gut-level yes or no is available the instant a real question is
+      asked, and it is most reliable answering out loud rather than turning
+      it over silently. The cost is that reasoning constructed after the
+      fact often just justifies a response that was already complete.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.9, direction: high}
+      - {facet: decision_making.timing, weight: 0.8, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: high}
+  splenic:
+    label: "Splenic"
+    text: >-
+      A quiet, instantaneous knowing that registers once, doesn't repeat
+      itself, and offers no justification. The cost is that a signal this
+      subtle and unrepeated is easy to talk oneself out of once the moment
+      has passed.
+    tags:
+      - {facet: decision_making.timing, weight: 0.9, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: high}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  ego_manifested:
+    label: "Ego Manifested"
+    text: >-
+      A willpower-based yes or no that is also voiced and tested against
+      another person before it counts as decided, since it runs through the
+      throat. The cost is that will left unspoken curdles into resentment
+      rather than simply going unmet.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.8, direction: high}
+      - {facet: relational.conflict, weight: 0.5, direction: high}
+  ego_projected:
+    label: "Ego Projected"
+    text: >-
+      The same willpower-based yes or no, but with no automatic pull to
+      speak it, so it has to be deliberately voiced rather than assumed
+      heard. The cost is a want that goes unclaimed and then unmet, mistaken
+      by others for not having wanted it at all.
+    tags:
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: high}
+      - {facet: communication.directness, weight: 0.6, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  self-projected:
+    label: "Self-Projected"
+    text: >-
+      Clarity arrives by hearing oneself talk it through out loud with a
+      trusted listener, not through silent reflection. The cost is a
+      discovery process that looks scattered or indecisive from outside,
+      even when it reliably converges on the right read.
+    tags:
+      - {facet: communication.register, weight: 0.7, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: low}
+      - {facet: communication.listening, weight: 0.5, direction: low}
+      - {facet: core_essence.visibility, weight: 0.4, direction: high}
+  mental_projected:
+    label: "Mental Projected"
+    text: >-
+      No fixed internal authority: clarity comes only from talking a
+      decision through with the right outside sounding boards and letting a
+      full lunar cycle pass on anything major. The cost is a decision made
+      before the environment has actually had a chance to weigh in.
+    tags:
+      - {facet: decision_making.timing, weight: 0.9, direction: low}
+      - {facet: communication.listening, weight: 0.7, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: low}
+  lunar:
+    label: "Lunar"
+    text: >-
+      The one authority tied to elapsed time rather than a body signal: a
+      full lunar cycle of sampling the environment before a major decision
+      is what makes it trustworthy. The cost is that any decision forced
+      faster than that is unreliable no matter how certain it feels in the
+      moment.
+    tags:
+      - {facet: decision_making.timing, weight: 0.9, direction: low}
+      - {facet: emotional.sensitivity, weight: 0.7, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}

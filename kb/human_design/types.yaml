@@ -1,0 +1,73 @@
+schema: kb.mapping.v1
+system: human_design
+element: types
+reviewed: true
+source: >-
+  Human Design as taught in the mainstream Jovian-derived lineage (Ra Uru
+  Hu's original synthesis and its common contemporary teaching). Interpretive
+  choice: type is read as energy mechanics -- how a person's aura is built to
+  engage the world and what correct entry into action looks like for it --
+  not as a personality typology, and never as a claim about talent or worth.
+  Each entry names a tendency and its practical cost, not a strength/weakness
+  scorecard.
+entries:
+  generator:
+    label: "Generator"
+    text: >-
+      Sustainable working energy that switches on in response to what is
+      actually in front of it, not to what it invents from scratch. The cost
+      is a working life that can drift into frustration when it keeps
+      starting things instead of waiting to respond to the right one.
+    tags:
+      - {facet: drive.initiative, weight: 0.7, direction: low}
+      - {facet: work_energy.endurance, weight: 0.9, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.7, direction: high}
+  manifesting_generator:
+    label: "Manifesting Generator"
+    text: >-
+      Responds like a Generator but skips steps once the response lands,
+      often running several things in parallel. The cost is a habit of
+      leaving a trail of half-finished threads when the multi-tracking
+      outpaces informing anyone about the shortcuts being taken.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.8, direction: high}
+      - {facet: communication.pace, weight: 0.7, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: work_energy.structure, weight: 0.4, direction: low}
+  projector:
+    label: "Projector"
+    text: >-
+      Reads systems and people efficiently rather than out-working them, and
+      runs best on recognition and real rest. The cost is exhaustion and
+      resentment when the response to that efficiency is more grind rather
+      than an invitation to actually use it.
+    tags:
+      - {facet: drive.recognition, weight: 0.8, direction: high}
+      - {facet: work_energy.endurance, weight: 0.7, direction: low}
+      - {facet: work_energy.role_shape, weight: 0.5, direction: high}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+  manifestor:
+    label: "Manifestor"
+    text: >-
+      Initiates on its own timing without waiting for an external cue, and
+      moves fastest when left alone to do it. The cost lands on the people
+      around it, who experience unannounced action as friction or
+      unpredictability rather than the independence it feels like from inside.
+    tags:
+      - {facet: drive.initiative, weight: 0.9, direction: high}
+      - {facet: relational.autonomy, weight: 0.8, direction: high}
+      - {facet: decision_making.timing, weight: 0.7, direction: high}
+      - {facet: communication.directness, weight: 0.5, direction: low}
+  reflector:
+    label: "Reflector"
+    text: >-
+      Samples and amplifies the environment rather than carrying a fixed
+      energy of its own, so who and where it is around changes what shows up.
+      The cost is a self-sense that can feel unusually unstable to a world
+      that expects a fixed identity from one day to the next.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.9, direction: high}
+      - {facet: decision_making.timing, weight: 0.8, direction: low}
+      - {facet: core_essence.archetype_force, weight: 0.7, direction: low}
+      - {facet: core_essence.self_image, weight: 0.4, direction: low}

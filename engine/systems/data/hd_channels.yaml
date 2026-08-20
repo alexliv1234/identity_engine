@@ -1,0 +1,50 @@
+# engine/systems/data/hd_channels.yaml
+# The 36 channels. Each is a gate pair; a channel is defined when BOTH gates are
+# activated (by either the personality or the design side).
+#
+# Verified against an independent published source (2026-08-20):
+#   - humandesignsystem.co/en/36-channels-of-the-human-design-chart/ lists
+#     all 36 channels by gate pair; every pair below matches one of theirs
+#     (compared as unordered gate pairs, since publications vary in which
+#     gate they print first), and neither list has an entry the other lacks.
+# Like the gate-center map, the channel list is a fixed structural property
+# of the bodygraph (it is the set of hexagram pairs the Mandala's gate
+# geometry makes adjacent), so exact agreement across sources is expected.
+schema: hd.channels.v1
+channels:
+  - [1, 8]
+  - [2, 14]
+  - [3, 60]
+  - [4, 63]
+  - [5, 15]
+  - [6, 59]
+  - [7, 31]
+  - [9, 52]
+  - [10, 20]
+  - [10, 34]
+  - [10, 57]
+  - [11, 56]
+  - [12, 22]
+  - [13, 33]
+  - [16, 48]
+  - [17, 62]
+  - [18, 58]
+  - [19, 49]
+  - [20, 34]
+  - [20, 57]
+  - [21, 45]
+  - [23, 43]
+  - [24, 61]
+  - [25, 51]
+  - [26, 44]
+  - [27, 50]
+  - [28, 38]
+  - [29, 46]
+  - [30, 41]
+  - [32, 54]
+  - [34, 57]
+  - [35, 36]
+  - [37, 40]
+  - [39, 55]
+  - [42, 53]
+  - [47, 64]

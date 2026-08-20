@@ -23,3 +23,15 @@ files:
   astrology/ascendants:
     keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
            "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  human_design/types:
+    keys: ["generator", "manifesting_generator", "projector", "manifestor", "reflector"]
+  human_design/authorities:
+    keys: ["emotional", "sacral", "splenic", "ego_manifested", "ego_projected",
+           "self-projected", "mental_projected", "lunar"]
+  human_design/profiles:
+    keys: ["1_3", "1_4", "2_4", "2_5", "3_5", "3_6",
+           "4_6", "4_1", "5_1", "5_2", "6_2", "6_3"]
+  human_design/centers:
+    keys: ["head_defined", "ajna_defined", "throat_defined", "g_defined",
+           "heart_defined", "sacral_defined", "solar_plexus_defined",
+           "spleen_defined", "root_defined"]
