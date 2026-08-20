@@ -11,7 +11,11 @@ KB_DIR = Path("kb")
 
 
 def kb_files():
-    return [p for p in sorted(KB_DIR.rglob("*.yaml")) if p.name != "facets.yaml"]
+    return [
+        p
+        for p in sorted(KB_DIR.rglob("*.yaml"))
+        if p.name not in ("facets.yaml", "manifest.yaml") and not p.name.endswith(".draft.yaml")
+    ]
 
 
 def test_shipped_kb_loads_clean():

@@ -136,8 +136,10 @@ def load_kb(root: Path | None = None) -> KnowledgeBase:
     files: dict[tuple[str, str], KBFile] = {}
     # sorted() so load order — and therefore any error reported — is deterministic.
     for path in sorted(kb_root.rglob("*.yaml")):
-        if path.name == "facets.yaml":
+        if path.name == "facets.yaml" or path.name == "manifest.yaml":
             continue
+        if path.name.endswith(".draft.yaml"):
+            continue  # in-review draft; load_kb would reject reviewed: false anyway
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         kb_file = _validate_and_build(path, doc, taxonomy)
         key = (kb_file.system, kb_file.element)
