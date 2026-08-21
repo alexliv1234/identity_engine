@@ -1,0 +1,322 @@
+schema: kb.mapping.v1
+system: compatibility
+element: life_path_pairs
+reviewed: true
+source: >-
+  Curated Life Path pair-harmony matrix, common contemporary numerology synthesis.
+  Keys are the two Life Path numbers sorted ascending and joined with a hyphen,
+  e.g. "1-5". Values 0..10 in the label field. Master numbers 11/22/33 are keyed
+  as themselves, not reduced.
+entries:
+  "1-1":
+    label: "6"
+    text: "Two initiators: fast-moving together, prone to competing for the wheel."
+    tags: []
+  "1-2":
+    label: "4"
+    text: "Initiators meet partners: fast-moving and self-directed alongside attuned and quick to read the room. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-3":
+    label: "5"
+    text: "Initiators meet expressers: fast-moving and self-directed alongside playful and idea-rich. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-4":
+    label: "3"
+    text: "Initiators meet builders: fast-moving and self-directed alongside steady and structure-seeking. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "1-5":
+    label: "9"
+    text: "Initiative meets appetite for change; high momentum, low routine."
+    tags: []
+  "1-6":
+    label: "4"
+    text: "Initiators meet caretakers: fast-moving and self-directed alongside responsible and service-minded. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-7":
+    label: "2"
+    text: "Initiators meet processors: fast-moving and self-directed alongside inward and solitary. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "1-8":
+    label: "4"
+    text: "Initiators meet stewards: fast-moving and self-directed alongside scale-oriented and driven. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-9":
+    label: "4"
+    text: "Initiators meet closers: fast-moving and self-directed alongside broad-minded and idealistic. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-11":
+    label: "5"
+    text: "Initiators meet seers: fast-moving and self-directed alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-22":
+    label: "4"
+    text: "Initiators meet architects: fast-moving and self-directed alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "1-33":
+    label: "4"
+    text: "Initiators meet teachers: fast-moving and self-directed alongside devoted and other-focused. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-2":
+    label: "8"
+    text: "Two partners: both attuned and quick to read the room. A high-harmony pair; the differences reinforce rather than grate."
+    tags: []
+  "2-3":
+    label: "5"
+    text: "Partners meet expressers: attuned and quick to read the room alongside playful and idea-rich. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-4":
+    label: "6"
+    text: "Partners meet builders: attuned and quick to read the room alongside steady and structure-seeking. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "2-5":
+    label: "3"
+    text: "Partners meet wanderers: attuned and quick to read the room alongside restless and change-hungry. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "2-6":
+    label: "9"
+    text: "Both oriented to care and attunement; easy warmth, watch for over-accommodation."
+    tags: []
+  "2-7":
+    label: "5"
+    text: "Partners meet processors: attuned and quick to read the room alongside inward and solitary. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-8":
+    label: "4"
+    text: "Partners meet stewards: attuned and quick to read the room alongside scale-oriented and driven. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-9":
+    label: "6"
+    text: "Partners meet closers: attuned and quick to read the room alongside broad-minded and idealistic. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "2-11":
+    label: "5"
+    text: "Partners meet seers: attuned and quick to read the room alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-22":
+    label: "5"
+    text: "Partners meet architects: attuned and quick to read the room alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "2-33":
+    label: "7"
+    text: "Partners meet teachers: attuned and quick to read the room alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "3-3":
+    label: "4"
+    text: "Two expressers: both playful and idea-rich. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-4":
+    label: "4"
+    text: "Expressers meet builders: playful and idea-rich alongside steady and structure-seeking. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-5":
+    label: "5"
+    text: "Expressers meet wanderers: playful and idea-rich alongside restless and change-hungry. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-6":
+    label: "6"
+    text: "Expressers meet caretakers: playful and idea-rich alongside responsible and service-minded. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "3-7":
+    label: "3"
+    text: "Expressers meet processors: playful and idea-rich alongside inward and solitary. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "3-8":
+    label: "5"
+    text: "Expressers meet stewards: playful and idea-rich alongside scale-oriented and driven. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-9":
+    label: "5"
+    text: "Expressers meet closers: playful and idea-rich alongside broad-minded and idealistic. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-11":
+    label: "5"
+    text: "Expressers meet seers: playful and idea-rich alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-22":
+    label: "5"
+    text: "Expressers meet architects: playful and idea-rich alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "3-33":
+    label: "6"
+    text: "Expressers meet teachers: playful and idea-rich alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "4-4":
+    label: "6"
+    text: "Two builders: both steady and structure-seeking. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "4-5":
+    label: "2"
+    text: "Builders meet wanderers: steady and structure-seeking alongside restless and change-hungry. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "4-6":
+    label: "6"
+    text: "Builders meet caretakers: steady and structure-seeking alongside responsible and service-minded. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "4-7":
+    label: "4"
+    text: "Builders meet processors: steady and structure-seeking alongside inward and solitary. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "4-8":
+    label: "3"
+    text: "Builders meet stewards: steady and structure-seeking alongside scale-oriented and driven. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "4-9":
+    label: "5"
+    text: "Builders meet closers: steady and structure-seeking alongside broad-minded and idealistic. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "4-11":
+    label: "4"
+    text: "Builders meet seers: steady and structure-seeking alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "4-22":
+    label: "4"
+    text: "Builders meet architects: steady and structure-seeking alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "4-33":
+    label: "6"
+    text: "Builders meet teachers: steady and structure-seeking alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "5-5":
+    label: "3"
+    text: "Two wanderers: both restless and change-hungry. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "5-6":
+    label: "4"
+    text: "Wanderers meet caretakers: restless and change-hungry alongside responsible and service-minded. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "5-7":
+    label: "2"
+    text: "Wanderers meet processors: restless and change-hungry alongside inward and solitary. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "5-8":
+    label: "4"
+    text: "Wanderers meet stewards: restless and change-hungry alongside scale-oriented and driven. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "5-9":
+    label: "4"
+    text: "Wanderers meet closers: restless and change-hungry alongside broad-minded and idealistic. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "5-11":
+    label: "4"
+    text: "Wanderers meet seers: restless and change-hungry alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "5-22":
+    label: "3"
+    text: "Wanderers meet architects: restless and change-hungry alongside visionary and practical. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "5-33":
+    label: "4"
+    text: "Wanderers meet teachers: restless and change-hungry alongside devoted and other-focused. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "6-6":
+    label: "8"
+    text: "Two caretakers: both responsible and service-minded. A high-harmony pair; the differences reinforce rather than grate."
+    tags: []
+  "6-7":
+    label: "4"
+    text: "Caretakers meet processors: responsible and service-minded alongside inward and solitary. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "6-8":
+    label: "5"
+    text: "Caretakers meet stewards: responsible and service-minded alongside scale-oriented and driven. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "6-9":
+    label: "6"
+    text: "Caretakers meet closers: responsible and service-minded alongside broad-minded and idealistic. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "6-11":
+    label: "6"
+    text: "Caretakers meet seers: responsible and service-minded alongside highly perceptive and sensitive. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "6-22":
+    label: "6"
+    text: "Caretakers meet architects: responsible and service-minded alongside visionary and practical. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "6-33":
+    label: "7"
+    text: "Caretakers meet teachers: responsible and service-minded alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "7-7":
+    label: "7"
+    text: "Two inward processors: deep understanding, sparse day-to-day signal."
+    tags: []
+  "7-8":
+    label: "3"
+    text: "Processors meet stewards: inward and solitary alongside scale-oriented and driven. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "7-9":
+    label: "3"
+    text: "Processors meet closers: inward and solitary alongside broad-minded and idealistic. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "7-11":
+    label: "4"
+    text: "Processors meet seers: inward and solitary alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "7-22":
+    label: "3"
+    text: "Processors meet architects: inward and solitary alongside visionary and practical. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "7-33":
+    label: "4"
+    text: "Processors meet teachers: inward and solitary alongside devoted and other-focused. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "8-8":
+    label: "3"
+    text: "Two stewards: both scale-oriented and driven. A friction-prone pair; the gap takes deliberate effort to bridge."
+    tags: []
+  "8-9":
+    label: "5"
+    text: "Stewards meet closers: scale-oriented and driven alongside broad-minded and idealistic. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "8-11":
+    label: "5"
+    text: "Stewards meet seers: scale-oriented and driven alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "8-22":
+    label: "4"
+    text: "Stewards meet architects: scale-oriented and driven alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "8-33":
+    label: "5"
+    text: "Stewards meet teachers: scale-oriented and driven alongside devoted and other-focused. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "9-9":
+    label: "6"
+    text: "Two closers: both broad-minded and idealistic. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "9-11":
+    label: "5"
+    text: "Closers meet seers: broad-minded and idealistic alongside highly perceptive and sensitive. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "9-22":
+    label: "5"
+    text: "Closers meet architects: broad-minded and idealistic alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "9-33":
+    label: "6"
+    text: "Closers meet teachers: broad-minded and idealistic alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "11-11":
+    label: "7"
+    text: "Two seers: both highly perceptive and sensitive. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "11-22":
+    label: "5"
+    text: "Seers meet architects: highly perceptive and sensitive alongside visionary and practical. A neutral pair; harmony depends more on the people than the numbers."
+    tags: []
+  "11-33":
+    label: "6"
+    text: "Seers meet teachers: highly perceptive and sensitive alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "22-22":
+    label: "6"
+    text: "Two architects: both visionary and practical. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "22-33":
+    label: "6"
+    text: "Architects meet teachers: visionary and practical alongside devoted and other-focused. A workable, generally easy pair with a minor friction point to watch."
+    tags: []
+  "33-33":
+    label: "8"
+    text: "Two teachers: both devoted and other-focused. A high-harmony pair; the differences reinforce rather than grate."
+    tags: []
