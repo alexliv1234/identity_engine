@@ -15,6 +15,62 @@ Spec §6: Postgres in production, SQLite for dev and tests. `pip install .[postg
 (or `.[dev]`, which already includes it) is required whenever `IDENTITY_DATABASE_URL`
 points at Postgres — a base install alone has no Postgres driver.
 
+## Quickstart: run the API and the playground
+
+With the venv set up and the ephemeris kernel fetched (above), provision a
+per-app API key and start the server:
+
+```bash
+.venv/bin/python kb_tools/create_app_key.py "Local Dev"   # Windows: .venv\Scripts\python
+.venv/bin/uvicorn api.main:app --reload                    # Windows: .venv\Scripts\uvicorn
+```
+
+`create_app_key.py` prints the key once, in plaintext — only its SHA-256 hash
+is stored (`api/models.py::App.api_key_hash`), so save it now. Then open
+<http://127.0.0.1:8000/playground/> and paste the key in: it drives the same
+`/v1/*` routes below, entirely client-side, with no bundler or external asset
+(`tests/test_playground.py` enforces the no-external-asset property).
+
+## API endpoints
+
+Every route below requires `Authorization: Bearer <api_key>`, except
+`/playground/`, which serves static HTML with no auth. Persons are scoped to
+the app that created them: another app's person id resolves to `404`, never
+`403` — existence of another tenant's person is not disclosed either way
+(`api/service.py::load_person`).
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/v1/persons` | Create a person; computes and stores the six-system profile |
+| GET | `/v1/persons/{id}/profile` | Cached profile. `?layers=raw,synthesis` and `?systems=astrology,...` narrow the response |
+| GET | `/v1/persons/{id}/context` | Token-budgeted LLM bundle. `?format=text\|json`, `?vocabulary=plain\|esoteric` |
+| GET | `/v1/persons/{id}/timing` | Numerology personal year/month. `?year=&month=` default to the current UTC date |
+| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall score, three dimension scores, reasons |
+| DELETE | `/v1/persons/{id}` | Full erasure, cascades to every derived profile row |
+| GET | `/v1/meta/versions` | Engine version, KB version, registered system list |
+
+See `docs/superpowers/specs/2026-08-19-identity-engine-design.md` §5 for
+response shapes, and `tests/test_acceptance.py` for one passing test per
+v1 acceptance criterion (spec §12).
+
+## Positioning & ethics
+
+Every `/profile`, `/context`, and `/timing` response carries a `disclaimer`
+field, verbatim, regardless of which `?layers=` filter was requested:
+
+> Reflective and entertainment insight; not medical, psychological, or
+> financial advice.
+
+The API makes no claim of scientific validity for any of the six systems it
+layers together (Western astrology, Human Design, Gene Keys, Pythagorean
+numerology, Jewish numerology/Kabbalah, the Chinese zodiac). Honesty about
+*convergence* — how many applicable systems agree on a facet — and
+*tension* — where they disagree — is part of the product, not a caveat
+bolted on afterward; see `engine/synthesis.py` and spec §4.2. Birth data and
+names are PII: `DELETE /v1/persons/{id}` is a full, cascading erasure (spec
+§6), and only the minimum PII needed to recompute a profile is stored
+(`api/models.py`).
+
 ## Determinism guarantee
 
 Identical input plus identical engine/system versions produce byte-identical
