@@ -1,0 +1,291 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Karla:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; font-family: "Karla", system-ui, sans-serif; }
+    a { color: oklch(0.52 0.14 42); } a:hover { color: oklch(0.42 0.14 42); }
+    .crow { position: relative; }
+    .crow .tip {
+      position: absolute; left: 50%; top: -36px; transform: translateX(-50%);
+      background: oklch(0.24 0.014 62); color: oklch(0.96 0.008 70);
+      padding: 7px 11px; font-size: 11px; line-height: 1.45; white-space: nowrap;
+      opacity: 0; pointer-events: none; transition: opacity 90ms ease; z-index: 5;
+    }
+    .crow:hover .tip { opacity: 1; }
+    .crow:hover { background: oklch(0.965 0.010 68); }
+  </style>
+</helmet>
+
+<div style="width: 960px; min-height: 2020px; background: {{bg}}; color: oklch(0.24 0.014 62); padding: 52px 56px 44px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px;">
+    <div style="font-size: 12.5px; color: oklch(0.50 0.02 60); cursor: pointer;">&larr; Back to your profile</div>
+    <div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 14.5px; color: oklch(0.46 0.03 50);">A mirror, not a diagnosis.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 13px; border-bottom: 1px solid oklch(0.84 0.018 68); padding-bottom: 24px;">
+    <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">Read together</div>
+    <div style="font-family: 'Newsreader', Georgia, serif; font-size: 42px; font-weight: 300; letter-spacing: -0.015em; line-height: 1.1;">You and Theo Adeyemi</div>
+    <div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 15px; color: oklch(0.46 0.02 60);">Six traditions, read across both charts &mdash; where they meet and where they pull apart.</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 300px; gap: 48px;">
+
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div style="font-family: 'Newsreader', Georgia, serif; font-size: 31px; font-weight: 400; line-height: 1.2; letter-spacing: -0.012em; text-wrap: pretty;">You reach each other easily. Staying in step will take more work.</div>
+      <div style="font-size: 14.5px; line-height: 1.75; color: oklch(0.38 0.016 60); text-wrap: pretty;">Astrology puts your Moon close to his Venus, and Human Design finds two channels that only complete when you are both in the room. Where the two of you differ is pace and exposure: almost everything that says he moves quickly, or outward, also says you would rather not be rushed.</div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; padding-top: 2px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">{{reasonsLabel}}</div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          <sc-for list="{{reasons}}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; gap: 14px; align-items: baseline;">
+              <div style="width: 3px; align-self: stretch; background: {{r.mark}}; flex-shrink: 0;"></div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-family: 'Newsreader', Georgia, serif; font-size: 17px; line-height: 1.4;">{{r.text}}</div>
+                <div style="font-size: 11.5px; color: oklch(0.52 0.018 60); font-style: italic; font-family: 'Newsreader', serif;">{{r.source}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 22px; border-left: 1px solid oklch(0.86 0.016 68); padding-left: 30px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 56px; font-weight: 300; line-height: 1; letter-spacing: -0.02em;">72</div>
+        <div style="font-size: 11.5px; color: oklch(0.50 0.02 60); line-height: 1.5;">out of 100, across all six</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <sc-for list="{{dimensions}}" as="d" hint-placeholder-count="3">
+          <div onClick="{{d.pick}}" style="display: flex; flex-direction: column; gap: 7px; cursor: pointer; padding: 12px 12px 13px; background: {{d.bg}}; margin-left: -12px; margin-right: -12px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;">
+              <div style="font-family: 'Newsreader', serif; font-size: 16px; color: {{d.nameColor}};">{{d.name}}</div>
+              <div style="font-size: 13px; color: oklch(0.42 0.02 60); font-weight: 500;">{{d.score}}</div>
+            </div>
+            <div style="height: 2px; background: oklch(0.87 0.014 68);">
+              <div style="height: 2px; width: {{d.width}}; background: {{d.bar}};"></div>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: oklch(0.50 0.018 60);">{{d.note}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size: 11.5px; line-height: 1.7; color: oklch(0.50 0.018 60); border-top: 1px dotted oklch(0.84 0.016 68); padding-top: 16px; font-style: italic; font-family: 'Newsreader', serif;">A high number is not a verdict. It means the traditions happened to agree &mdash; which is interesting, not binding.</div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; border-top: 1px solid oklch(0.86 0.016 68); padding-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px;">
+      <div style="font-family: 'Newsreader', Georgia, serif; font-size: 27px; font-weight: 400; letter-spacing: -0.01em;">Trait by trait</div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <div style="width: 9px; height: 9px; border-radius: 50%; background: oklch(0.53 0.13 42);"></div>
+          <div style="font-size: 12px; color: oklch(0.40 0.018 60);">you</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <div style="width: 9px; height: 9px; border-radius: 50%; border: 2px solid oklch(0.53 0.13 42); box-sizing: border-box;"></div>
+          <div style="font-size: 12px; color: oklch(0.40 0.018 60);">Theo</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 13.5px; line-height: 1.7; color: oklch(0.40 0.018 60); max-width: 700px; text-wrap: pretty;">{{summary}} A row where both marks sit on the same side is one you will not have to negotiate. The tinted rows are where you pull opposite ways &mdash; those are the ones worth knowing about early.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 18px;">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="9">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; padding-bottom: 4px;">
+          <div style="font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(0.48 0.02 60); font-weight: 600;">{{g.label}}</div>
+          <div style="height: 1px; flex-grow: 1; background: oklch(0.88 0.014 68);"></div>
+          <div style="font-size: 10.5px; color: oklch(0.60 0.016 60);">{{g.n}}</div>
+        </div>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="4">
+          <div class="crow" style="display: flex; align-items: center; padding: 3px 8px; margin: 0 -8px; background: {{r.rowBg}};">
+            <div class="tip">{{r.tip}}</div>
+            <div style="width: 168px; flex-shrink: 0; text-align: right; padding-right: 12px; font-size: 12.5px; color: {{r.loColor}}; font-family: 'Newsreader', Georgia, serif;">{{r.lo}}</div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; width: 118px; padding-right: 8px;">
+              <sc-for list="{{r.left}}" as="m" hint-placeholder-count="1">
+                <div style="width: 9px; height: 9px; border-radius: 50%; background: {{m.fill}}; border: {{m.border}}; box-sizing: border-box; flex-shrink: 0;"></div>
+              </sc-for>
+            </div>
+            <div style="width: 1px; height: 17px; background: {{r.axis}}; flex-shrink: 0;"></div>
+            <div style="display: flex; align-items: center; gap: 4px; width: 118px; padding-left: 8px;">
+              <sc-for list="{{r.right}}" as="m" hint-placeholder-count="1">
+                <div style="width: 9px; height: 9px; border-radius: 50%; background: {{m.fill}}; border: {{m.border}}; box-sizing: border-box; flex-shrink: 0;"></div>
+              </sc-for>
+            </div>
+            <div style="width: 168px; flex-shrink: 0; padding-left: 12px; font-size: 12.5px; color: {{r.hiColor}}; font-family: 'Newsreader', Georgia, serif;">{{r.hi}}</div>
+            <div style="width: 92px; flex-shrink: 0; text-align: right; font-size: 10.5px; color: {{r.tagColor}}; font-style: italic; font-family: 'Newsreader', serif;">{{r.tag}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: oklch(0.958 0.022 46); border-top: 2px solid oklch(0.52 0.14 38); padding: 26px 30px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: oklch(0.47 0.13 38); font-weight: 600;">Where they disagree about the two of you</div>
+    <div style="font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 400; line-height: 1.32; color: oklch(0.25 0.03 44); max-width: 700px; text-wrap: pretty;">Numerology reads your Life Paths as an easy pair. Human Design reads the same two charts as a slow burn. Both are in the score; neither has been quietly dropped.</div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px; border-top: 1px solid oklch(0.86 0.016 68); padding-top: 16px; margin-top: auto;">
+    <div style="font-size: 12px; color: oklch(0.50 0.02 60); line-height: 1.65; max-width: 560px;">Reflective and entertainment insight; not medical, psychological, or financial advice.</div>
+    <div style="font-size: 13px; color: oklch(0.42 0.13 40); font-weight: 500; white-space: nowrap; cursor: pointer;">Compare with someone else &rarr;</div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"bg":{"editor":"color","default":"#faf6ef","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { picked: "connection" };
+  }
+  renderVals() {
+    var self = this;
+    var picked = this.state.picked;
+    var MARK = "oklch(0.53 0.13 42)";
+
+    var defs = [
+      { key: "connection", name: "Connection", score: 78, note: "How readily you reach each other" },
+      { key: "communication", name: "Communication", score: 65, note: "How much translation it takes" },
+      { key: "growth", name: "Growth", score: 74, note: "How much friction there is to work with" }
+    ];
+    var byDim = {
+      connection: [
+        { text: "Her Moon sits close to his Venus.", source: "Astrology · inter-chart conjunction", warm: true },
+        { text: "Two channels complete only when both are present.", source: "Human Design · gates 34 and 57", warm: true },
+        { text: "Life Paths 1 and 5 read as an easy pair.", source: "Numerology · pair matrix", warm: true }
+      ],
+      communication: [
+        { text: "His Mercury squares her Ascendant &mdash; things land harder than he means them to.", source: "Astrology · square, 4° orb", warm: false },
+        { text: "One decides in the body, the other after sleeping on it.", source: "Human Design · sacral against emotional authority", warm: false }
+      ],
+      growth: [
+        { text: "Almost everything that says he moves fast says you would rather not be rushed.", source: "Astrology and Human Design agree", warm: false },
+        { text: "Earth Dragon and Water Rat &mdash; steady against restless.", source: "Chinese zodiac", warm: false },
+        { text: "Friction here is material to work with, not a warning.", source: "How this engine reads hard aspects", warm: true }
+      ]
+    };
+    var labels = { connection: "Why connection reads high", communication: "Why communication needs work", growth: "Where the friction is" };
+
+    // a / b: "L" low side, "R" high side, "S" the engine found that person split
+    var DATA = [
+      ["Core essence", [
+        ["self-questioning", "self-assured", "R", "R"],
+        ["adaptive", "singular", "R", "L"],
+        ["inward", "outward", "L", "R"]
+      ]],
+      ["Drive", [
+        ["responsive", "self-starting", "R", "R"],
+        ["steady-burn", "high-burn", "R", "R"],
+        ["depth-seeking", "novelty-seeking", "L", "R"],
+        ["self-validating", "needs-recognition", "R", "L"]
+      ]],
+      ["Decision-making", [
+        ["deliberation", "gut", "R", "R"],
+        ["needs-time", "immediate", "S", "R"],
+        ["dislikes-pressure", "thrives under pressure", "L", "R"],
+        ["risk-averse", "risk-taking", "L", "R"]
+      ]],
+      ["Communication", [
+        ["indirect", "direct", "R", "R"],
+        ["measured", "fast", "R", "R"],
+        ["reserved", "expressive", "L", "R"],
+        ["asserting", "absorbing", "R", "L"]
+      ]],
+      ["Emotional", [
+        ["internal", "in the open", "L", "R"],
+        ["even", "wave-like", "L", "R"],
+        ["thick-skinned", "highly sensitive", "R", "R"]
+      ]],
+      ["Relational", [
+        ["slow-bonding", "fast-bonding", "L", "R"],
+        ["interdependent", "independent", "R", "R"],
+        ["avoids conflict", "engages conflict", "L", "R"],
+        ["free-ranging", "committed", "R", "R"]
+      ]],
+      ["Work &amp; energy", [
+        ["marathon", "sprint", "R", "R"],
+        ["improvisational", "structured", "S", "R"],
+        ["supporting", "leading", "R", "R"],
+        ["needs recovery", "high capacity", "L", "R"]
+      ]],
+      ["Growth edges", [
+        ["drifts", "grips", "R", "R"],
+        ["under-claims", "over-proves", "R", "R"],
+        ["over-waiting", "impatient", "R", "R"]
+      ]],
+      ["Life themes", [
+        ["mastery", "meaning", "R", "R"],
+        ["self-realising", "outward-serving", "L", "R"],
+        ["continuity", "reinvention", "R", "R"]
+      ]]
+    ];
+
+    var aligned = 0, opposed = 0, split = 0;
+    var groups = DATA.map(function (g) {
+      var rows = g[1].map(function (r) {
+        var lo = r[0], hi = r[1], a = r[2], b = r[3];
+        var isSplit = a === "S";
+        var isOpposed = !isSplit && a !== b;
+        if (isSplit) split++; else if (isOpposed) opposed++; else aligned++;
+
+        var you = { fill: MARK, border: "none" };
+        var them = { fill: "transparent", border: "2px solid " + MARK };
+        var left = [], right = [];
+        if (isSplit) { right.push(b === "R" ? them : them); if (b === "L") { left.push(them); right = []; } }
+        else { (a === "L" ? left : right).push(you); }
+        if (!isSplit) { (b === "L" ? left : right).push(them); }
+
+        var tip;
+        if (isSplit) tip = "You: the six split on this · Theo: " + (b === "L" ? lo : hi);
+        else tip = "You: " + (a === "L" ? lo : hi) + "   ·   Theo: " + (b === "L" ? lo : hi);
+
+        return {
+          lo: lo, hi: hi, tip: tip, left: left, right: right,
+          loColor: (a === "L" || b === "L") ? "oklch(0.28 0.016 60)" : "oklch(0.58 0.016 60)",
+          hiColor: (a === "R" || b === "R") ? "oklch(0.28 0.016 60)" : "oklch(0.58 0.016 60)",
+          axis: isOpposed ? "oklch(0.55 0.13 42)" : "oklch(0.80 0.016 68)",
+          rowBg: isOpposed ? "oklch(0.962 0.016 60)" : "transparent",
+          tag: isSplit ? "you are split" : (isOpposed ? "opposite ways" : ""),
+          tagColor: isSplit ? "oklch(0.52 0.10 62)" : "oklch(0.48 0.12 40)"
+        };
+      });
+      return { label: g[0], n: rows.length + " traits", rows: rows };
+    });
+
+    var dimensions = defs.map(function (d) {
+      var on = d.key === picked;
+      return {
+        name: d.name, score: d.score, note: d.note, width: d.score + "%",
+        bg: on ? "oklch(0.955 0.018 52)" : "transparent",
+        nameColor: on ? "oklch(0.42 0.13 40)" : "oklch(0.28 0.02 60)",
+        bar: on ? "oklch(0.52 0.14 40)" : "oklch(0.62 0.04 60)",
+        pick: function () { self.setState({ picked: d.key }); }
+      };
+    });
+    var reasons = (byDim[picked] || []).map(function (r) {
+      return { text: r.text, source: r.source, mark: r.warm ? "oklch(0.62 0.11 42)" : "oklch(0.80 0.02 60)" };
+    });
+
+    return {
+      bg: this.props.bg || "#faf6ef",
+      dimensions: dimensions, reasons: reasons,
+      reasonsLabel: labels[picked] || "Reasons",
+      groups: groups,
+      summary: "Of the 32 traits, " + aligned + " put the two of you on the same side and " + opposed +
+               " pull opposite ways; on " + split + " the six traditions could not agree about you, so there is nothing to compare."
+    };
+  }
+}
+</script>
+</body>
+</html>

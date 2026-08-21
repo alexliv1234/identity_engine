@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Karla:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; font-family: "Karla", system-ui, sans-serif; }
+    a { color: oklch(0.52 0.14 42); } a:hover { color: oklch(0.42 0.14 42); }
+    input { font-family: inherit; font-size: inherit; color: inherit; }
+    input:focus { outline: 2px solid oklch(0.62 0.12 42); outline-offset: 1px; }
+  </style>
+</helmet>
+
+<div style="width: 960px; min-height: 1820px; background: {{bg}}; color: oklch(0.24 0.014 62); padding: 52px 64px 44px; box-sizing: border-box; display: flex; flex-direction: column; gap: 30px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px;">
+    <div style="font-family: 'Newsreader', Georgia, serif; font-size: 19px; font-weight: 400; letter-spacing: -0.005em;">Identity Engine</div>
+    <div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 14.5px; color: oklch(0.46 0.03 50);">A mirror, not a diagnosis.</div>
+  </div>
+
+  <sc-if value="{{isEntry}}" hint-placeholder-val="{{true}}">
+    <div style="display: flex; flex-direction: column; gap: 32px; padding-top: 22px;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px; max-width: 640px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 44px; font-weight: 300; line-height: 1.1; letter-spacing: -0.015em; text-wrap: pretty;">Six traditions, read side by side &mdash; including where they disagree.</div>
+        <div style="font-size: 15px; line-height: 1.7; color: oklch(0.40 0.018 60); text-wrap: pretty;">Astrology, Human Design, Gene Keys, numerology, the Chinese zodiac and Kabbalah, each consulted separately across 32 traits. Where they agree, you'll see who. Where they don't, we'll say so rather than average it away.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 30px; max-width: 640px;">
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">Full name</div>
+          <input value="{{name}}" onChange="{{setName}}" style="border: none; border-bottom: 1px solid oklch(0.72 0.02 60); background: transparent; padding: 7px 2px; font-size: 17px; font-family: 'Newsreader', Georgia, serif;">
+          <div style="font-size: 11.5px; color: oklch(0.54 0.018 60); line-height: 1.5;">Numerology reads the letters.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">Born on</div>
+          <input value="{{date}}" onChange="{{setDate}}" style="border: none; border-bottom: 1px solid oklch(0.72 0.02 60); background: transparent; padding: 7px 2px; font-size: 17px; font-family: 'Newsreader', Georgia, serif;">
+          <div style="font-size: 11.5px; color: oklch(0.54 0.018 60); line-height: 1.5;">All six need this.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">At</div>
+          <input value="{{time}}" onChange="{{setTime}}" style="border: none; border-bottom: 1px solid oklch(0.72 0.02 60); background: transparent; padding: 7px 2px; font-size: 17px; font-family: 'Newsreader', Georgia, serif;">
+          <div style="font-size: 11.5px; color: oklch(0.54 0.018 60); line-height: 1.5;">Unlocks Human Design, Gene Keys and your houses.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">In</div>
+          <input value="{{place}}" onChange="{{setPlace}}" style="border: none; border-bottom: 1px solid oklch(0.72 0.02 60); background: transparent; padding: 7px 2px; font-size: 17px; font-family: 'Newsreader', Georgia, serif;">
+          <div style="font-size: 11.5px; color: oklch(0.54 0.018 60); line-height: 1.5;">Looked up offline &mdash; nothing leaves the server.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 7px; grid-column: span 2;">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">Hebrew name</div>
+            <div style="font-size: 11px; color: oklch(0.58 0.018 60); font-style: italic; font-family: 'Newsreader', serif;">optional</div>
+          </div>
+          <input value="{{hebrew}}" onChange="{{setHebrew}}" dir="rtl" style="border: none; border-bottom: 1px solid oklch(0.72 0.02 60); background: transparent; padding: 7px 2px; font-size: 19px; font-family: 'Newsreader', Georgia, serif;">
+          <div style="font-size: 11.5px; color: oklch(0.54 0.018 60); line-height: 1.55; max-width: 480px;">{{hebrewHint}}</div>
+        </div>
+      </div>
+
+      <div onClick="{{toggleNoTime}}" style="display: flex; align-items: center; gap: 10px; cursor: pointer; max-width: 640px;">
+        <div style="width: 15px; height: 15px; border: 1px solid {{checkBorder}}; background: {{checkFill}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <sc-if value="{{noTime}}" hint-placeholder-val="{{true}}">
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="oklch(0.98 0.01 60)" stroke-width="2.2" stroke-linecap="round"><path d="M2 6.4 L4.6 9 L10 3"/></svg>
+          </sc-if>
+        </div>
+        <div style="font-size: 14px; color: oklch(0.38 0.018 60);">I don't know my birth time</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div onClick="{{go}}" style="background: oklch(0.42 0.13 40); color: oklch(0.97 0.012 70); padding: 13px 26px; font-size: 15px; font-weight: 500; cursor: pointer; letter-spacing: 0.01em;">Read the profile</div>
+        <div style="font-size: 13px; color: oklch(0.52 0.02 60);">Nothing is stored. Takes about half a second.</div>
+      </div>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isProfile}}" hint-placeholder-val="{{false}}">
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid oklch(0.84 0.018 68); padding-bottom: 22px;">
+        <div onClick="{{back}}" style="font-size: 12.5px; color: oklch(0.50 0.02 60); cursor: pointer;">&larr; Start again</div>
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 42px; font-weight: 300; letter-spacing: -0.015em; line-height: 1.1;">{{name}}</div>
+        <div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 15px; color: oklch(0.46 0.02 60);">{{bornLine}}</div>
+      </div>
+
+      <sc-if value="{{noTime}}" hint-placeholder-val="{{false}}">
+        <div style="background: oklch(0.955 0.024 72); border-left: 2px solid oklch(0.62 0.10 62); padding: 20px 24px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 400;">Without a birth time, two of the six can't speak.</div>
+          <div style="font-size: 14px; line-height: 1.7; color: oklch(0.40 0.02 60); text-wrap: pretty;">Human Design and Gene Keys both depend on the exact minute, so they've been left out rather than guessed at. Astrology still reads your placements, but not your houses. The other three don't need the time at all.</div>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 33px; font-weight: 400; line-height: 1.16; letter-spacing: -0.012em; max-width: 720px; text-wrap: pretty;">You decide from the gut, not by deliberation.</div>
+        <div style="font-size: 14.5px; line-height: 1.72; color: oklch(0.38 0.016 60); max-width: 720px; text-wrap: pretty;">{{gutSources}} It is the widest agreement anywhere in your profile &mdash; nothing else below is backed by more.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px; border-bottom: 1px solid oklch(0.86 0.016 68); padding-bottom: 10px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">32 traits, nine dimensions</div>
+          <div style="font-size: 12px; color: oklch(0.54 0.018 60); font-style: italic; font-family: 'Newsreader', serif;">the figure at right is the widest agreement in that dimension &mdash; open any row</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0;">
+          <sc-for list="{{dimensions}}" as="d" hint-placeholder-count="9">
+            <div style="border-bottom: 1px dotted oklch(0.85 0.016 68);">
+              <div onClick="{{d.toggle}}" style="display: flex; gap: 20px; align-items: baseline; padding: 14px 0; cursor: pointer;">
+                <div style="width: 128px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; padding-top: 4px;">
+                  <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: {{d.labelColor}}; font-weight: 600;">{{d.label}}</div>
+                  <div style="font-size: 10.5px; color: oklch(0.60 0.016 60);">{{d.traitCount}}</div>
+                </div>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <div style="font-family: 'Newsreader', Georgia, serif; font-size: 21px; font-weight: 400; line-height: 1.35; color: {{d.claimColor}};">{{d.claim}}</div>
+                  <sc-if value="{{d.isOpen}}" hint-placeholder-val="{{false}}">
+                    <div style="display: flex; flex-direction: column; gap: 11px; padding-top: 10px; padding-bottom: 6px;">
+                      <sc-for list="{{d.facets}}" as="f" hint-placeholder-count="4">
+                        <div style="display: flex; gap: 12px; align-items: baseline;">
+                          <div style="width: 3px; align-self: stretch; background: {{f.mark}}; flex-shrink: 0;"></div>
+                          <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <div style="font-size: 14px; color: {{f.textColor}};">{{f.text}}</div>
+                            <div style="font-size: 11.5px; color: {{f.sourceColor}}; font-style: italic; font-family: 'Newsreader', serif;">{{f.source}}</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+                <div style="width: 58px; flex-shrink: 0; text-align: right; font-size: 12px; color: {{d.countColor}}; padding-top: 6px; white-space: nowrap;">{{d.count}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: oklch(0.958 0.022 46); border-top: 2px solid oklch(0.52 0.14 38); padding: 26px 30px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: oklch(0.47 0.13 38); font-weight: 600;">Where they disagree &mdash; 2 traits of 32</div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          <sc-for list="{{tensions}}" as="t" hint-placeholder-count="2">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-family: 'Newsreader', Georgia, serif; font-size: 21px; font-weight: 400; line-height: 1.34; color: oklch(0.25 0.03 44); max-width: 700px; text-wrap: pretty;">{{t.claim}}</div>
+              <div style="font-size: 13.5px; line-height: 1.7; color: oklch(0.38 0.02 50); max-width: 700px;">{{t.detail}}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.7; color: oklch(0.42 0.02 50); font-style: italic; font-family: 'Newsreader', serif; border-top: 1px dotted oklch(0.78 0.03 46); padding-top: 13px;">A single-system reading cannot produce these lines, because it has nothing to disagree with.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 13px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: oklch(0.50 0.02 60); font-weight: 600;">For your AI assistant</div>
+          <div onClick="{{copy}}" style="font-size: 12.5px; color: {{copyColor}}; cursor: pointer; font-weight: 500;">{{copyLabel}}</div>
+        </div>
+        <div style="background: oklch(0.945 0.012 68); padding: 18px 20px; font-size: 12.5px; line-height: 1.75; color: oklch(0.36 0.016 60); font-family: 'Newsreader', Georgia, serif;">Decides by instinct rather than deliberation; five of six traditions agree. Starts things and needs the work seen. Turned inward; processes internally and feels more than shows. Slow to bond, then committed. Works in bursts with real recovery between. Two open questions: timing splits evenly between acting now and waiting, and so does the need for structure. Hold caution and the singular-archetype reading lightly &mdash; only two systems raise either.</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px; border-top: 1px solid oklch(0.86 0.016 68); padding-top: 16px; margin-top: auto;">
+        <div style="font-size: 12px; color: oklch(0.50 0.02 60); line-height: 1.65; max-width: 520px;">Reflective and entertainment insight; not medical, psychological, or financial advice.</div>
+        <div style="font-size: 13px; color: oklch(0.42 0.13 40); font-weight: 500; white-space: nowrap; cursor: pointer;">Compare with someone &rarr;</div>
+      </div>
+
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"bg":{"editor":"color","default":"#faf6ef","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      view: "entry", noTime: false, copied: false, open: "decision_making",
+      name: "Maya Okonkwo", date: "4 July 1988", time: "06:45",
+      place: "Sydney, Australia", hebrew: ""
+    };
+  }
+  renderVals() {
+    var st = this.state, self = this;
+    var active = st.noTime ? 4 : 6;
+
+    var DIMS = [
+      { id: "core_essence", label: "Core essence", claim: "You read as someone with a settled centre, turned inward.", top: 5, f: [
+        { t: "Turned inward. You are not performing for the room.", s: "Astrology (Sun in Cancer), Human Design, numerology, Gene Keys and the Chinese zodiac.", k: "strong" },
+        { t: "Self-assured rather than self-questioning.", s: "Human Design, numerology, the Chinese zodiac and Kabbalah.", k: "strong" },
+        { t: "One singular archetype rather than many adaptive ones.", s: "Gene Keys and Kabbalah only. Held lightly.", k: "weak" }
+      ] },
+      { id: "drive", label: "Drive", claim: "You start things &mdash; and you need the work seen.", top: 5, f: [
+        { t: "Self-starting. You move before you are asked.", s: "Numerology (Life Path 1), Human Design, astrology, the Chinese zodiac and Gene Keys.", k: "strong" },
+        { t: "Recognition matters more than you would say out loud.", s: "Human Design, Gene Keys, astrology and numerology.", k: "strong" },
+        { t: "High burn rather than steady burn.", s: "The Chinese zodiac, Gene Keys and numerology.", k: "mid" },
+        { t: "Depth-seeking rather than novelty-seeking.", s: "Kabbalah and astrology only. A quieter signal.", k: "weak" }
+      ] },
+      { id: "decision_making", label: "Decision-making", claim: "You decide from the gut, not by deliberation.", top: 5, f: [
+        { t: "The body knows before the reasons arrive.", s: "Human Design says it most plainly &mdash; a sacral authority. Astrology, numerology, Gene Keys and the Chinese zodiac agree.", k: "strong" },
+        { t: "You would rather not be rushed.", s: "Human Design and astrology; the Chinese zodiac and Gene Keys lean the same way.", k: "strong" },
+        { t: "On timing, they split evenly.", s: "Numerology and the Chinese zodiac say act now. Astrology and Human Design say wait. Reported, not averaged.", k: "tension" },
+        { t: "More cautious than you let on.", s: "Only numerology and the Chinese zodiac. Worth holding lightly.", k: "weak" }
+      ] },
+      { id: "communication", label: "Communication", claim: "Direct, and faster than most people expect.", top: 4, f: [
+        { t: "Direct rather than indirect.", s: "Numerology, astrology, Human Design and the Chinese zodiac.", k: "strong" },
+        { t: "Quick pace. You arrive at the point early.", s: "The Chinese zodiac (Dragon), numerology, Gene Keys and astrology.", k: "strong" },
+        { t: "Reserved in register rather than expressive.", s: "Astrology, Kabbalah and Human Design.", k: "mid" },
+        { t: "You absorb more than you assert.", s: "Human Design and Kabbalah only. Thin evidence.", k: "weak" }
+      ] },
+      { id: "emotional", label: "Emotional", claim: "You process inwardly, and feel more than you show.", top: 4, f: [
+        { t: "Internal processing rather than out in the open.", s: "Astrology (Sun in Cancer), Kabbalah, Gene Keys and Human Design.", k: "strong" },
+        { t: "Highly sensitive to the room.", s: "Astrology, Human Design, Kabbalah and Gene Keys.", k: "strong" },
+        { t: "Even weather rather than wave-like.", s: "The Chinese zodiac and numerology only.", k: "weak" }
+      ] },
+      { id: "relational", label: "Relational", claim: "Slow to bond, and then hard to lose.", top: 5, f: [
+        { t: "Committed once you are in.", s: "Numerology, the Chinese zodiac, astrology, Human Design and Kabbalah.", k: "strong" },
+        { t: "Slow bonding. Trust is earned, not extended.", s: "Astrology, Kabbalah, Gene Keys and Human Design.", k: "strong" },
+        { t: "You avoid conflict rather than engage it.", s: "Astrology, Kabbalah and Gene Keys.", k: "mid" },
+        { t: "Independent rather than interdependent.", s: "Numerology, Human Design and the Chinese zodiac.", k: "mid" }
+      ] },
+      { id: "work_energy", label: "Work &amp; energy", claim: "You work in bursts, and need real recovery between them.", top: 4, f: [
+        { t: "Sprint rhythm rather than marathon.", s: "Numerology, the Chinese zodiac, Gene Keys and astrology.", k: "strong" },
+        { t: "Recovery is not optional for you.", s: "Human Design, astrology, Kabbalah and Gene Keys.", k: "strong" },
+        { t: "On structure, they split evenly.", s: "Numerology, Human Design and Kabbalah want structure. Astrology, Gene Keys and the Chinese zodiac want room to improvise.", k: "tension" },
+        { t: "Leading rather than supporting.", s: "Numerology, the Chinese zodiac and Gene Keys.", k: "mid" }
+      ] },
+      { id: "growth_edges", label: "Growth edges", claim: "You over-prove. The impatience is the tell.", top: 4, f: [
+        { t: "Over-proving rather than under-claiming.", s: "Gene Keys 26 (Pride), numerology, astrology and the Chinese zodiac.", k: "strong" },
+        { t: "Impatient under your own timeline.", s: "The Chinese zodiac, numerology and Gene Keys.", k: "mid" },
+        { t: "You grip rather than drift.", s: "Kabbalah and Human Design only. Offered tentatively.", k: "weak" }
+      ] },
+      { id: "life_themes", label: "Life themes", claim: "Meaning over mastery; reinvention over continuity.", top: 5, f: [
+        { t: "Meaning-seeking rather than mastery-seeking.", s: "Kabbalah, Gene Keys, astrology, numerology and Human Design.", k: "strong" },
+        { t: "Reinvention runs through the arc.", s: "Gene Keys, the Chinese zodiac, numerology and astrology.", k: "strong" },
+        { t: "Self-realising more than outward-serving.", s: "Astrology, Kabbalah and Gene Keys.", k: "mid" }
+      ] }
+    ];
+
+    var MARK = { strong: "oklch(0.62 0.11 42)", mid: "oklch(0.76 0.06 48)", weak: "oklch(0.86 0.02 60)", tension: "oklch(0.70 0.14 72)" };
+
+    var dimensions = DIMS.map(function (d) {
+      var open = st.open === d.id;
+      var top = st.noTime && d.top > 4 ? d.top - 1 : d.top;
+      return {
+        label: d.label, claim: d.claim, isOpen: open,
+        traitCount: d.f.length + " traits",
+        count: top + " of " + active,
+        labelColor: open ? "oklch(0.45 0.13 40)" : "oklch(0.52 0.02 60)",
+        claimColor: open ? "oklch(0.22 0.016 60)" : "oklch(0.32 0.016 60)",
+        countColor: top >= 4 ? "oklch(0.45 0.10 42)" : "oklch(0.58 0.02 60)",
+        facets: d.f.map(function (f) {
+          return {
+            text: f.t, source: f.s, mark: MARK[f.k],
+            textColor: f.k === "tension" ? "oklch(0.36 0.06 60)" : (f.k === "weak" ? "oklch(0.44 0.016 60)" : "oklch(0.30 0.016 60)"),
+            sourceColor: f.k === "tension" ? "oklch(0.48 0.07 62)" : "oklch(0.52 0.018 60)"
+          };
+        }),
+        toggle: function () { self.setState({ open: open ? null : d.id }); }
+      };
+    });
+
+    var tensions = [
+      { claim: "On timing, they split evenly &mdash; and we would rather show you that than average it into something that describes nobody.",
+        detail: "Numerology and the Chinese zodiac both say act now. Astrology and Human Design both say wait for clarity. Four systems, evenly divided, so this is a real fork in you rather than a reading error." },
+      { claim: "On structure, the six divide three against three.",
+        detail: "Numerology, Human Design and Kabbalah read you as wanting a frame to work inside. Astrology, Gene Keys and the Chinese zodiac read you as needing room to improvise. Neither majority exists, so neither is reported as the answer." }
+    ];
+
+    return {
+      bg: this.props.bg || "#faf6ef",
+      isEntry: st.view === "entry", isProfile: st.view === "profile",
+      noTime: st.noTime, name: st.name, date: st.date, time: st.time,
+      place: st.place, hebrew: st.hebrew,
+      hebrewHint: st.hebrew
+        ? "Kabbalah will read these letters directly &mdash; full confidence."
+        : "Leave it blank and we will transliterate your Latin name instead. That still works, but Kabbalah says so and lowers its own confidence rather than pretending.",
+      bornLine: st.noTime
+        ? "Born " + st.date + " in " + st.place + " · time unknown"
+        : "Born " + st.date + " at " + st.time + " in " + st.place,
+      gutSources: st.noTime
+        ? "Astrology, numerology and the Chinese zodiac all point this way."
+        : "Human Design says it most plainly &mdash; a sacral authority decides in the body, before the reasons arrive. Astrology, numerology, Gene Keys and the Chinese zodiac agree.",
+      dimensions: dimensions,
+      tensions: tensions,
+      checkBorder: st.noTime ? "oklch(0.42 0.13 40)" : "oklch(0.66 0.02 60)",
+      checkFill: st.noTime ? "oklch(0.42 0.13 40)" : "transparent",
+      copyLabel: st.copied ? "Copied" : "Copy",
+      copyColor: st.copied ? "oklch(0.48 0.12 150)" : "oklch(0.42 0.13 40)",
+      setName: function (e) { self.setState({ name: e.target.value }); },
+      setDate: function (e) { self.setState({ date: e.target.value }); },
+      setTime: function (e) { self.setState({ time: e.target.value }); },
+      setPlace: function (e) { self.setState({ place: e.target.value }); },
+      setHebrew: function (e) { self.setState({ hebrew: e.target.value }); },
+      toggleNoTime: function () { self.setState({ noTime: !st.noTime }); },
+      go: function () { self.setState({ view: "profile" }); },
+      back: function () { self.setState({ view: "entry", copied: false }); },
+      copy: function () {
+        self.setState({ copied: true });
+        setTimeout(function () { self.setState({ copied: false }); }, 1600);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

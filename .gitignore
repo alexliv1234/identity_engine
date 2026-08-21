@@ -16,3 +16,7 @@ engine/ephemeris/data/
 # reappears locally on the first `client`-fixture test run or `uvicorn`
 # invocation; never meant to be committed.
 *.db
+
+# Playwright MCP scratch output
+.playwright-mcp/
+design/playground/identity-engine-playground.html
