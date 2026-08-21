@@ -53,6 +53,15 @@ class EngineError(Exception):
 _PYDANTIC_KIND_PREFIX = re.compile(r"^(Value|Type|Assertion) error,\s*")
 
 # Our own convention: "<CODE>: <message>".
+#
+# Stripped *unconditionally*, whether or not the captured name is a known
+# `ErrorCode`. Only the code lookup is conditional. Previously an
+# unrecognised but code-shaped prefix -- a code from a future engine version,
+# or one a validator added without also adding it to `ErrorCode` -- kept the
+# whole prefix in `.message`, so the human-readable prose an API surfaces to
+# a caller read "SOME_NEW_CODE: birth_date must be ...". That is machine
+# noise in a prose field; `.code` is where a code belongs, and when the name
+# is unknown the honest answer is the field fallback, not a leaked token.
 _CODE_PREFIX = re.compile(r"^([A-Z][A-Z0-9_]*):\s*")
 
 # Fallback when a failure carries no code of ours — a pydantic built-in check
@@ -84,6 +93,10 @@ def from_validation_error(exc: ValidationError) -> EngineError:
     2. otherwise a fallback derived from the offending field name;
     3. otherwise `DEFAULT_ERROR_CODE` (`INVALID_INPUT`).
 
+    A code-shaped prefix is stripped from the message in all three cases --
+    see `_CODE_PREFIX`. The code is reported in `.code`; it must never also
+    be left sitting in the prose a caller reads.
+
     **Multiple errors: the first one wins.** `exc.errors()` is ordered by
     field declaration order on the model, which is fixed by the source, so the
     choice is deterministic — the same invalid input always yields the same
@@ -100,8 +113,14 @@ def from_validation_error(exc: ValidationError) -> EngineError:
     field = ".".join(str(part) for part in loc) or None
 
     message = _PYDANTIC_KIND_PREFIX.sub("", str(first.get("msg", "")))
-    match = _CODE_PREFIX.match(message)
-    if match is not None and match.group(1) in ErrorCode.__members__:
-        return EngineError(ErrorCode[match.group(1)], message[match.end() :], field=field)
 
-    return EngineError(_FIELD_FALLBACK.get(field, DEFAULT_ERROR_CODE), message, field=field)
+    code: ErrorCode | None = None
+    match = _CODE_PREFIX.match(message)
+    if match is not None:
+        message = message[match.end() :]  # strip whether or not the name is known
+        if match.group(1) in ErrorCode.__members__:
+            code = ErrorCode[match.group(1)]
+
+    if code is None:
+        code = _FIELD_FALLBACK.get(field, DEFAULT_ERROR_CODE)
+    return EngineError(code, message, field=field)

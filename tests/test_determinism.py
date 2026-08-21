@@ -29,11 +29,24 @@ def test_recompute_across_fresh_caches_is_byte_identical(name):
     assert profile_bytes(build_profile(inp)) == first
 
 
-def test_system_selection_order_does_not_affect_output():
+def test_registration_order_does_not_affect_output():
+    """`build_profile` walks SYSTEM_REGISTRY via sorted(), so re-inserting a
+    system (which changes dict iteration order) must not move a byte. This
+    replaces an older test that permuted the removed `systems=` parameter."""
+    from engine.orchestrator import SYSTEM_REGISTRY
+
     inp = FIXTURES["standard"]
-    a = profile_bytes(build_profile(inp, systems=["numerology", "chinese_zodiac"]))
-    b = profile_bytes(build_profile(inp, systems=["chinese_zodiac", "numerology"]))
-    assert a == b
+    before = profile_bytes(build_profile(inp))
+
+    original = dict(SYSTEM_REGISTRY)
+    try:
+        for key in sorted(original, reverse=True):
+            SYSTEM_REGISTRY[key] = SYSTEM_REGISTRY.pop(key)
+        assert list(SYSTEM_REGISTRY) != list(original)  # order really did change
+        assert profile_bytes(build_profile(inp)) == before
+    finally:
+        SYSTEM_REGISTRY.clear()
+        SYSTEM_REGISTRY.update(original)
 
 
 def test_cold_compute_is_within_the_latency_budget():

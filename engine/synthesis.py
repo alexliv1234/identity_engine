@@ -78,7 +78,12 @@ def synthesize(
             continue
         accumulators[tag.facet].add(tag, confidence)
 
-    by_dimension: dict[str, list[dict]] = defaultdict(list)
+    # Facets are collected per dimension as (emitted_dict, dominant_weight)
+    # pairs. `dominant_weight` (the confidence-scaled accumulated weight of
+    # the dominant direction, i.e. `acc.weights[dominant]`) drives the
+    # ranking below but is deliberately not part of `emitted_dict` -- the
+    # public response shape (spec §5.1) has no field for it.
+    by_dimension: dict[str, list[tuple[dict, float]]] = defaultdict(list)
     tensions_by_dimension: dict[str, list[dict]] = defaultdict(list)
 
     for facet_id, acc in accumulators.items():
@@ -87,6 +92,7 @@ def synthesize(
             continue
         score = {d: acc.weights[d] / total for d in ("high", "low")}
         dominant = "high" if score["high"] >= score["low"] else "low"
+        dominant_weight = acc.weights[dominant]
 
         # Numerator: distinct systems with at least one tag in the dominant
         # direction. Denominator: applicable systems (see above). `applicable`
@@ -96,14 +102,17 @@ def synthesize(
 
         facet = tax.get(facet_id)
         by_dimension[facet.dimension].append(
-            {
-                "facet": facet_id,
-                "label": facet.label,
-                "score": round(score[dominant], ROUND),
-                "direction": facet.label_for(dominant),
-                "convergence": round(convergence, ROUND),
-                "provenance": sorted(acc.provenance, key=lambda p: (p["system"], p["element"])),
-            }
+            (
+                {
+                    "facet": facet_id,
+                    "label": facet.label,
+                    "score": round(score[dominant], ROUND),
+                    "direction": facet.label_for(dominant),
+                    "convergence": round(convergence, ROUND),
+                    "provenance": sorted(acc.provenance, key=lambda p: (p["system"], p["element"])),
+                },
+                dominant_weight,
+            )
         )
 
         high_systems = sorted(acc.systems["high"])
@@ -122,12 +131,23 @@ def synthesize(
                 }
             )
 
+    def _rank_key(pair: tuple[dict, float]) -> tuple[float, float, str]:
+        # Rank by purity-times-agreement first; a lone-source facet with all
+        # its tags pointing one way scores exactly 1.0 regardless of how much
+        # weight backs it, so `score * convergence` alone collapses to a
+        # constant across most facets in a dimension (the knowledge-base
+        # weight cancels out of `score`, and within one profile every
+        # single-source facet shares the same convergence). Break that tie
+        # with the accumulated dominant weight -- the evidential mass `score`
+        # normalises away -- before falling back to `facet_id` as the final,
+        # fully deterministic tiebreaker.
+        emitted, dominant_weight = pair
+        return (-(emitted["score"] * emitted["convergence"]), -dominant_weight, emitted["facet"])
+
     dimensions: dict[str, dict] = {}
     for dim_id in sorted(by_dimension, key=lambda d: tax.dimensions[d].order):
-        facets = sorted(
-            by_dimension[dim_id],
-            key=lambda f: (-(f["score"] * f["convergence"]), f["facet"]),
-        )
+        ranked = sorted(by_dimension[dim_id], key=_rank_key)
+        facets = [emitted for emitted, _dominant_weight in ranked]
         dimensions[dim_id] = {
             "label": tax.dimensions[dim_id].label,
             "summary_tags": [f["direction"] for f in facets[:SUMMARY_TAG_COUNT]],

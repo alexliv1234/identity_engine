@@ -139,14 +139,15 @@ def test_summary_tags_are_the_top_three_facet_directions():
     # Each facet below gets exactly one tag, and "astrology" is the only
     # applicable system, so every facet's score and convergence are both 1.0
     # (all its weight is in one direction, from the one applicable system).
-    # The sort key (-(score * convergence), facet_id) therefore ties
-    # on the numeric part for all four facets and falls through to
-    # alphabetical facet_id:
-    #   decision_making.gut_vs_deliberation  -> "gut"
-    #   decision_making.pressure_response    -> "dislikes-pressure"
-    #   decision_making.risk_appetite        -> "risk-taking"
-    #   decision_making.timing               -> "immediate"
-    # Top three by facet_id: gut_vs_deliberation, pressure_response, risk_appetite.
+    # The sort key (-(score * convergence), -dominant_weight, facet_id)
+    # therefore ties on the numeric score*convergence term for all four
+    # facets and falls through to the accumulated dominant weight, which is
+    # exactly the per-facet tag weight here (single tag, confidence 1.0):
+    #   decision_making.gut_vs_deliberation  -> weight 0.9 -> "gut"
+    #   decision_making.timing               -> weight 0.8 -> "immediate"
+    #   decision_making.pressure_response    -> weight 0.7 -> "dislikes-pressure"
+    #   decision_making.risk_appetite        -> weight 0.1 -> "risk-taking"
+    # Top three by weight, heaviest first: gut_vs_deliberation, timing, pressure_response.
     tags = [
         tag("astrology", "high", 0.9, FACET),
         tag("astrology", "high", 0.8, "decision_making.timing"),
@@ -154,7 +155,7 @@ def test_summary_tags_are_the_top_three_facet_directions():
         tag("astrology", "high", 0.1, "decision_making.risk_appetite"),
     ]
     dim = synthesize(tags, {"astrology": 1.0})["dimensions"]["decision_making"]
-    assert dim["summary_tags"] == ["gut", "dislikes-pressure", "risk-taking"]
+    assert dim["summary_tags"] == ["gut", "immediate", "dislikes-pressure"]
 
 
 def test_output_is_deterministic_regardless_of_tag_order():
@@ -284,3 +285,47 @@ def test_zero_confidence_system_is_not_applicable_and_not_in_the_denominator():
         {"astrology": 1.0, "human_design": 0.0},
     )
     assert only_facet(result)["convergence"] == 1.0
+
+
+# --- FIX 3: dominant weight breaks purity ties -----------------------------
+
+
+def test_heavier_facet_ranks_first_when_tied_on_score_times_convergence():
+    """gut_vs_deliberation and risk_appetite each get a single tag from the
+    only applicable system, so both score 1.0 and converge at 1.0 -- an exact
+    tie on score * convergence. Their facet_ids alone would rank
+    gut_vs_deliberation first (alphabetically before risk_appetite), but
+    risk_appetite carries far more accumulated weight (0.9 vs 0.2). The
+    heavier facet must win the tie, not the alphabetically earlier one."""
+    tags = [
+        tag("astrology", "low", 0.2, "decision_making.gut_vs_deliberation"),
+        tag("astrology", "high", 0.9, "decision_making.risk_appetite"),
+    ]
+    result = synthesize(tags, {"astrology": 1.0})
+    dim = result["dimensions"]["decision_making"]
+    assert [f["score"] * f["convergence"] for f in dim["facets"]] == [1.0, 1.0]
+    assert [f["facet"] for f in dim["facets"]] == [
+        "decision_making.risk_appetite",
+        "decision_making.gut_vs_deliberation",
+    ]
+    assert dim["summary_tags"][0] == "risk-taking"
+
+
+def test_facet_id_still_breaks_a_genuine_three_way_tie():
+    """Three facets with identical weight (0.5), each from the sole
+    applicable system in the same direction, tie exactly on score (1.0),
+    convergence (1.0), and now also on accumulated dominant weight (0.5).
+    With every discriminating term exhausted, the ranking must still fall
+    back to alphabetical facet_id, deterministically."""
+    tags = [
+        tag("astrology", "high", 0.5, "decision_making.risk_appetite"),
+        tag("astrology", "high", 0.5, "decision_making.gut_vs_deliberation"),
+        tag("astrology", "high", 0.5, "decision_making.pressure_response"),
+    ]
+    result = synthesize(tags, {"astrology": 1.0})
+    dim = result["dimensions"]["decision_making"]
+    assert [f["facet"] for f in dim["facets"]] == [
+        "decision_making.gut_vs_deliberation",
+        "decision_making.pressure_response",
+        "decision_making.risk_appetite",
+    ]

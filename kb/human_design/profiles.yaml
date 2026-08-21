@@ -1,0 +1,146 @@
+schema: kb.mapping.v1
+system: human_design
+element: profiles
+reviewed: true
+source: >-
+  Human Design as taught in the mainstream Jovian-derived lineage. Profile
+  combines the personality (conscious) Sun's line with the design
+  (unconscious) Sun's line, each 1-6, read as a role rather than a fixed
+  personality: 1 Investigator, 2 Hermit, 3 Martyr, 4 Opportunist, 5 Heretic,
+  6 Role Model. Interpretive choice: entries describe the friction each
+  pairing tends to produce, not a life script or a level of the two lines
+  ranked against each other.
+entries:
+  "1_3":
+    label: "1/3 Investigator/Martyr"
+    text: >-
+      Builds a foundation through solitary research, then only really learns
+      what holds up by trying it and getting it wrong in public. The cost is
+      that the trial-and-error phase reads as inconsistency to people who
+      only see the failed attempts, not the study behind them.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.4, direction: high}
+  "1_4":
+    label: "1/4 Investigator/Opportunist"
+    text: >-
+      Wants a solid, well-researched foundation before acting, but actually
+      moves through the world on a fixed circle of close relationships
+      rather than broad networking. The cost is that opportunity is bounded
+      by that small circle, and stepping outside it feels unusually costly.
+    tags:
+      - {facet: relational.bonding, weight: 0.6, direction: low}
+      - {facet: core_essence.visibility, weight: 0.4, direction: low}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+  "2_4":
+    label: "2/4 Hermit/Opportunist"
+    text: >-
+      Has a natural talent that needs solitude to develop and then needs to
+      be actively called out by someone else before it is trusted. The cost
+      is a dependence on a small, fixed network to ever get called out at
+      all, leaving real ability sitting idle without the right invitation.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+      - {facet: drive.recognition, weight: 0.5, direction: high}
+  "2_5":
+    label: "2/5 Hermit/Heretic"
+    text: >-
+      A natural gift that prefers to stay hidden gets pulled into the open
+      anyway, because other people project urgent expectations onto it. The
+      cost is a mismatch between what was actually offered and what the
+      wider audience assumed was promised.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: relational.autonomy, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  "3_5":
+    label: "3/5 Martyr/Heretic"
+    text: >-
+      Learns exclusively by direct trial and error, then gets treated as the
+      practical solution to other people's problems whether or not that was
+      ever offered. The cost is a reputation staked on projections that the
+      person did not choose and often cannot fully live up to.
+    tags:
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: high}
+      - {facet: relational.autonomy, weight: 0.5, direction: high}
+      - {facet: drive.recognition, weight: 0.4, direction: low}
+  "3_6":
+    label: "3/6 Martyr/Role Model"
+    text: >-
+      A life of hands-on trial and error that, once enough has been tried
+      and survived, is later expected to model something steady for others.
+      The cost is that the visible missteps of the early trial-and-error
+      years stay attached to a reputation long after the person has moved on
+      from them.
+    tags:
+      - {facet: decision_making.risk_appetite, weight: 0.7, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.5, direction: high}
+      - {facet: growth_edges.patience, weight: 0.4, direction: high}
+  "4_6":
+    label: "4/6 Opportunist/Role Model"
+    text: >-
+      Operates through a fixed circle of relationships and, over time, is
+      expected to stand as an example within it. The cost is a reputation
+      that becomes hard to revise once it calcifies inside that same closed
+      circle.
+    tags:
+      - {facet: relational.bonding, weight: 0.6, direction: low}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.4, direction: high}
+  "4_1":
+    label: "4/1 Opportunist/Investigator"
+    text: >-
+      Moves through a fixed network of close relationships while privately
+      needing a thoroughly researched foundation before trusting any of it.
+      The cost is that the research happens in private, so the confidence it
+      produces can look unearned to people who never saw the work.
+    tags:
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: low}
+      - {facet: core_essence.visibility, weight: 0.4, direction: low}
+  "5_1":
+    label: "5/1 Heretic/Investigator"
+    text: >-
+      A well-researched, genuinely reliable foundation gets projected onto
+      as a fix for problems it was never built to solve. The cost is a gap
+      between the actual, narrow expertise and the sweeping expectations a
+      wider audience assumes it covers.
+    tags:
+      - {facet: relational.autonomy, weight: 0.5, direction: high}
+      - {facet: core_essence.visibility, weight: 0.4, direction: low}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
+  "5_2":
+    label: "5/2 Heretic/Hermit"
+    text: >-
+      A natural talent that would rather stay private gets pulled into
+      public expectation by other people's projections before it feels
+      ready. The cost is a pressure to perform a fix on demand for a gift
+      that actually needs unstructured time to mature.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+      - {facet: drive.recognition, weight: 0.4, direction: low}
+  "6_2":
+    label: "6/2 Role Model/Hermit"
+    text: >-
+      A naturally gifted way of being that, over a long arc, becomes an
+      example other people watch and learn from -- but only once it has had
+      enough undisturbed time alone to develop. The cost is resenting an
+      audience that shows up before that private development is finished.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: growth_edges.patience, weight: 0.5, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.4, direction: high}
+  "6_3":
+    label: "6/3 Role Model/Martyr"
+    text: >-
+      A long arc toward being a trusted example, built entirely on lessons
+      learned by trying things directly and living with the consequences.
+      The cost is a visible early record of missteps that later observers
+      judge without the context of the growth that followed.
+    tags:
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}

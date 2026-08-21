@@ -6,3 +6,7 @@ venv/
 .pytest_cache/
 .coverage
 *.egg-info/
+
+# Vendored JPL ephemeris kernel (~300 MB). Fetched by kb_tools/fetch_ephemeris.py,
+# never committed. See README "Ephemeris data" section.
+engine/ephemeris/data/

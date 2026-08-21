@@ -1,0 +1,34 @@
+schema: kb.mapping.v1
+system: kabbalah
+element: equivalences
+reviewed: true
+source: >-
+  A small curated set of widely-cited gematria equivalences (mispar hechrechi):
+  two words that happen to share a numeric value, traditionally read as a
+  meaningful pairing rather than a coincidence. Deliberately short — the space
+  of coincidental equalities is large and most of it is noise, so only
+  long-established, commonly-cited pairs are included here. This file is
+  intentionally not declared in kb/manifest.yaml: it is an open-ended,
+  curatorial table rather than a fixed enumeration, and new entries can be
+  added after review without the completeness check treating the set as closed.
+entries:
+  chai:
+    label: "18"
+    text: "Shares its value with chai (life) — traditionally read as a vitality signature."
+    tags:
+      - {facet: drive.intensity, weight: 0.5, direction: high}
+  emet:
+    label: "441"
+    text: "Shares its value with emet (truth) — traditionally read as a directness signature."
+    tags:
+      - {facet: communication.directness, weight: 0.5, direction: high}
+  shalom:
+    label: "376"
+    text: "Shares its value with shalom (peace, wholeness) — traditionally read as a conflict-averse, integrating signature."
+    tags:
+      - {facet: relational.conflict, weight: 0.5, direction: low}
+  ahava:
+    label: "13"
+    text: "Shares its value with ahava (love), and with echad (one) — a classical pairing traditionally read to mean that love and unity are the same value."
+    tags:
+      - {facet: relational.bonding, weight: 0.5, direction: high}

@@ -115,3 +115,56 @@ def test_multiple_errors_resolve_to_the_first_deterministically():
 def test_a_valid_input_raises_nothing_so_the_translation_is_never_needed():
     """Guards against the parametrized cases passing for the wrong reason."""
     assert BirthInput(**VALID).tz == "Europe/London"
+
+
+# --- review FIX 5: an unrecognised code-shaped prefix must not leak ------
+
+
+def test_unknown_code_shaped_prefix_is_stripped_from_the_prose():
+    """`<CODE>: ` is our own wire convention, not English. It was stripped
+    only when the captured name was a *known* `ErrorCode`, so a code from a
+    future engine version -- or one a validator emitted without also adding it
+    to the enum -- survived into `.message` and would be shown to a caller as
+    "FUTURE_CODE: full_name must not be blank". The code belongs in `.code`.
+    """
+    import pydantic
+
+    class Future(pydantic.BaseModel):
+        full_name: str
+
+        @pydantic.field_validator("full_name")
+        @classmethod
+        def _check(cls, v: str) -> str:
+            raise ValueError("SOME_FUTURE_CODE: full_name must not be blank")
+
+    with pytest.raises(ValidationError) as exc:
+        Future(full_name="x")
+
+    err = from_validation_error(exc.value)
+    assert err.message == "full_name must not be blank"
+    assert "SOME_FUTURE_CODE" not in err.message
+    # Unknown name => the field fallback decides the code, not the leaked token.
+    assert err.code is ErrorCode.NAME_UNMAPPABLE
+    assert err.field == "full_name"
+
+
+def test_stripping_does_not_swallow_ordinary_prose():
+    """The contrast case, so the unconditional strip cannot eat real text.
+    `_CODE_PREFIX` requires SCREAMING_SNAKE immediately before the colon, so
+    a message that merely happens to start with a word and a colon keeps
+    every character of it."""
+    import pydantic
+
+    class Prosaic(pydantic.BaseModel):
+        full_name: str
+
+        @pydantic.field_validator("full_name")
+        @classmethod
+        def _check(cls, v: str) -> str:
+            raise ValueError("Note: the name looked odd: check it")
+
+    with pytest.raises(ValidationError) as exc:
+        Prosaic(full_name="x")
+
+    err = from_validation_error(exc.value)
+    assert err.message == "Note: the name looked odd: check it"

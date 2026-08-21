@@ -1,0 +1,25 @@
+# engine/systems/data/hd_gates.yaml
+# Gate -> center. All 64 gates; counts per center: head 3, ajna 6, throat 11,
+# g 8, heart 4, sacral 9, solar_plexus 7, spleen 7, root 9 (summing to 64).
+#
+# Verified against two independent published sources (2026-08-20):
+#   - freehumandesignchart.com/the-64-human-design-gates/ (gate-by-center
+#     listing) -- matches this file's centers/gate assignment exactly, gate
+#     for gate, across all nine centers.
+#   - geneticmatrix.com/learn-hub/gates/ was also consulted but returned
+#     HTTP 403 to automated fetches, so it did not factor into verification.
+# This mapping is a fixed structural property of the Human Design Rave
+# Mandala (it does not vary by lineage or teacher), so exact agreement with
+# an independent source is the expected and required outcome, not a
+# coincidence.
+schema: hd.gates.v1
+centers:
+  head:         [61, 63, 64]
+  ajna:         [4, 11, 17, 24, 43, 47]
+  throat:       [8, 12, 16, 20, 23, 31, 33, 35, 45, 56, 62]
+  g:            [1, 2, 7, 10, 13, 15, 25, 46]
+  heart:        [21, 26, 40, 51]
+  sacral:       [3, 5, 9, 14, 27, 29, 34, 42, 59]
+  solar_plexus: [6, 22, 30, 36, 37, 49, 55]
+  spleen:       [18, 28, 32, 44, 48, 50, 57]
+  root:         [19, 38, 39, 41, 52, 53, 54, 58, 60]

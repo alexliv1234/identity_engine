@@ -1,0 +1,111 @@
+schema: kb.mapping.v1
+system: human_design
+element: centers
+reviewed: true
+source: >-
+  Human Design as taught in the mainstream Jovian-derived lineage. Each of
+  the nine centers, when defined (consistently colored in, as opposed to
+  open/undefined), gives fixed and reliable access to the theme that center
+  governs. Interpretive choice: entries describe only the defined case --
+  what a consistent, reliable inner signal costs -- and take no position on
+  the corresponding undefined/open state, which this KB does not tag.
+entries:
+  head_defined:
+    label: "Head defined"
+    text: >-
+      A steady internal pressure to think and question, translated into
+      ideas at a fairly constant rate. The cost is that the pressure doesn't
+      switch off on its own, so an unanswered question can occupy the mind
+      long after it stopped being useful to keep turning over.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.6, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: low}
+      - {facet: growth_edges.control, weight: 0.4, direction: high}
+  ajna_defined:
+    label: "Ajna defined"
+    text: >-
+      A fixed, consistent way of processing information into opinions and
+      certainty. The cost is that the same fixed process which makes those
+      opinions reliable also makes them slow to update once new information
+      contradicts them.
+    tags:
+      - {facet: core_essence.archetype_force, weight: 0.7, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: low}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  throat_defined:
+    label: "Throat defined"
+    text: >-
+      Reliable, on-demand access to speaking and acting into the world --
+      thought and impulse reach expression without needing another center to
+      carry them there. The cost is a pull toward always being the one who
+      speaks or does, whether or not the moment actually called for it.
+    tags:
+      - {facet: communication.directness, weight: 0.7, direction: high}
+      - {facet: drive.initiative, weight: 0.5, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.5, direction: high}
+  g_defined:
+    label: "G defined"
+    text: >-
+      A stable sense of identity and direction that holds steady regardless
+      of who else is in the room. The cost is a rigidity about who one is
+      and where one is going that can be slow to take on genuinely new
+      context.
+    tags:
+      - {facet: core_essence.self_image, weight: 0.8, direction: high}
+      - {facet: relational.autonomy, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.4, direction: high}
+  heart_defined:
+    label: "Heart/Ego defined"
+    text: >-
+      Reliable access to willpower for keeping commitments and negotiating
+      resources in the material world. The cost is a tendency to tie
+      self-worth to whatever was promised and delivered, rather than to
+      anything steadier.
+    tags:
+      - {facet: growth_edges.self_worth, weight: 0.7, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.6, direction: high}
+      - {facet: drive.recognition, weight: 0.4, direction: high}
+  sacral_defined:
+    label: "Sacral defined"
+    text: >-
+      A consistent, self-renewing well of working energy that responds to
+      what's in front of it. The cost is that the body will keep supplying
+      that energy to work well past a healthy point unless something outside
+      it calls a stop.
+    tags:
+      - {facet: work_energy.endurance, weight: 0.8, direction: high}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.6, direction: high}
+      - {facet: drive.initiative, weight: 0.4, direction: low}
+  solar_plexus_defined:
+    label: "Solar plexus defined"
+    text: >-
+      A built-in emotional wave that colors every experience as it moves
+      from one felt state to the next, never staying flat for long. The cost
+      is that mood swings other people (and the person having them) can
+      mistake for a complete and final truth in the moment they hit.
+    tags:
+      - {facet: emotional.volatility, weight: 0.8, direction: high}
+      - {facet: emotional.processing, weight: 0.6, direction: high}
+      - {facet: decision_making.timing, weight: 0.5, direction: low}
+  spleen_defined:
+    label: "Spleen defined"
+    text: >-
+      A quiet, continuous stream of body-based instinct about what is and
+      isn't safe, running well below conscious awareness. The cost is that
+      the same constant vigilance can tip into a low hum of anxiety that
+      never fully settles.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.6, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  root_defined:
+    label: "Root defined"
+    text: >-
+      A steady internal hum of pressure that keeps pushing toward getting
+      things done and moving on to the next thing. The cost is that the
+      pressure doesn't switch off by itself, so genuine rest takes deliberate
+      effort rather than happening on its own.
+    tags:
+      - {facet: drive.intensity, weight: 0.7, direction: high}
+      - {facet: growth_edges.patience, weight: 0.6, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.4, direction: high}

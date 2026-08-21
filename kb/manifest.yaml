@@ -14,3 +14,36 @@ files:
            "horse", "goat", "monkey", "rooster", "dog", "pig"]
   chinese_zodiac/elements:
     keys: ["wood", "fire", "earth", "metal", "water"]
+  astrology/sun_signs:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  astrology/moon_signs:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  astrology/ascendants:
+    keys: ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+           "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+  human_design/types:
+    keys: ["generator", "manifesting_generator", "projector", "manifestor", "reflector"]
+  human_design/authorities:
+    keys: ["emotional", "sacral", "splenic", "ego_manifested", "ego_projected",
+           "self-projected", "mental_projected", "lunar"]
+  human_design/profiles:
+    keys: ["1_3", "1_4", "2_4", "2_5", "3_5", "3_6",
+           "4_6", "4_1", "5_1", "5_2", "6_2", "6_3"]
+  human_design/centers:
+    keys: ["head_defined", "ajna_defined", "throat_defined", "g_defined",
+           "heart_defined", "sacral_defined", "solar_plexus_defined",
+           "spleen_defined", "root_defined"]
+  gene_keys/keys:
+    keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
+           "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
+           "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35",
+           "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
+           "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57",
+           "58", "59", "60", "61", "62", "63", "64"]
+  kabbalah/sefirot:
+    keys: ["keter", "chokhmah", "binah", "chesed", "gevurah",
+           "tiferet", "netzach", "hod", "yesod", "malkhut"]
+  kabbalah/hebrew_months:
+    keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"]
