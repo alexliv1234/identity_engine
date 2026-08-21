@@ -21,6 +21,17 @@ that most directly contradicts that pitch — more than any bug, because a bug i
 and this would read as a misrepresentation. It is also the cheapest thing on this list to
 fix: one domain-literate pass over 78 short cells.
 
+**Context the reviewer surfaced, which the human reader needs up front:** the four pinned
+anchors sit *outside* the range the heuristic ever produces. `1-5`=9 and `2-6`=9 are the two
+highest values in the whole table, while no derived entry exceeds 8, and most `5-x` derived
+pairs score 2-4. So the four "curated" examples do not represent the model that generated the
+other 74 — the anchors and the derivation disagree about how generous the scale is. Decide which
+is right before reading the rest, or every cell will be judged against the wrong yardstick.
+
+The derivation itself is not incoherent: symmetry holds (one sorted-pair key per unordered pair)
+and the labels bucket monotonically into four text tiers. But labels 6 and 7 share identical
+boilerplate prose, so the text is coarser than the number it accompanies.
+
 **Stops being deferrable:** before the first paying customer or public deployment.
 
 **What "done" looks like:** a human who knows numerology reads all 78 cells, adjusts the
