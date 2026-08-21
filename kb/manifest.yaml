@@ -9,6 +9,10 @@ files:
     keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"]
   numerology/soul_urge:
     keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"]
+  numerology/personal_years:
+    keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"]
+  numerology/personal_months:
+    keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"]
   chinese_zodiac/animals:
     keys: ["rat", "ox", "tiger", "rabbit", "dragon", "snake",
            "horse", "goat", "monkey", "rooster", "dog", "pig"]
