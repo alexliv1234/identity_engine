@@ -46,6 +46,38 @@ def test_person_without_birth_time_round_trips(session, app_row):
     assert person.to_birth_input().birth_time is None
 
 
+@pytest.mark.parametrize(
+    ("stored", "expected"),
+    [
+        ("Aleph", "Aleph"),
+        ("  Aleph  ", "Aleph"),
+        ("   ", None),
+        (None, None),
+    ],
+)
+def test_hebrew_name_normalisation_round_trips(session, app_row, stored, expected):
+    """Whitespace-only and absent must both normalise to None (engine/types.py):
+
+    Kabbalah treats a blank hebrew_name as absent and derives one, changing
+    `input_quality.hebrew_name` from "provided" to "derived" and shifting
+    confidence. A row that stored "   " must not be indistinguishable from a
+    row that genuinely supplied one.
+    """
+    person = Person(
+        id=f"prs_heb_{stored!r}",
+        app_id=app_row.id,
+        full_name="X Y",
+        hebrew_name=stored,
+        birth_date=dt.date(2000, 1, 1),
+        lat=0.0,
+        lon=0.0,
+        tz="UTC",
+    )
+    session.add(person)
+    session.commit()
+    assert person.to_birth_input().hebrew_name == expected
+
+
 def test_profile_uniqueness_is_per_person_and_version(session, app_row):
     person = Person(
         id="prs_uniq",

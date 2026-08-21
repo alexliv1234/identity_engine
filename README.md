@@ -11,6 +11,10 @@ python3.12 -m venv .venv
 .venv/bin/pytest                      # Windows: .venv\Scripts\pytest
 ```
 
+Spec §6: Postgres in production, SQLite for dev and tests. `pip install .[postgres]`
+(or `.[dev]`, which already includes it) is required whenever `IDENTITY_DATABASE_URL`
+points at Postgres — a base install alone has no Postgres driver.
+
 ## Determinism guarantee
 
 Identical input plus identical engine/system versions produce byte-identical
