@@ -21,6 +21,12 @@ def _settings(**over):
         database_url="sqlite:///./unused.db",
         playground_enabled=False,
         eager_ephemeris_load=False,
+        # R74: create_app now wires CORSMiddleware on every build, which
+        # reads these two off whatever settings object get_settings()
+        # returns -- these fixtures monkeypatch that with a bare
+        # SimpleNamespace, so it needs both attributes too.
+        cors_allow_origins=[],
+        environment="production",
     )
     base.update(over)
     return SimpleNamespace(**base)

@@ -43,6 +43,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.db import create_all
 from api.errors import install_handlers
@@ -57,6 +58,18 @@ _EAGER_EPHEMERIS_DISABLED_WARNING = (
     "first chart-touching request instead of failing this deploy at boot. "
     "This flag is meant for tests; if this is a production deploy, unset it."
 )
+
+# task-8 controller amendment R74: cross-origin access is opt-in only, via
+# an explicit origin allowlist (Settings.cors_allow_origins), which defaults
+# to empty -- no cross-origin origin is allowed until an operator names one.
+# This regex additionally allows localhost/127.0.0.1 at any port, but ONLY
+# when Settings.environment == "development", so a developer running the
+# playground locally against a locally running API does not have to
+# enumerate every dev server port. Never combined with allow_credentials=
+# True: auth here is a header-carried API key, not a cookie, so no
+# credentialed CORS mode is needed, and that pairing (wildcard-ish origins +
+# credentials) is exactly the misconfiguration R74 calls out.
+_DEV_LOCALHOST_ORIGIN_REGEX = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
 
 class PostgresDriverMissing(RuntimeError):
@@ -123,6 +136,20 @@ def create_app(*, eager_ephemeris: bool | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     install_handlers(app)
+
+    # R74: deny cross-origin by default. allow_credentials=False always --
+    # see the module-level comment on _DEV_LOCALHOST_ORIGIN_REGEX for why a
+    # credentialed CORS mode is never appropriate here.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allow_origins,
+        allow_origin_regex=(
+            _DEV_LOCALHOST_ORIGIN_REGEX if settings.environment == "development" else None
+        ),
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
 
     from api.routers import compatibility, context, meta, persons, timing  # noqa: PLC0415
 
