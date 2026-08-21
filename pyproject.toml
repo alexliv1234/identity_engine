@@ -84,3 +84,11 @@ extend-exclude = ["docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection pattern is exactly the "function call as a
+# sentinel default" shape B008 warns about -- `Depends(...)` is only ever
+# evaluated once, by design, and FastAPI recognises the sentinel and resolves
+# it per-request rather than reusing the return value. That is the documented,
+# idiomatic use, not the mutable-default footgun the rule exists to catch.
+extend-immutable-calls = ["fastapi.Depends"]
