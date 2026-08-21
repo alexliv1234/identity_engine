@@ -8,13 +8,22 @@ dependencies = [
     "Unidecode>=1.3",
     "lunardate>=0.3.0",
     "tzdata>=2024.1; sys_platform == 'win32'",
-    # Upper-bounded deliberately: engine/ephemeris/skyfield_adapter.py calls
-    # timescale(builtin=True), which bakes skyfield's bundled Delta-T and
-    # leap-second tables into TT->UT1->RAMC->every Placidus house cusp. A
-    # minor-version upgrade could revise those tables and silently shift
-    # cusps for identical input, breaking the byte-identical determinism
-    # guarantee in README.md. A full lockfile would pin this more precisely
-    # than a version range can; this range is the interim guard.
+    # engine/ephemeris/skyfield_adapter.py calls timescale(builtin=True),
+    # which bakes skyfield's bundled Delta-T and leap-second tables into
+    # TT->UT1->RAMC->every Placidus house cusp. A *minor* release can revise
+    # those tables and shift cusps for identical input.
+    #
+    # This range does not prevent that, and the comment here used to imply it
+    # did. The <2.0 bound only rules out a major API break; every table
+    # revision the paragraph above worries about ships inside it. The real
+    # guard is detection, not prevention: tests/test_golden.py recomputes all
+    # eleven fixtures byte-for-byte, so a table revision that moves a single
+    # cusp fails the suite loudly on the upgrade commit, which is where a
+    # human can look at the diff and decide. Deliberately not tightened to
+    # ==1.55: a pin that blocks security and correctness fixes, on a
+    # dependency whose drift is already caught, buys nothing. A lockfile is
+    # the right tool for reproducing an exact environment; this range plus
+    # the golden suite is the interim.
     "skyfield>=1.49,<2.0",
     "pyluach>=2.2",
 ]
