@@ -51,7 +51,7 @@ def get_context(
 
     person = service.load_person(session, app, person_id)
     profile = service.get_or_compute_profile(session, person)
-    bundle = build_context(profile, vocabulary=vocabulary)
+    bundle = build_context(profile, vocabulary=vocabulary, person_id=person_id)
     if format == "json":
         return bundle
     return PlainTextResponse(bundle["text"])

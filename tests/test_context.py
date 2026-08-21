@@ -1,10 +1,15 @@
+import logging
+import re
+
 import pytest
 
 from engine.context import (
+    ESOTERIC_PATTERN,
     ESOTERIC_TERMS,
     MAX_FACETS_PER_SECTION,
     SECTIONS,
     TOKEN_BUDGET,
+    _confidence_note,
     build_context,
     estimate_tokens,
 )
@@ -38,8 +43,8 @@ def test_context_fits_the_budget_for_every_fixture():
 
 def test_plain_vocabulary_contains_no_esoteric_terminology(profile):
     lowered = build_context(profile)["text"].lower()
-    for term in ESOTERIC_TERMS:
-        assert term not in lowered, term
+    match = ESOTERIC_PATTERN.search(lowered)
+    assert match is None, match.group() if match else None
 
 
 def test_plain_vocabulary_contains_no_esoteric_terminology_for_every_fixture():
@@ -48,20 +53,54 @@ def test_plain_vocabulary_contains_no_esoteric_terminology_for_every_fixture():
     likely to leak a raw-layer value into the plain text."""
     for name, inp in sorted(FIXTURES.items()):
         lowered = build_context(build_profile(inp))["text"].lower()
-        for term in ESOTERIC_TERMS:
-            assert term not in lowered, f"{name}: {term}"
+        match = ESOTERIC_PATTERN.search(lowered)
+        assert match is None, f"{name}: {match.group() if match else None}"
 
 
 def test_esoteric_guard_would_catch_a_leak():
     """Proves the scan above is not vacuous: ESOTERIC_TERMS is not merely
     disjoint from everything the generator could ever emit. Construct text
     the way a leaking template might (an esoteric raw value spliced into an
-    otherwise-plain sentence) and confirm the same assertion pattern used
-    above actually fails against it."""
+    otherwise-plain sentence) and confirm the same guard used above actually
+    fires against it."""
     leaked = "Identity snapshot — self-assured, outward, singular (Sun in Sagittarius)."
-    with pytest.raises(AssertionError):
-        for term in ESOTERIC_TERMS:
-            assert term not in leaked.lower(), term
+    assert ESOTERIC_PATTERN.search(leaked.lower()) is not None
+
+
+def test_word_boundary_does_not_fire_on_words_that_merely_contain_a_restored_term():
+    """Regression for the bug that got 'rat', 'ox', 'dog', 'pig' and 'yin'
+    deleted from ESOTERIC_TERMS entirely (ruling R56): under substring
+    containment, 'rat' fired on 'deliberation' and 'generator' because both
+    merely *contain* the letters r-a-t, not the word 'rat'. Restoring 'rat'
+    to the term list must not reintroduce that false positive now that
+    matching is word-boundary based -- checked here against the isolated
+    'rat' alternative, built the exact same way ESOTERIC_PATTERN builds it.
+
+    ('generator' is separately, correctly, caught by the full
+    ESOTERIC_PATTERN for an unrelated reason: it is itself a listed Human
+    Design term (a plain-vocabulary leak of chart jargon), independent of
+    the 'rat' substring collision. That is a true positive, not the
+    collision under test here, so this test isolates just the 'rat'
+    alternative rather than asserting on ESOTERIC_PATTERN as a whole.)
+    """
+    rat_only = re.compile(r"\brats?\b", re.IGNORECASE)
+    assert rat_only.search("deliberation") is None
+    assert rat_only.search("generator") is None
+
+
+def test_esoteric_pattern_catches_restored_terms_at_word_boundaries():
+    """The other half of ruling R56: word-boundary matching must still catch
+    the restored terms, including through hyphenation and pluralization."""
+    assert ESOTERIC_PATTERN.search("Year of the Rat")
+    assert ESOTERIC_PATTERN.search("dragon-like")  # hyphen must not defeat \b
+    assert ESOTERIC_PATTERN.search("the Rats")  # plural
+
+
+def test_restored_chinese_zodiac_terms_are_present():
+    """Ruling R56 requirement #1: 'rat', 'ox', 'dog', 'pig' and 'yin' must be
+    back in ESOTERIC_TERMS -- deleting them removed the guard's coverage of
+    exactly the terms it exists to catch."""
+    assert {"rat", "ox", "dog", "pig", "yin"} <= ESOTERIC_TERMS
 
 
 def test_plain_vocabulary_names_no_systems(profile):
@@ -187,6 +226,110 @@ def test_budget_trimming_drops_whole_facets_before_whole_sections():
         assert line.strip().endswith(".")
     assert bundle["json"]
     assert any(len(lines) < MAX_FACETS_PER_SECTION for lines in bundle["json"].values())
+
+
+def test_trimming_floors_at_one_section_one_facet_and_warns(caplog):
+    """R57: a single facet whose label alone exceeds the token budget must
+    not be trimmed away to an empty bundle -- the old loop had no floor and
+    fell through to `sections.pop()` until `sections == []`, returning
+    `{"text": "", "json": {}, "tokens": 0}`. The trimming loop now floors at
+    one section carrying one facet; since that floor block still exceeds
+    the budget here, build_context must return it anyway (non-empty text
+    AND non-empty json) and log a warning naming the person identifier and
+    the actual token count against the budget."""
+
+    def oversized_facet(label: str) -> dict:
+        return {
+            "facet": "x.solo",
+            "label": label + " " + ("padding word " * 200),
+            "score": 1.0,
+            "direction": "direction",
+            "convergence": 0.333333,
+        }
+
+    profile = {
+        "synthesis": {
+            "dimensions": {
+                "core_essence": {"facets": [oversized_facet("solo facet")]},
+            }
+        }
+    }
+
+    # Sanity check: the single facet, alone, already exceeds the budget --
+    # so the floor block cannot possibly fit, and the warning path must fire.
+    assert estimate_tokens(oversized_facet("solo facet")["label"]) > TOKEN_BUDGET
+
+    with caplog.at_level(logging.WARNING, logger="engine.context"):
+        bundle = build_context(profile, person_id="person-solo-facet")
+
+    assert bundle["text"].strip()
+    assert bundle["json"]
+    assert bundle["tokens"] > TOKEN_BUDGET  # the floor block still doesn't fit
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "person-solo-facet" in message
+    assert str(bundle["tokens"]) in message
+    assert str(TOKEN_BUDGET) in message
+
+
+def test_trimming_pops_sections_down_to_the_floor_when_every_section_is_oversized(caplog):
+    """R57's second reviewer-verified reproduction: not one oversized facet
+    but every section still oversized even trimmed to a single facet each,
+    which forces the loop to pop whole sections -- not just trim facets --
+    all the way down to the one-section-one-facet floor. Must still return
+    a non-empty bundle rather than the previous empty one."""
+
+    def oversized_facet(dim_id: str, i: int) -> dict:
+        return {
+            "facet": f"x.{dim_id}.{i}",
+            "label": f"{dim_id} facet {i} " + ("padding word " * 200),
+            "score": 1.0,
+            "direction": f"direction-{i}",
+            "convergence": 0.333333,
+        }
+
+    profile = {
+        "synthesis": {
+            "dimensions": {
+                dim_id: {
+                    "facets": [oversized_facet(dim_id, i) for i in range(MAX_FACETS_PER_SECTION)]
+                }
+                for dim_id, _heading, _key in SECTIONS
+            }
+        }
+    }
+
+    with caplog.at_level(logging.WARNING, logger="engine.context"):
+        bundle = build_context(profile, person_id="person-all-oversized")
+
+    assert bundle["text"].strip()
+    assert bundle["json"]
+    # Proof the loop popped whole sections, not just facets: only the
+    # highest-priority section (core_essence) survives to the floor.
+    assert len(bundle["json"]) == 1
+    assert "identity_snapshot" in bundle["json"]
+    assert bundle["tokens"] > TOKEN_BUDGET
+    assert caplog.records
+
+
+@pytest.mark.parametrize(
+    "convergence, expected",
+    [
+        (0.8333, " (consistently indicated)"),
+        (0.6667, " (consistently indicated)"),
+        (0.6666, " (repeatedly indicated)"),
+        (0.5, " (repeatedly indicated)"),
+        (0.4999, ""),
+        (0.1667, " (a single indicator)"),
+    ],
+)
+def test_confidence_note_band_edges_are_frozen(convergence, expected):
+    """R58: three bands, not two. The old >= 0.5 threshold called a bare
+    3-of-6 tie "consistently indicated", which overclaims -- "consistently"
+    implies a majority, not a split. Exact boundary values (not
+    approximations) so a future edit to the thresholds goes red here rather
+    than drifting silently."""
+    assert _confidence_note(convergence) == expected
 
 
 def test_context_endpoint_returns_text_by_default(client, auth_headers):

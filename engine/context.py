@@ -20,7 +20,11 @@ wants the chart specifics.
 
 from __future__ import annotations
 
+import logging
 import math
+import re
+
+logger = logging.getLogger(__name__)
 
 TOKEN_BUDGET = 350
 
@@ -84,14 +88,18 @@ ESOTERIC_TERMS: frozenset[str] = frozenset(
         "expression number",
         "soul urge",
         "master number",
-        # Chinese zodiac. "rat", "ox", "dog", "pig" and "yin" are deliberately
-        # excluded even though they're valid animal/polarity terms: as bare
-        # substrings they collide with ordinary English ("deliberation" and
-        # "generator" both contain "rat"; "-ying" words like "saying" contain
-        # "yin"). A substring-based guard can only be as safe as its terms are
-        # distinctive -- the per-fixture sweep in tests/test_context.py is
-        # what caught this collision.
+        # Chinese zodiac (ruling R56). "rat", "ox", "dog", "pig" and "yin" were
+        # briefly deleted here because *substring containment* made "rat"
+        # fire on "deliberation" and "generator". That fix was backwards --
+        # it removed the guard's coverage of exactly the terms it exists to
+        # catch, on the accident that today's KB never emits them, not on any
+        # guarantee that a future `kb/facets.yaml` edit or a `raw`-reading
+        # code path never will. The real bug was the matching strategy, not
+        # these five terms; word-boundary matching (`ESOTERIC_PATTERN` below)
+        # fixes the collision without giving up coverage.
         "chinese zodiac",
+        "rat",
+        "ox",
         "tiger",
         "rabbit",
         "dragon",
@@ -100,6 +108,9 @@ ESOTERIC_TERMS: frozenset[str] = frozenset(
         "goat",
         "monkey",
         "rooster",
+        "dog",
+        "pig",
+        "yin",
         "yang",
         # Kabbalah
         "kabbalah",
@@ -117,6 +128,31 @@ ESOTERIC_TERMS: frozenset[str] = frozenset(
         "netzach",
         "malkuth",
     }
+)
+
+# Word-boundary alternation over ESOTERIC_TERMS, with an optional trailing
+# "s" so a plural still trips it (e.g. "the Rats", "dragons"). Compiled once
+# at module import rather than once per term per call, since the guard runs
+# on every request. Case-insensitive: the plain block's casing is not a
+# defense.
+#
+# `\b` treats hyphens, punctuation and string boundaries as word breaks, so
+# "dragon-like" and "Year of the Rat" both trip on the bare term while
+# "deliberation" and "generator" -- which merely *contain* "rat" as
+# characters, not as a word -- do not (that collision, under naive substring
+# containment, is exactly what caused the five terms above to be deleted;
+# see the Chinese zodiac comment).
+#
+# Known gap, accepted: irregular plurals ("oxen") are not covered by the
+# trailing `s?`. Not fixed here because the failure mode is asymmetric --
+# leaked chart jargon in the singular or regularly-plural form still reads
+# as a proper noun/term of art to a plain-vocabulary reader and gets caught;
+# "oxen" specifically slipping through reads as an ordinary plural noun, not
+# as chart jargon, which is a much smaller leak than what the guard exists
+# to catch.
+ESOTERIC_PATTERN: re.Pattern[str] = re.compile(
+    r"\b(?:" + "|".join(re.escape(term) for term in sorted(ESOTERIC_TERMS)) + r")s?\b",
+    re.IGNORECASE,
 )
 
 # (dimension id, heading, json key), in spec §5.2 order. Deliberately five of
@@ -138,12 +174,20 @@ MAX_FACETS_PER_SECTION = 3
 # applicable system agrees on rarely clears ~0.83 (5/6) in practice, since no
 # facet in the fixture suite is ever addressed by all six systems at once.
 # Reading these thresholds against that scale (not against a 0-1 "percent
-# agreement" intuition) is what keeps the hedge honest:
-#   - >= 0.5: at least half of the applicable systems agree -- flagged as
-#     corroborated.
+# agreement" intuition) is what keeps the hedge honest. Three bands
+# (ruling R58 -- the original two-band version overclaimed "consistently
+# indicated" at a bare 3-of-6 tie):
+#   - >= 0.6667: at least 4 of 6 applicable systems agree -- a genuine
+#     majority, not a tie. Reachable: the observed maximum across the
+#     fixture suite is 0.833 (5/6); nothing in the suite reaches 6/6.
+#   - >= 0.5 and < 0.6667: at least half agree but not more -- e.g. exactly
+#     3 of 6, a tie. "(repeatedly indicated)" claims only that more than one
+#     system pointed there, which is exactly what is true at a tie; it does
+#     not claim consensus.
 #   - <  0.25: one applicable system (or two, out of five-plus) -- flagged as
 #     a single indicator, so the assistant does not over-index on it.
 #   - in between: the common case, left unmarked.
+CONVERGENCE_CONSISTENT = 0.6667
 CONVERGENCE_CORROBORATED = 0.5
 CONVERGENCE_SINGLE_SOURCE = 0.25
 
@@ -156,8 +200,10 @@ def estimate_tokens(text: str) -> int:
 
 
 def _confidence_note(convergence: float) -> str:
-    if convergence >= CONVERGENCE_CORROBORATED:
+    if convergence >= CONVERGENCE_CONSISTENT:
         return " (consistently indicated)"
+    if convergence >= CONVERGENCE_CORROBORATED:
+        return " (repeatedly indicated)"
     if convergence < CONVERGENCE_SINGLE_SOURCE:
         return " (a single indicator)"
     return ""
@@ -188,7 +234,9 @@ def _esoteric_headline(profile: dict) -> str:
     return "; ".join(bits)
 
 
-def build_context(profile: dict, vocabulary: str = "plain") -> dict:
+def build_context(
+    profile: dict, vocabulary: str = "plain", *, person_id: str | None = None
+) -> dict:
     dimensions = profile.get("synthesis", {}).get("dimensions", {})
 
     sections: list[tuple[str, str, list[str]]] = []
@@ -214,8 +262,20 @@ def build_context(profile: dict, vocabulary: str = "plain") -> dict:
     # rendered text fits the budget. Never truncate mid-sentence: each drop
     # removes a whole facet line, so every render() call above is still a
     # set of complete sentences.
+    #
+    # Floored at one section carrying one facet (ruling R57): trimming below
+    # that point is what used to fall through to `sections.pop()` until
+    # `sections == []`, returning `{"text": "", "json": {}, "tokens": 0}`.
+    # The token budget is a promise about size; "never truncate
+    # mid-sentence" is a promise about usability. An empty string keeps the
+    # first promise by breaking the second completely -- a caller can detect
+    # and handle a marginally oversized bundle, but it cannot do anything
+    # with an empty one. So if the floor block still exceeds the budget, we
+    # return it anyway and log a warning instead of erasing it.
     text = render(sections)
     while estimate_tokens(text) > TOKEN_BUDGET and sections:
+        if len(sections) == 1 and len(sections[0][2]) == 1:
+            break
         for index in range(len(sections) - 1, -1, -1):
             heading, key, lines = sections[index]
             if len(lines) > 1:
@@ -225,8 +285,18 @@ def build_context(profile: dict, vocabulary: str = "plain") -> dict:
             sections.pop()
         text = render(sections)
 
+    tokens = estimate_tokens(text)
+    if sections and tokens > TOKEN_BUDGET:
+        logger.warning(
+            "context bundle for %s exceeds token budget even at the minimum "
+            "size of one section with one facet: %d tokens > %d budget",
+            person_id if person_id is not None else "<unknown>",
+            tokens,
+            TOKEN_BUDGET,
+        )
+
     return {
         "text": text,
         "json": {key: lines for _heading, key, lines in sections},
-        "tokens": estimate_tokens(text),
+        "tokens": tokens,
     }
