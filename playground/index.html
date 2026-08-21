@@ -304,13 +304,13 @@
     <div id="heroClaim"></div>
   </div>
   <div id="noTimeNotice" class="notice" hidden></div>
-  <h2 style="margin-top:1.4rem">All nine dimensions, all 32 traits</h2>
+  <h2 id="traitsHeading" style="margin-top:1.4rem"></h2>
   <div id="dimensions"></div>
 </section>
 
 <section id="tensionsSummary" hidden></section>
 
-<section>
+<section id="rawSection" hidden>
   <h2>Raw systems</h2>
   <div id="rawLayer"></div>
 </section>
@@ -383,6 +383,60 @@ function fillTemplate(template, params) {
   return out;
 }
 
+/* >>> PURE_PROFILE_HELPERS_START -- extracted verbatim by
+   tests/test_playground.py to execute under Node without a DOM. Nothing in
+   this block may reference `document`, `window`, or `$`; it may only read
+   from a `profile` (or `report`) object and return plain values. */
+
+// kb/facets.yaml defines a fixed taxonomy: nine dimensions, 32 facets in
+// total, regardless of what any single profile actually has data for.
+const TOTAL_DIMENSIONS = 9;
+const TOTAL_FACETS = 32;
+
+function applicableSystemCount(profile) {
+  return Object.values(profile.raw || {}).filter((p) => p && p.confidence > 0).length;
+}
+
+function allFacets(profile) {
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+  const out = [];
+  for (const dim of Object.values(dims)) {
+    for (const facet of dim.facets) out.push(facet);
+  }
+  return out;
+}
+
+// fix round 1 (finding 2): a profile only carries a synthesised facet when
+// at least one applicable system actually tagged it (engine/synthesis.py
+// skips a facet whose accumulated weight is zero) -- so the number of
+// facets a real profile renders is routinely less than the taxonomy's
+// fixed 32, and that is correct engine behaviour, not a bug. The heading
+// must say what was actually rendered and name the gap, never claim "all
+// 32" while showing fewer -- on a product whose whole pitch is reporting
+// what the systems actually said rather than smoothing it, that mismatch
+// is the worst kind of copy error.
+function traitsHeadingText(profile) {
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+  const dimensionCount = Object.keys(dims).length;
+  const facetCount = allFacets(profile).length;
+  const missing = TOTAL_FACETS - facetCount;
+
+  const dimensionPart =
+    dimensionCount === TOTAL_DIMENSIONS
+      ? "all nine dimensions"
+      : dimensionCount + " of " + TOTAL_DIMENSIONS + " dimensions";
+
+  if (missing <= 0) {
+    return dimensionPart + ", all " + TOTAL_FACETS + " traits";
+  }
+
+  const gapNote =
+    missing === 1 ? "one had no system speak to it" : missing + " had no system speak to them";
+  return dimensionPart + ", " + facetCount + " of " + TOTAL_FACETS + " traits — " + gapNote;
+}
+
+/* <<< PURE_PROFILE_HELPERS_END */
+
 /* ---------- API base + key resolution (R73) ----------
    Precedence: (1) the API base URL field, which reflects whatever was
    persisted to sessionStorage on a previous visit; (2) a build/host
@@ -445,19 +499,6 @@ $("noBirthTime").addEventListener("change", () => {
 
 /* ---------- rendering: profile ---------- */
 
-function applicableSystemCount(profile) {
-  return Object.values(profile.raw || {}).filter((p) => p && p.confidence > 0).length;
-}
-
-function allFacets(profile) {
-  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
-  const out = [];
-  for (const dim of Object.values(dims)) {
-    for (const facet of dim.facets) out.push(facet);
-  }
-  return out;
-}
-
 function renderHero(profile) {
   const target = $("heroClaim");
   target.textContent = "";
@@ -487,6 +528,10 @@ function renderHero(profile) {
     " systems agree — the widest agreement anywhere in this profile.";
 
   target.append(claim, sub);
+}
+
+function renderTraitsHeading(profile) {
+  $("traitsHeading").textContent = traitsHeadingText(profile);
 }
 
 function renderNoTimeNotice(profile) {
@@ -611,6 +656,7 @@ function renderTensionsSummary(profile) {
 }
 
 function renderRaw(profile) {
+  const section = $("rawSection");
   const target = $("rawLayer");
   target.textContent = "";
   for (const [system, payload] of Object.entries(profile.raw || {})) {
@@ -630,6 +676,7 @@ function renderRaw(profile) {
     }
     target.append(row);
   }
+  section.hidden = false;
 }
 
 /* ---------- rendering: compatibility ---------- */
@@ -747,6 +794,7 @@ $("buildProfile").addEventListener("click", async () => {
     const profile = created.profile;
 
     renderHero(profile);
+    renderTraitsHeading(profile);
     renderNoTimeNotice(profile);
     renderDimensions(profile);
     renderTensionsSummary(profile);
