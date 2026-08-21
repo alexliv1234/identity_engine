@@ -24,6 +24,8 @@ import logging
 import math
 import re
 
+from engine.synthesis import ROUND
+
 logger = logging.getLogger(__name__)
 
 TOKEN_BUDGET = 350
@@ -137,11 +139,17 @@ ESOTERIC_TERMS: frozenset[str] = frozenset(
 # defense.
 #
 # `\b` treats hyphens, punctuation and string boundaries as word breaks, so
-# "dragon-like" and "Year of the Rat" both trip on the bare term while
-# "deliberation" and "generator" -- which merely *contain* "rat" as
-# characters, not as a word -- do not (that collision, under naive substring
-# containment, is exactly what caused the five terms above to be deleted;
-# see the Chinese zodiac comment).
+# "dragon-like" and "Year of the Rat" both trip on the bare term, while
+# "deliberation" -- which merely *contains* "rat" as characters, not as a
+# word -- does not (that collision, under naive substring containment, is
+# exactly what caused the five terms above to be deleted; see the Chinese
+# zodiac comment). "generator" is a different case from "deliberation", not
+# an example of the same one: it still trips the guard, correctly, because
+# it is itself a listed Human Design term above, not because of the old
+# "rat" substring bug -- see
+# test_word_boundary_does_not_fire_on_words_that_merely_contain_a_restored_term
+# in tests/test_context.py, which isolates the two so neither claim goes
+# untested.
 #
 # Known gap, accepted: irregular plurals ("oxen") are not covered by the
 # trailing `s?`. Not fixed here because the failure mode is asymmetric --
@@ -169,25 +177,30 @@ SECTIONS: tuple[tuple[str, str, str], ...] = (
 MAX_FACETS_PER_SECTION = 3
 
 # Convergence is the share of *applicable* systems agreeing on a facet's
-# direction (engine/synthesis.py). With six systems live, an unremarkable
-# single-source facet already reads around 0.17 (1/6), and even a facet every
-# applicable system agrees on rarely clears ~0.83 (5/6) in practice, since no
-# facet in the fixture suite is ever addressed by all six systems at once.
-# Reading these thresholds against that scale (not against a 0-1 "percent
-# agreement" intuition) is what keeps the hedge honest. Three bands
-# (ruling R58 -- the original two-band version overclaimed "consistently
-# indicated" at a bare 3-of-6 tie):
-#   - >= 0.6667: at least 4 of 6 applicable systems agree -- a genuine
-#     majority, not a tie. Reachable: the observed maximum across the
-#     fixture suite is 0.833 (5/6); nothing in the suite reaches 6/6.
-#   - >= 0.5 and < 0.6667: at least half agree but not more -- e.g. exactly
-#     3 of 6, a tie. "(repeatedly indicated)" claims only that more than one
+# direction (engine/synthesis.py), rounded to `engine.synthesis.ROUND` (6
+# decimals) by the producer -- so a genuine 4-of-6 facet is never exactly
+# 2/3, it is `round(4 / 6, ROUND) == 0.666667`. With six systems live, an
+# unremarkable single-source facet already reads around 0.166667 (1/6), and
+# even a facet every applicable system agrees on rarely clears ~0.833333
+# (5/6) in practice, since no facet in the fixture suite is ever addressed
+# by all six systems at once. Reading these thresholds against that scale
+# (not against a 0-1 "percent agreement" intuition) is what keeps the hedge
+# honest. Three bands (ruling R58 -- the original two-band version
+# overclaimed "consistently indicated" at a bare 3-of-6 tie):
+#   - >= 2/3 (rounded the same way the producer rounds, so the two can never
+#     drift apart -- ruling R58 fix-2, replacing a hand-typed 0.6667 that
+#     was *below* every real 4-of-6 value and therefore never fired): at
+#     least 4 of 6 applicable systems agree -- a genuine majority, not a
+#     tie. Reachable: the observed maximum across the fixture suite is
+#     0.833333 (5/6); nothing in the suite reaches 6/6.
+#   - >= 0.5 and < 2/3: at least half agree but not more -- e.g. exactly 3 of
+#     6, a tie. "(repeatedly indicated)" claims only that more than one
 #     system pointed there, which is exactly what is true at a tie; it does
 #     not claim consensus.
 #   - <  0.25: one applicable system (or two, out of five-plus) -- flagged as
 #     a single indicator, so the assistant does not over-index on it.
 #   - in between: the common case, left unmarked.
-CONVERGENCE_CONSISTENT = 0.6667
+CONVERGENCE_CONSISTENT = round(2 / 3, ROUND)
 CONVERGENCE_CORROBORATED = 0.5
 CONVERGENCE_SINGLE_SOURCE = 0.25
 
@@ -286,7 +299,19 @@ def build_context(
         text = render(sections)
 
     tokens = estimate_tokens(text)
-    if sections and tokens > TOKEN_BUDGET:
+    # Two distinct reasons the bundle can come up short, warned differently
+    # (ruling R57 fix-3): an EMPTY bundle here means the synthesis layer
+    # resolved no facets at all for this profile -- there was never anything
+    # to trim, so "" is the honest answer (unlike the R57 floor case below,
+    # where trimming destroyed content that existed). Still worth a warning,
+    # because it used to happen silently. We do not synthesise filler text
+    # to avoid it.
+    if not text:
+        logger.warning(
+            "context bundle for %s resolved no facets to include; returning an empty bundle",
+            person_id if person_id is not None else "<unknown>",
+        )
+    elif tokens > TOKEN_BUDGET:
         logger.warning(
             "context bundle for %s exceeds token budget even at the minimum "
             "size of one section with one facet: %d tokens > %d budget",

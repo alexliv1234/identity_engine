@@ -312,23 +312,55 @@ def test_trimming_pops_sections_down_to_the_floor_when_every_section_is_oversize
     assert caplog.records
 
 
+def test_empty_profile_returns_empty_bundle_but_warns(caplog):
+    """R57 fix-3: a profile that resolves no facets at all genuinely has
+    nothing to say, so an empty `text`/`json` is the honest answer -- unlike
+    the floor case above, where trimming destroys content that existed. What
+    was wrong is that this used to happen silently. Must still warn, naming
+    the profile, and must NOT synthesise filler text to avoid the warning."""
+    profile = {"synthesis": {"dimensions": {}}}
+
+    with caplog.at_level(logging.WARNING, logger="engine.context"):
+        bundle = build_context(profile, person_id="empty-profile")
+
+    assert bundle == {"text": "", "json": {}, "tokens": 0}
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "empty-profile" in message
+
+
 @pytest.mark.parametrize(
     "convergence, expected",
     [
-        (0.8333, " (consistently indicated)"),
-        (0.6667, " (consistently indicated)"),
-        (0.6666, " (repeatedly indicated)"),
-        (0.5, " (repeatedly indicated)"),
-        (0.4999, ""),
-        (0.1667, " (a single indicator)"),
+        # Every value below is one the engine can actually emit: k / n for
+        # n <= 6 applicable systems, rounded to engine.synthesis.ROUND (6
+        # decimals). A prior version of this test froze 0.6666 and 0.6667 --
+        # values convergence can NEVER take -- so it stayed green through a
+        # production bug where the real 4-of-6 value, 0.666667, rendered
+        # "(repeatedly indicated)" instead of "(consistently indicated)".
+        (0.166667, " (a single indicator)"),  # 1/6
+        (0.2, " (a single indicator)"),  # 1/5
+        (0.25, ""),  # 1/4 -- exactly the single-indicator/unmarked boundary
+        (0.333333, ""),  # 1/3 or 2/6
+        (0.4, ""),  # 2/5
+        (0.4999, ""),  # synthetic, just below the repeatedly-indicated edge
+        (0.5, " (repeatedly indicated)"),  # 1/2 or 3/6 -- the tie R58 exists for
+        (0.6, " (repeatedly indicated)"),  # 3/5
+        (0.666666, " (repeatedly indicated)"),  # synthetic, just below 2/3
+        (0.666667, " (consistently indicated)"),  # 2/3 or 4/6 -- the value this fix restores
+        (0.75, " (consistently indicated)"),  # 3/4
+        (0.8, " (consistently indicated)"),  # 4/5
+        (0.833333, " (consistently indicated)"),  # 5/6, the observed fixture-suite max
+        (1.0, " (consistently indicated)"),  # 6/6, unreached in the fixture suite
     ],
 )
 def test_confidence_note_band_edges_are_frozen(convergence, expected):
     """R58: three bands, not two. The old >= 0.5 threshold called a bare
     3-of-6 tie "consistently indicated", which overclaims -- "consistently"
-    implies a majority, not a split. Exact boundary values (not
-    approximations) so a future edit to the thresholds goes red here rather
-    than drifting silently."""
+    implies a majority, not a split. Pinned against values the engine
+    actually emits (see comment above), not arbitrary literals, so a future
+    edit to the thresholds -- or a future edit to engine.synthesis.ROUND --
+    goes red here rather than drifting silently."""
     assert _confidence_note(convergence) == expected
 
 
