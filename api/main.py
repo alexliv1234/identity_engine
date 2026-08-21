@@ -20,11 +20,24 @@ the first request (Plan 3 review, task-2 corrections 2 & 3):
 Both checks are opt-out for tests via `create_app(eager_ephemeris=...)` — see
 that parameter's docstring below for why an *unconditional* eager load would
 make the test suite fragile rather than correct.
+
+Task-2 review, finding 1: the ephemeris guard has a legitimate opt-out
+(`eager_ephemeris=False`, used by tests) and an illegitimate one (an operator
+setting `IDENTITY_EAGER_EPHEMERIS_LOAD=false` in production to silence a
+failing deploy). Both reach `create_app` as "don't load eagerly", but only the
+first is supposed to happen quietly. `create_app` distinguishes them by
+*how* eager-loading was turned off: an explicit `eager_ephemeris=False`
+argument is the caller (tests) opting out on purpose, so it stays silent;
+`eager_ephemeris=None` falling through to a `Settings.eager_ephemeris_load`
+that is `False` can only mean the environment variable was set, since the
+field's own default is `True` — that path logs a loud startup warning naming
+exactly what stopped being checked.
 """
 
 from __future__ import annotations
 
 import importlib.util
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -34,6 +47,16 @@ from fastapi import FastAPI
 from api.db import create_all
 from api.errors import install_handlers
 from api.settings import get_settings
+
+logger = logging.getLogger(__name__)
+
+_EAGER_EPHEMERIS_DISABLED_WARNING = (
+    "IDENTITY_EAGER_EPHEMERIS_LOAD=false: the ephemeris will NOT be validated "
+    "at startup. A missing or misconfigured kernel file will boot healthy, "
+    "pass /health, and only surface as EphemerisDataMissing on a customer's "
+    "first chart-touching request instead of failing this deploy at boot. "
+    "This flag is meant for tests; if this is a production deploy, unset it."
+)
 
 
 class PostgresDriverMissing(RuntimeError):
@@ -67,8 +90,13 @@ def create_app(*, eager_ephemeris: bool | None = None) -> FastAPI:
     `tests/conftest.py`'s `client` fixture passes `eager_ephemeris=False` for
     exactly that reason; production leaves this `None` and gets the real
     startup guard from correction 2.
+
+    That argument is also how a deliberate test opt-out is told apart from an
+    operator quietly defeating the guard via the environment: see the module
+    docstring's "Task-2 review, finding 1" note. Only the latter path logs.
     """
     settings = get_settings()
+    disabled_via_environment = eager_ephemeris is None and not settings.eager_ephemeris_load
     should_load_ephemeris = (
         settings.eager_ephemeris_load if eager_ephemeris is None else eager_ephemeris
     )
@@ -81,6 +109,8 @@ def create_app(*, eager_ephemeris: bool | None = None) -> FastAPI:
             from engine.ephemeris import get_ephemeris  # noqa: PLC0415
 
             get_ephemeris()
+        elif disabled_via_environment:
+            logger.warning(_EAGER_EPHEMERIS_DISABLED_WARNING)
         yield
 
     app = FastAPI(

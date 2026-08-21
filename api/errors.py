@@ -43,14 +43,25 @@ def error_response(code: ErrorCode, message: str, field: str | None, status: int
 
 def _strip_body_loc(exc: RequestValidationError) -> list[dict]:
     """FastAPI's `RequestValidationError.errors()` prefixes `loc` with the
-    request part the field came from (`"body"`, `"query"`, ...). That prefix
-    is FastAPI wiring, not part of the field name `from_validation_error`'s
-    field->code fallback (`engine.errors._FIELD_FALLBACK`) is keyed on, so it
-    is stripped before handing the errors to the engine's translator.
+    request part the field came from (`("body", ...)`, `("query", ...)`,
+    ...). That leading marker is FastAPI wiring, not part of the field name
+    `from_validation_error`'s field->code fallback
+    (`engine.errors._FIELD_FALLBACK`) is keyed on, so it is stripped before
+    handing the errors to the engine's translator.
+
+    Review finding (task-2 fix round): only the *leading* element is a
+    location marker. `loc` can otherwise legitimately contain `"body"` as an
+    ordinary field or nested-model attribute name (e.g. a model with a field
+    literally called `body`, at any depth) — stripping every occurrence
+    would silently drop that element from the reported field path. Only
+    `loc[:1] == ("body",)` is ever the marker; anything after index 0 is
+    model structure and must survive untouched.
     """
     stripped = []
     for error in exc.errors():
-        loc = tuple(part for part in error.get("loc", ()) if part != "body")
+        loc = tuple(error.get("loc", ()))
+        if loc[:1] == ("body",):
+            loc = loc[1:]
         stripped.append({**error, "loc": loc})
     return stripped
 
