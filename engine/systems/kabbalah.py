@@ -10,6 +10,24 @@ unreduced value the equivalences table already compares against, while
 display; Hebrew date via pyluach with no sunset adjustment (the birth *date*
 is taken as given — see kb/kabbalah/hebrew_months.yaml's source header for the
 same note recorded at the KB layer).
+
+**Declared gap: day-of-week significance is not implemented.** Spec §3.5
+lists "Hebrew day/month/year, month meaning, day-of-week significance". The
+first three are implemented; the fourth is not. `raw.hebrew_date.day_of_week`
+is emitted as a bare integer and nothing interprets it: there is no
+kb/kabbalah/ file for it, it contributes no `TraitTag`, and it reaches no
+facet. That is a deliberate narrowing, recorded the way the missing Chiron
+body was (see `engine.ephemeris.base.Body`) rather than left silent --
+quietly shipping a documented capability as an uninterpreted number is the
+defect; saying so is not.
+
+To add it later: create `kb/kabbalah/weekdays.yaml` (schema `kb.mapping.v1`,
+keys "1".."7" matching the convention in `_hebrew_date` below), then extend
+`compute` with `kb.tags_for(self.key, "weekdays", str(hebrew_date["day_of_week"]))`
+alongside the existing `hebrew_months` lookup. The source header must record
+which tradition's weekday correspondences it draws on; the material here is
+even less standardized than the rest of this module, which is part of why it
+was deferred rather than guessed at.
 """
 
 from __future__ import annotations
@@ -121,6 +139,13 @@ def _hebrew_date(date) -> dict:
         "month": hd.month,
         "month_name": month_name,
         "day": hd.day,
+        # pyluach's `weekday()` convention, verified against known dates:
+        # 1 = Sunday (Yom Rishon) ... 7 = Saturday (Shabbat). This is the
+        # Jewish-calendar numbering, NOT Python's `date.weekday()` (0 =
+        # Monday) and NOT `date.isoweekday()` (1 = Monday), so a consumer
+        # that assumes either of those is off by a day or two. The field is
+        # documented but *uninterpreted* -- see this module's docstring for
+        # the declared gap and the path to closing it.
         "day_of_week": hd.weekday(),
     }
 

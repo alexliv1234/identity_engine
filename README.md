@@ -30,6 +30,30 @@ download (see `kb_tools/build_cities.py`). Running
 `python kb_tools/build_cities.py <cities15000.txt> <countryInfo.txt> engine/places/data/cities.csv`
 against a real GeoNames extract replaces the seed with the full dataset.
 
+## Declared gaps
+
+Things v1 deliberately does not do, recorded here so nothing is narrowed
+silently. Each is named again at the code or knowledge-base site that would
+implement it, with the path to closing it.
+
+- **Chiron** is not placed. The vendored DE406 kernel carries only the Sun,
+  Moon and the eight planet barycenters; Chiron needs a separate small-body
+  SPK from JPL Horizons — a second data dependency and a second failure
+  mode. See `engine/ephemeris/base.py` (`Body`) and "Coverage" below.
+- **Lunar node** is the *mean* node from the Meeus polynomial, not the true
+  (osculating) node read from a kernel. Conventional in Western tropical
+  astrology; see "Coverage" below.
+- **Day-of-week significance** (spec §3.5) is not implemented. Kabbalah
+  emits `raw.hebrew_date.day_of_week` as a bare integer on pyluach's
+  convention (**1 = Sunday … 7 = Saturday/Shabbat** — not Python's
+  `date.weekday()`, which is 0 = Monday) and nothing interprets it: no
+  knowledge-base file, no tags, no contribution to synthesis. Closing it
+  means adding `kb/kabbalah/weekdays.yaml` with keys `"1"`–`"7"` and one
+  `tags_for` lookup; see `engine/systems/kabbalah.py`'s docstring and
+  `kb/kabbalah/hebrew_months.yaml`'s source header.
+- **`cities.csv` ships as a curated seed**, not the full GeoNames extract —
+  see "Offline place lookup" above.
+
 ## Ephemeris
 
 `engine/ephemeris/` supplies planetary longitudes and house cusps to every
@@ -46,6 +70,35 @@ needed a commercial license before any closed-source launch; Skyfield carries
 no such constraint. `pyswisseph` was also impractical to install here — it
 ships no binary wheels and needs a C compiler this environment doesn't have —
 which is what surfaced the licensing question early rather than later.
+
+**Scope of that resolution.** The ephemeris blocker is genuinely resolved,
+but "licensing is settled" is not true unqualified, and the difference
+matters. Two runtime dependencies on the request path are copyleft:
+
+| Dependency  | Licence           | Used for                                    |
+|-------------|-------------------|---------------------------------------------|
+| `Unidecode` | GPL-2.0-or-later  | Latin transliteration of non-Latin names    |
+| `lunardate` | GPL-3.0-or-later  | Chinese New Year year boundary              |
+
+(Both verified from installed package metadata, 2026-08-21.)
+
+For a **hosted API** — the v1 shape — this carries no obligation at all: the
+GPL's conditions attach to *distribution*, and running software on your own
+server to answer HTTP requests is not distribution. (The AGPL is the licence
+that closes that gap, which is exactly why the Swiss Ephemeris question was a
+real blocker and these are not.) So spec §9's flagged item is closed for the
+launch as designed.
+
+It is **not** closed for any build that ships the engine to someone else: an
+on-prem or customer-hosted deployment, an embedded SDK, a desktop or mobile
+app, or a container image handed to a third party. Each of those is
+distribution, and each would require either releasing the distributed work
+under a compatible copyleft licence or replacing both dependencies first.
+Neither is hard to replace — `Unidecode` is one fixed lookup table (see
+`engine/names.py`, which already owns its own Latin→Hebrew table) and
+`lunardate` supplies one lunisolar boundary date per year (see
+`engine/systems/chinese_zodiac.py`) — but it is work that has not been done,
+and no such build should be shipped on the assumption that it has.
 
 **Ephemeris data.** The DE406 kernel (`de406.bsp`, ~300 MB) is vendored
 locally but never committed — see `.gitignore`. Fetch it once with:
@@ -70,6 +123,15 @@ second failure mode. It also carries no lunar node model at all: the
 polynomial rather than read from a kernel — the *mean* node, not the *true*
 (osculating) node, which is the conventional choice in Western tropical
 astrology.
+
+**Kernel integrity.** `kb_tools/fetch_ephemeris.py` pins both the kernel's
+size and its SHA-256
+(`99399a830f8a1c7eeb0c4e6975f3879f7b0086a093f84d95a84f4b5a55b0e36a`) and
+refuses to proceed on a mismatch. Size alone cannot tell a substituted or
+re-issued kernel from the right one, and since every planetary position comes
+from this file, two deployments holding different kernels would produce
+different profiles for identical input with nothing detecting it — which is
+what the determinism guarantee above is a claim about.
 
 **Houses.** Skyfield has no house-system support, so Placidus cusps are
 implemented by hand in `skyfield_adapter.py` from closed-form ASC/MC angles

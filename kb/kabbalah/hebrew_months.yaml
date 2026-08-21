@@ -20,6 +20,18 @@ source: >-
   — the Gregorian calendar date is converted to a Hebrew date as-is. That is a
   recorded limitation, not an oversight. Entries describe a tendency and its
   cost, not a prediction.
+
+  DECLARED GAP — day-of-week significance. Spec §3.5 asks for month meaning
+  (this file) AND day-of-week significance. There is no weekday file in
+  kb/kabbalah/: engine/systems/kabbalah.py emits
+  raw.hebrew_date.day_of_week as a bare integer (1 = Sunday ... 7 = Shabbat,
+  pyluach's convention) and nothing maps it to a facet, so it contributes
+  nothing to synthesis. Closing the gap means adding
+  kb/kabbalah/weekdays.yaml with keys "1".."7" on that same convention and
+  one tags_for lookup in the calculator; see that module's docstring. It was
+  deferred rather than guessed at because weekday correspondences are even
+  less agreed-upon across sources than the month themes here, and this file's
+  own rule is to use only the layer with the widest agreement.
 entries:
   "1":
     label: "Nisan"

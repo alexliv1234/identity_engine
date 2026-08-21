@@ -4,6 +4,14 @@
 **Status:** Approved (brainstorming session with alexliv@gmail.com)
 **Repo:** alexliv1234/identity_engine
 
+> **Amendments after approval.** This document was approved on 2026-08-19.
+> Anything changed since is marked inline with a dated
+> `> **Amendment (YYYY-MM-DD):**` block naming what changed and why, so a
+> reader can always separate the approved design from what implementation
+> taught us. Amendments to date: **2026-08-21** — §2 and §8 (birth-time
+> quality values and their degradation rules), §5.1 (convergence example
+> corrected), §5.4 (`INVALID_INPUT` error code).
+
 ## 1. Summary
 
 A standalone API platform that takes minimal input about a person — full name, birth
@@ -51,7 +59,8 @@ as data. No LLM sits in the runtime profile path. A profile is a pure function o
 ```
 full_name       required   Latin script (numerology); other scripts accepted but flagged
 birth_date      required   ISO date; supported range 1800-01-01 .. today
-birth_time      optional   local time HH:MM; absence degrades astrology/HD (see §8)
+birth_time      optional   local time HH:MM; absence degrades astrology/HD (see §8);
+                           a DST-ambiguous or DST-nonexistent reading also degrades
 birth_place     required   lat/lon + IANA timezone; a bundled offline city-lookup helper
                            (bundled GeoNames cities dataset) resolves
                            "city, country" → lat/lon/tz with no external calls
@@ -60,6 +69,25 @@ hebrew_name     optional   Hebrew script, for gematria; if absent, auto-translit
 ```
 
 No external network calls in the request path (no geocoding APIs, no LLM APIs).
+
+> **Amendment (2026-08-21):** `input_quality.birth_time` reports **four**
+> values, not two. The original design assumed a supplied local time names one
+> instant. It does not: in every zone observing DST, twice a year one
+> wall-clock hour is repeated (the clock goes back) or skipped (the clock goes
+> forward), so a reading can name two instants or none.
+>
+> | value | meaning |
+> |---|---|
+> | `exact` | a time was supplied and names exactly one instant |
+> | `missing` | no birth time supplied (a 24-hour uncertainty) |
+> | `ambiguous` | the clock read this time twice when DST ended — two candidate instants, one hour apart |
+> | `nonexistent` | the clock skipped this time when DST began — no candidate instant |
+>
+> Degradation rules for the last two are in §8. Added because the shipped
+> engine resolved both silently and reported `exact`; on a measured case
+> (1990-10-28 01:30 Europe/London) the two readings put the Ascendant in
+> different signs, firing different knowledge-base entries and producing a
+> different synthesis.
 
 ## 3. System modules
 
@@ -218,7 +246,7 @@ GET    /v1/meta/versions                 engine version, KB version, systems lis
         "summary_tags": ["intuitive", "needs-recognition", "dislikes-pressure"],
         "facets": [
           {"facet": "decision_making.gut_vs_deliberation", "score": 0.8,
-           "direction": "gut", "convergence": 0.75,
+           "direction": "gut", "convergence": 0.166667,
            "provenance": [{"system": "human_design", "element": "splenic_authority", "weight": 0.9}]}
         ],
         "tensions": []
@@ -228,6 +256,24 @@ GET    /v1/meta/versions                 engine version, KB version, systems lis
   "disclaimer": "Reflective and entertainment insight; not medical, psychological, or financial advice."
 }
 ```
+
+**Convergence denominator.** Convergence is the share of *applicable* systems
+agreeing in direction on that facet (§4.2) — applicable meaning the system ran
+and produced a usable result (`confidence > 0`), whether or not it had
+anything to say about this particular facet. The denominator is therefore the
+number of applicable systems, not the number of entries in `provenance`; a
+lone contributor scores low precisely because the other live systems stayed
+silent.
+
+> **Amendment (2026-08-21):** the sketch above previously showed
+> `"convergence": 0.75` on a facet whose `provenance` holds a single entry.
+> With the six systems now live the engine cannot produce that number for that
+> shape — one agreeing system out of six applicable is `0.166667`, and the
+> only values reachable in a six-system profile are `n/6`. Corrected so
+> integrators calibrate against a number the engine actually emits. The
+> denominator paragraph above was added at the same time, because `0.75`
+> implied a contributors-only denominator — under which every single-source
+> facet would score `1.0` and convergence would carry no information at all.
 
 ### 5.2 `/context` — the AI-assistant bundle
 
@@ -249,7 +295,23 @@ the synthesis layer — no esoteric terminology unless `?vocabulary=esoteric`.
 
 Structured `422/404/401` responses with stable codes: `INVALID_BIRTH_DATE`,
 `INVALID_BIRTH_TIME`, `UNKNOWN_TIMEZONE`, `UNKNOWN_PLACE`, `NAME_UNMAPPABLE`,
-`PERSON_NOT_FOUND`, `UNAUTHORIZED`.
+`PERSON_NOT_FOUND`, `UNAUTHORIZED`, `INVALID_INPUT`.
+
+> **Amendment (2026-08-21):** `INVALID_INPUT` added as an eighth stable code.
+> The seven above enumerate problems the engine *recognises*; this is the
+> last-resort code for a validation failure that no specific rule named — a
+> model-level validator, or a `ValidationError` arriving from some other
+> model. It exists so `engine/errors.py`'s `from_validation_error` never has
+> to report a *wrong* specific code (claiming `INVALID_BIRTH_DATE` for an
+> unrelated failure) merely to stay inside the original list.
+>
+> It is currently **unreachable for `BirthInput`**: when no code prefixes the
+> message the translator falls back on the offending field name, and the
+> field-fallback table covers every field `BirthInput` declares. It becomes
+> reachable only if a future model-level validator or a foreign model reaches
+> the translator. Documented as a guaranteed-stable code regardless, because
+> an API contract that omits its own fallback is one a client cannot handle
+> exhaustively.
 
 ## 6. Data & persistence
 
@@ -284,9 +346,29 @@ identity_engine/
 ## 8. Error handling & degradation rules
 
 - **Missing birth time**: astrology omits houses/angles, moon sign reported as a
-  range when it changes sign that day; Human Design (and its Gene Keys derivation)
-  excluded from synthesis with an explicit note; per-system `confidence` drives
-  synthesis weighting. The engine never fakes precision.
+  range when it changes sign that day, and the Moon's *aspects* are segregated
+  out of the fact list into `raw.astrology.moon_aspects_uncertain`; Human
+  Design (and its Gene Keys derivation) excluded from synthesis with an
+  explicit note; per-system `confidence` drives synthesis weighting. The
+  engine never fakes precision.
+- **Ambiguous or nonexistent birth time** (§2): reduced precision, not absent
+  data. All three chart systems still compute — the uncertainty is one hour,
+  not twenty-four — resolving to the pre-transition (`fold=0`) reading. Each
+  adds a note naming the case and the assumption, and each reduces
+  `confidence` in proportion to what one hour actually risks for its own
+  output, which is not the same for all three.
+
+> **Amendment (2026-08-21):** the second bullet is new, and the first gained
+> the Moon-aspect clause. Both close the same defect: the engine was
+> publishing values it could not stand behind. An ambiguous or nonexistent
+> reading previously reported `input_quality.birth_time: "exact"` with all
+> three chart systems at `confidence 1.0` and no note anywhere; and the Moon's
+> aspects, whose set genuinely differs between 00:00, noon and 23:59, were
+> emitted from the noon chart with four-decimal orbs indistinguishable from
+> the Sun's. §5.3's `/compatibility` scores inter-chart Moon aspects and would
+> have consumed them as fact. Deliberately *not* handled by excluding the
+> chart systems on an uncertain time: that would understate what the engine
+> knows as badly as `"exact"` overstated it.
 - **Name scripts**: numerology requires Latin (deterministic transliteration via
   a fixed table, e.g. `unidecode`, flagged); gematria requires Hebrew
   (deterministic Latin→Hebrew transliteration table, flagged). `input_quality`
