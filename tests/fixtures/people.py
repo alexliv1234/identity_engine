@@ -36,13 +36,34 @@ FIXTURES: dict[str, BirthInput] = {
         hebrew_name=None,
     ),
     "dst_transition": BirthInput(
-        # 2:30am on a US spring-forward date: the local clock never showed 2:30.
+        # 2:30am on a US spring-forward date: the clock jumped 01:59:59 ->
+        # 03:00 and never showed 02:30, so this reading is *nonexistent*.
+        # `input_quality.birth_time` reports "nonexistent" and all three chart
+        # systems carry a note and a reduced confidence -- before the FIX 1
+        # review this fixture silently reported "exact" at confidence 1.0.
         full_name="Casey Rivera",
         birth_date=dt.date(1990, 4, 1),
         birth_time=dt.time(2, 30),
         lat=40.7128,
         lon=-74.0060,
         tz="America/New_York",
+        hebrew_name=None,
+    ),
+    "ambiguous_birth_time": BirthInput(
+        # The other half of the DST pair, which no fixture reached: British
+        # Summer Time ended at 02:00 BST on 1990-10-28, the clock went back to
+        # 01:00 GMT, and 01:30 therefore happened *twice*. The engine resolves
+        # to the first (pre-transition) occurrence and says so. The two
+        # readings are an hour apart and the Ascendant crosses a sign boundary
+        # between them (Leo 27.33 -> Virgo 7.84), so a different
+        # astrology/ascendants KB entry fires for each -- which is why this is
+        # a golden fixture and not only a unit test.
+        full_name="Robin Hale",
+        birth_date=dt.date(1990, 10, 28),
+        birth_time=dt.time(1, 30),
+        lat=51.5074,
+        lon=-0.1278,
+        tz="Europe/London",
         hebrew_name=None,
     ),
     "master_numbers": BirthInput(

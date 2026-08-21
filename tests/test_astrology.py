@@ -1,6 +1,7 @@
 import datetime as dt
+from zoneinfo import ZoneInfo
 
-from engine.ephemeris import Body
+from engine.ephemeris import Body, get_ephemeris
 from engine.systems.astrology import (
     ASPECTS,
     SIGNS,
@@ -225,7 +226,75 @@ def test_polar_latitude_without_birth_time_gives_one_coherent_note():
     assert out.raw["houses_available"] is False
     assert out.raw["angles"] is None
     assert out.confidence == 0.6
-    time_notes = [n for n in out.notes if "birth time" in n.lower()]
+    # Count notes that explain the *absent houses/angles*, not notes that
+    # merely mention the birth time: the missing-time path now also emits a
+    # separate note about Moon aspects (review FIX 2), which is a different
+    # subject and not the redundancy this test guards against.
+    house_notes = [n for n in out.notes if "houses or angles" in n.lower()]
     latitude_notes = [n for n in out.notes if "latitude" in n.lower() or "polar" in n.lower()]
-    assert len(time_notes) == 1
+    assert len(house_notes) == 1
     assert len(latitude_notes) == 0
+
+
+# --- Moon aspects on the missing-time path (review FIX 2) ----------------
+#
+# The noon chart's Moon is an approximation: the Moon covers ~13 degrees a
+# day, enough to gain and lose aspects between local midnight and 23:59. The
+# module already suppresses Moon *sign* tags when the sign is ambiguous, but
+# it used to publish the Moon's aspects in the same list, with the same
+# four-decimal orbs and no qualification, as the Sun's. Spec 5.3's
+# `/compatibility` scores inter-chart aspects across Sun, Moon, Venus, Mars
+# and Ascendant, so it would consume them as fact.
+
+
+def test_moon_aspects_are_segregated_when_the_birth_time_is_missing():
+    out = AstrologyCalculator().compute(make_input(birth_time=None))
+    assert all("moon" not in (a["a"], a["b"]) for a in out.raw["aspects"]), (
+        "the fact list must not carry noon-chart Moon aspects"
+    )
+    assert out.raw["moon_aspects_uncertain"] is not None
+    assert all("moon" in (a["a"], a["b"]) for a in out.raw["moon_aspects_uncertain"])
+
+
+def test_moon_aspects_are_not_lost_only_relabelled():
+    """Segregation, not deletion: every aspect the noon chart found is still
+    reachable, just under a name a consumer cannot mistake for fact."""
+    inp = make_input(birth_time=None)
+    out = AstrologyCalculator().compute(inp)
+    combined = out.raw["aspects"] + out.raw["moon_aspects_uncertain"]
+
+    eph = get_ephemeris()
+    noon = dt.datetime.combine(inp.birth_date, dt.time(12, 0), tzinfo=ZoneInfo(inp.tz)).astimezone(
+        dt.UTC
+    )
+    every = aspects_between(eph.positions(eph.julian_day(noon), list(Body)))
+    assert sorted(combined, key=lambda a: (a["a"], a["b"], a["aspect"])) == every
+
+
+def test_missing_time_notes_explain_the_moon_aspect_caveat():
+    out = AstrologyCalculator().compute(make_input(birth_time=None))
+    if out.raw["moon_aspects_uncertain"]:
+        assert any("moon_aspects_uncertain" in n for n in out.notes), out.notes
+
+
+def test_moon_aspects_really_do_change_across_the_day():
+    """The measurement the fix exists for: three clock readings on one date
+    produce three different Moon aspect sets, so publishing the noon set as
+    exact is a fabrication."""
+    eph = get_ephemeris()
+    tz = ZoneInfo("Europe/London")
+    sets = []
+    for clock in (dt.time(0, 0), dt.time(12, 0), dt.time(23, 59)):
+        moment = dt.datetime.combine(dt.date(1815, 12, 10), clock, tzinfo=tz).astimezone(dt.UTC)
+        found = aspects_between(eph.positions(eph.julian_day(moment), list(Body)))
+        moon = [a for a in found if "moon" in (a["a"], a["b"])]
+        sets.append(frozenset((a["a"], a["b"], a["aspect"]) for a in moon))
+    assert len(set(sets)) == 3
+
+
+def test_known_birth_time_keeps_one_undivided_aspect_list():
+    """The contrast case: with an exact time the Moon's aspects are facts and
+    stay in `aspects`, and the uncertain slot is null rather than empty."""
+    out = AstrologyCalculator().compute(make_input())
+    assert out.raw["moon_aspects_uncertain"] is None
+    assert any("moon" in (a["a"], a["b"]) for a in out.raw["aspects"])

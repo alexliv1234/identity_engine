@@ -59,16 +59,6 @@ def test_input_quality_reports_provided_vs_derived():
     assert no_time["input_quality"]["birth_time"] == "missing"
 
 
-def test_systems_filter_restricts_computation():
-    profile = build_profile(make_input(), systems=["numerology"])
-    assert set(profile["raw"]) == {"numerology"}
-
-
-def test_unknown_system_in_filter_is_ignored_not_fatal():
-    profile = build_profile(make_input(), systems=["numerology", "not_a_system"])
-    assert set(profile["raw"]) == {"numerology"}
-
-
 def test_profile_is_byte_identical_across_recomputes():
     """Spec §12 acceptance criterion 2."""
     inp = make_input()
@@ -101,7 +91,7 @@ def test_gated_system_reports_unavailable_raw_slot(monkeypatch):
 
     monkeypatch.setitem(SYSTEM_REGISTRY, "fake_system", _NeverAvailable())
 
-    profile = build_profile(make_input(hebrew_name=None), systems=["fake_system"])
+    profile = build_profile(make_input(hebrew_name=None))
     slot = profile["raw"]["fake_system"]
     assert slot["available"] is False
     assert slot["confidence"] == 0.0
@@ -153,5 +143,23 @@ def test_raw_key_colliding_with_an_engine_owned_key_fails_loudly(monkeypatch):
 
     monkeypatch.setitem(SYSTEM_REGISTRY, "collider", _Collides())
 
-    with pytest.raises(AssertionError, match="engine-owned key"):
-        build_profile(make_input(), systems=["collider"])
+    with pytest.raises(ValueError, match="engine-owned key"):
+        build_profile(make_input())
+
+
+def test_collision_guards_survive_python_dash_o(monkeypatch):
+    """Both orchestrator guards must be `raise`, not `assert`: `python -O`
+    strips assertions, and a hosted service is likelier to run under `-O`
+    than a test suite is. This asserts the *shape* of the guard, because a
+    test run without `-O` cannot otherwise tell the two apart -- the second
+    guard (`synthesize`'s completeness invariant) has no reachable input at
+    all, so a behavioural test of it is impossible by construction."""
+    import ast
+    import inspect
+
+    from engine import orchestrator
+
+    tree = ast.parse(inspect.getsource(orchestrator._build_raw_and_confidences))
+    assert not [n for n in ast.walk(tree) if isinstance(n, ast.Assert)]
+    raises = [n for n in ast.walk(tree) if isinstance(n, ast.Raise)]
+    assert len(raises) == 2

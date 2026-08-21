@@ -1,17 +1,37 @@
 """Western astrology (spec §3.1).
 
 Degrades rather than fails when the birth time is unknown: no houses, no
-angles, and the Moon is reported as a sign range if it crosses a boundary
-that day. It also degrades — separately — when Placidus houses have no
-solution for the given latitude (or the cusp solver fails to converge):
-`engine.ephemeris.HousesUnavailable` is caught here and turned into the same
-kind of honest "no houses" degradation, with a note naming the real reason
-(latitude) rather than reusing the missing-birth-time note. The two
-degradations never stack into two notes: houses are only ever attempted when
-a birth time is known, so when the birth time is missing the missing-time
-note alone already fully explains the absence of houses, and a latitude that
-would *also* be unsolvable does not add a second, redundant note on top of
-it (see `AstrologyCalculator.compute`).
+angles, the Moon is reported as a sign range if it crosses a boundary that
+day, and the Moon's *aspects* are segregated out of the fact list (see
+"Moon aspects" below). It also degrades — separately — when Placidus houses
+have no solution for the given latitude (or the cusp solver fails to
+converge): `engine.ephemeris.HousesUnavailable` is caught here and turned
+into the same kind of honest "no houses" degradation, with a note naming the
+real reason (latitude) rather than reusing the missing-birth-time note. The
+two degradations never stack into two notes: houses are only ever attempted
+when a birth time is known, so when the birth time is missing the missing-
+time note alone already fully explains the absence of houses, and a latitude
+that would *also* be unsolvable does not add a second, redundant note on top
+of it (see `AstrologyCalculator.compute`).
+
+**Uncertain birth times.** A supplied time that is ambiguous (the clock read
+it twice when DST ended) or nonexistent (the clock skipped it when DST began)
+is *reduced precision, not absent data*: the full chart is still computed
+from `BirthInput.utc_datetime`'s declared `fold=0` resolution, and the
+degradation is a note plus a reduced confidence rather than dropped output.
+See `CONFIDENCE_UNCERTAIN_TIME` for how that number was chosen.
+
+**Moon aspects.** The Moon covers ~13 degrees a day. Between local midnight
+and 23:59 it therefore gains and loses aspects outright — measured on the
+1815-12-10 fixture, the Moon's aspect set at 00:00, noon and 23:59 are three
+different sets. Publishing the noon set in `raw.aspects` alongside the Sun's,
+with the same four-decimal orbs and no qualification, states as fact
+something the engine does not know; spec §5.3's `/compatibility` scores
+inter-chart aspects across Sun, Moon, Venus, Mars and Ascendant and would
+consume it as such. So on the missing-time path `raw.aspects` carries only
+the slower pairs and the Moon's aspects move to
+`raw.moon_aspects_uncertain` — segregated rather than deleted, so nothing is
+lost, but a consumer reading `aspects` gets facts by default.
 """
 
 from __future__ import annotations
@@ -49,7 +69,30 @@ ASPECTS: dict[str, tuple[float, float]] = {
 }
 
 NOON = dt.time(12, 0)
+MOON = str(Body.MOON)
+
+#: No birth time at all: a 24-hour window. The Ascendant and houses are gone
+#: outright (the Ascendant traverses the entire zodiac in a day) and the Moon
+#: is frequently ambiguous, so only the Sun sign survives as a certainty.
 CONFIDENCE_NO_TIME = 0.6
+
+#: An ambiguous or nonexistent reading: a *one-hour* window (the DST shift),
+#: not twenty-four, so it must not reuse CONFIDENCE_NO_TIME. Derived from what
+#: the three tag sources actually risk over one hour:
+#:
+#:   * Sun sign      — the Sun moves ~0.04 deg/hour against a 30 deg sign, so
+#:                     the sign is invariant.                    reliability 1.00
+#:   * Moon sign     — ~0.55 deg/hour against 30 deg: a boundary
+#:                     crossing lands in ~1.8% of cases.         reliability 0.98
+#:   * Ascendant     — ~15 deg/hour against 30 deg: the rising
+#:                     sign changes about half the time.         reliability 0.50
+#:
+#: Their mean is 0.83. Floored to 0.8 because house placements move by roughly
+#: half a sign too, which the three-way mean does not price in. Measured on
+#: 1990-10-28 01:30 Europe/London the Ascendant really does move Leo 27.33 ->
+#: Virgo 7.84 between the two readings, firing a different `ascendants` KB
+#: entry (tests/test_birth_time_quality.py pins this).
+CONFIDENCE_UNCERTAIN_TIME = 0.8
 
 
 def sign_of(longitude: float) -> tuple[str, float]:
@@ -91,6 +134,10 @@ def aspects_between(positions: dict[Body, Position]) -> list[dict]:
     return found
 
 
+def _involves_moon(aspect: dict) -> bool:
+    return MOON in (aspect["a"], aspect["b"])
+
+
 def _moon_sign_range(eph, inp: BirthInput) -> list[str] | None:
     """Signs the Moon occupies between local midnight and 23:59 on the birth date."""
     tz = ZoneInfo(inp.tz)
@@ -120,6 +167,18 @@ class AstrologyCalculator:
             notes.append(
                 "birth time missing: chart computed for local noon; no houses or "
                 "angles are reported"
+            )
+
+        # An ambiguous or nonexistent reading still produces a full chart --
+        # it is one of two candidate instants, or the resolution of a skipped
+        # one, not an absence. Say which, and by how much it could be wrong.
+        if inp.birth_time_is_uncertain:
+            notes.append(
+                f"{inp.birth_time_note} Over that window the Ascendant advances "
+                "roughly 15 degrees an hour -- up to half a sign -- so the rising "
+                "sign, the Midheaven and the house placements may all differ for "
+                "the alternative reading; the Sun sign cannot, and the Moon sign "
+                "almost certainly does not."
             )
 
         jd = eph.julian_day(moment)
@@ -172,9 +231,31 @@ class AstrologyCalculator:
                 "midheaven": {"sign": mc_sign, "degree": round(mc_deg, 4)},
             }
 
+        # See the module docstring: with a known time every aspect is a fact
+        # and the list stays whole (`moon_aspects_uncertain` is null, not an
+        # empty list, mirroring `angles` and `moon_sign_range`). Without one,
+        # the Moon's aspects are noon-chart estimates and move out of the way.
+        every_aspect = aspects_between(positions)
+        aspects = every_aspect
+        moon_aspects_uncertain = None
+        if not has_time:
+            aspects = [a for a in every_aspect if not _involves_moon(a)]
+            moon_aspects_uncertain = [a for a in every_aspect if _involves_moon(a)]
+            if moon_aspects_uncertain:
+                notes.append(
+                    "birth time missing: the moon moves roughly 13 degrees a day, "
+                    "enough to gain and lose aspects between midnight and midnight, "
+                    "so its aspects in the noon chart are estimates rather than "
+                    "facts. They are reported separately under "
+                    "`moon_aspects_uncertain` and must not be consumed as exact; "
+                    "`aspects` carries only the slower-moving pairs (at most about "
+                    "1.5 degrees of motion across the date, against 5-8 degree orbs)"
+                )
+
         raw = {
             "placements": placements,
-            "aspects": aspects_between(positions),
+            "aspects": aspects,
+            "moon_aspects_uncertain": moon_aspects_uncertain,
             "angles": angles,
             "houses_available": houses is not None,
             "moon_sign_range": moon_range,
@@ -190,9 +271,11 @@ class AstrologyCalculator:
         if angles is not None:
             tags.extend(kb.tags_for(self.key, "ascendants", angles["ascendant"]["sign"].lower()))
 
-        return SystemOutput(
-            raw=raw,
-            tags=tags,
-            confidence=1.0 if has_time else CONFIDENCE_NO_TIME,
-            notes=notes,
-        )
+        if not has_time:
+            confidence = CONFIDENCE_NO_TIME
+        elif inp.birth_time_is_uncertain:
+            confidence = CONFIDENCE_UNCERTAIN_TIME
+        else:
+            confidence = 1.0
+
+        return SystemOutput(raw=raw, tags=tags, confidence=confidence, notes=notes)

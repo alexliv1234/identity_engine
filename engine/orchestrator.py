@@ -7,6 +7,17 @@ Every collection that reaches the output is built in a deterministic order:
 `SYSTEM_REGISTRY` is walked via `sorted()`, never dict iteration order, so a
 future registration order (or a dict re-insertion) can never change output
 bytes.
+
+`build_profile` deliberately takes no system filter. It used to accept
+`systems=[...]`, which *recomputed* the profile over a subset — and that is
+not the same operation as filtering a finished profile: convergence is the
+share of *applicable* systems agreeing (engine/synthesis.py), so dropping
+systems from the computation changes the denominator and rewrites every
+facet's convergence score (a facet measured at 0.333 on the full six rose to
+1.0 on a two-system subset). Plan 3's `?systems=` is a post-hoc projection
+over a stored full profile, which is a different thing entirely, so nothing
+consumed the parameter and it existed only as a trap. Removed rather than
+documented: a projection belongs at the API layer, over the stored profile.
 """
 
 from __future__ import annotations
@@ -42,6 +53,8 @@ SYSTEM_REGISTRY: dict[str, SystemCalculator] = {
     )
 }
 
+ENGINE_OWNED_RAW_KEYS = frozenset({"confidence", "notes"})
+
 
 def _unavailable(calc: SystemCalculator, missing: set) -> SystemOutput:
     names = ", ".join(sorted(str(m) for m in missing))
@@ -54,22 +67,28 @@ def _unavailable(calc: SystemCalculator, missing: set) -> SystemOutput:
 
 
 def _build_raw_and_confidences(
-    inp: BirthInput, selected: list[str]
+    inp: BirthInput,
 ) -> tuple[dict[str, dict], dict[str, float], list[TraitTag]]:
-    """Run every selected calculator (gating unavailable ones) and assemble
+    """Run every registered calculator (gating unavailable ones) and assemble
     the raw slots, the per-system confidence map, and the flat tag list.
 
     `confidences` is built from exactly the same key set as `raw` — every
-    selected system gets an entry, whether it ran, was gated, or produced no
-    tags — which is what keeps `synthesize`'s completeness invariant
+    system gets an entry, whether it ran, was gated, or produced no tags —
+    which is what keeps `synthesize`'s completeness invariant
     (engine/synthesis.py: every tag's system must have a confidence entry)
     satisfied by construction rather than by convention.
+
+    Both guards below `raise ValueError` rather than `assert`. `python -O`
+    strips assertions, and a hosted service is far likelier to run under `-O`
+    than a test suite is — which would have turned the first guard into silent
+    data loss and the second into a crash deep inside `synthesize`, in exactly
+    the deployment where the failure is hardest to diagnose.
     """
     raw: dict[str, dict] = {}
     confidences: dict[str, float] = {}
     all_tags: list[TraitTag] = []
 
-    for key in sorted(selected):
+    for key in sorted(SYSTEM_REGISTRY):
         calc = SYSTEM_REGISTRY[key]
         missing = set(calc.required_inputs) - inp.available_fields
         output = _unavailable(calc, missing) if missing else calc.compute(inp)
@@ -79,11 +98,13 @@ def _build_raw_and_confidences(
         # key, the spread below would silently discard it -- data loss with no
         # symptom. Fail loudly at the collision instead; the calculator should
         # name its key something else.
-        assert not {"confidence", "notes"} & set(output.raw), (
-            f"{key}: raw output collides with an engine-owned key "
-            f"({sorted({'confidence', 'notes'} & set(output.raw))}); "
-            "the engine sets confidence and notes from SystemOutput"
-        )
+        collisions = ENGINE_OWNED_RAW_KEYS & set(output.raw)
+        if collisions:
+            raise ValueError(
+                f"{key}: raw output collides with an engine-owned key "
+                f"({sorted(collisions)}); "
+                "the engine sets confidence and notes from SystemOutput"
+            )
         raw[key] = {
             **output.raw,
             "confidence": output.confidence,
@@ -99,28 +120,27 @@ def _build_raw_and_confidences(
     # other than its own registry key, this fails loudly here instead of
     # deep inside `synthesize`.
     for tag in all_tags:
-        assert tag.system in confidences, (
-            f"tag from facet {tag.facet!r} references system {tag.system!r}, "
-            "which has no confidence entry"
-        )
+        if tag.system not in confidences:
+            raise ValueError(
+                f"tag from facet {tag.facet!r} references system {tag.system!r}, "
+                "which has no confidence entry"
+            )
 
     return raw, confidences, all_tags
 
 
-def build_profile(inp: BirthInput, systems: list[str] | None = None) -> dict:
-    selected = (
-        list(SYSTEM_REGISTRY)
-        if systems is None
-        else [k for k in SYSTEM_REGISTRY if k in set(systems)]
-    )
-
-    raw, confidences, all_tags = _build_raw_and_confidences(inp, selected)
+def build_profile(inp: BirthInput) -> dict:
+    raw, confidences, all_tags = _build_raw_and_confidences(inp)
 
     name = normalize(inp.full_name, inp.hebrew_name)
     return {
         "versions": {"engine": __version__, "kb": kb_version()},
         "input_quality": {
-            "birth_time": "exact" if inp.birth_time is not None else "missing",
+            # "exact" | "missing" | "ambiguous" | "nonexistent" — see
+            # engine/types.py's BirthTimeQuality. The last two are DST clock
+            # readings that name two instants or none; reporting them as
+            # "exact" was the precision the engine was faking.
+            "birth_time": str(inp.birth_time_quality),
             "hebrew_name": "provided" if name.hebrew_quality is NameQuality.PROVIDED else "derived",
             "full_name_script": "latin"
             if name.latin_quality is NameQuality.PROVIDED

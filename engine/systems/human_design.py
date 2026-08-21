@@ -4,6 +4,14 @@ Requires a birth time. Without one the module returns confidence 0.0 and is
 excluded from synthesis rather than guessing -- an HD chart computed for noon
 is wrong often enough to be worse than absent.
 
+An *uncertain* birth time is a different case and is handled differently. A
+reading that is ambiguous (the clock read it twice when DST ended) or
+nonexistent (the clock skipped it when DST began) still pins the chart to
+within one hour, which is reduced precision rather than absent data: the
+bodygraph is computed as normal from `BirthInput.utc_datetime`'s declared
+`fold=0` resolution, and the degradation is an explicit note plus a reduced
+confidence. See `CONFIDENCE_UNCERTAIN_TIME`.
+
 This module builds on `engine.systems.hd_wheel` (gate/line resolution and the
 design-moment solve) without either module knowing about the other's layer:
 hd_wheel has no notion of centers, channels, type, or authority, and this
@@ -47,6 +55,30 @@ STRATEGY = {
     "Manifestor": "Inform before acting",
     "Reflector": "Wait a lunar cycle",
 }
+
+#: An ambiguous or nonexistent birth time: a one-hour window, not the
+#: twenty-four hours of a missing time, so this system degrades instead of
+#: being excluded. Derived from what one hour actually risks on the wheel,
+#: whose gates are 5.625 deg wide and whose lines are 0.9375 deg wide:
+#:
+#:   * Sun/Earth points move ~0.04 deg/hour -> ~0.7% chance of a gate change,
+#:     ~4.4% chance of a line change. The 1/2 profile digits come from the
+#:     personality and design Sun lines, so the profile is ~91% safe.
+#:   * The Moon moves ~0.55 deg/hour -> ~10% chance of a gate change and a
+#:     coin-flip on the line. Mercury and Venus sit between the two.
+#:   * Type, authority, definition and defined centers depend on the whole
+#:     26-activation gate set, so any single gate flip can (but usually does
+#:     not) cross a channel boundary and change them.
+#:
+#: 0.85 prices "one of the tagged elements is likely off" without pretending
+#: the bodygraph as a whole is unreliable. It sits above astrology's 0.8
+#: because no HD element is anywhere near as exposed as the Ascendant, whose
+#: sign changes about half the time over the same hour; and below Gene Keys'
+#: 0.9 because HD reads fast-moving points that Gene Keys does not.
+#: tests/test_birth_time_quality.py pins the measured case: over the
+#: 1990-10-28 Europe/London ambiguity the personality Moon moves 13/5 -> 13/6
+#: while the Sun's gate does not move at all.
+CONFIDENCE_UNCERTAIN_TIME = 0.85
 
 DEFINITION_NAMES = {
     0: "none",
@@ -201,6 +233,19 @@ class HumanDesignCalculator:
                 ],
             )
 
+        notes: list[str] = []
+        confidence = 1.0
+        if inp.birth_time_is_uncertain:
+            confidence = CONFIDENCE_UNCERTAIN_TIME
+            notes.append(
+                f"{inp.birth_time_note} Gate and line assignments taken from the "
+                "faster-moving points -- the Moon above all, which covers about "
+                "0.55 degrees an hour against a 0.9375-degree line -- may differ "
+                "for the alternative reading, and a single gate flip can cross a "
+                "channel boundary and change type, authority or definition. The "
+                "Sun-derived profile lines are far more stable"
+            )
+
         eph = get_ephemeris()
         natal_jd = eph.julian_day(inp.utc_datetime)
         design_jd = cached_design_julian_day(eph, natal_jd)
@@ -244,4 +289,4 @@ class HumanDesignCalculator:
         for center in sorted(defined):
             tags.extend(kb.tags_for(self.key, "centers", f"{center}_defined"))
 
-        return SystemOutput(raw=raw, tags=tags, confidence=1.0, notes=[])
+        return SystemOutput(raw=raw, tags=tags, confidence=confidence, notes=notes)
