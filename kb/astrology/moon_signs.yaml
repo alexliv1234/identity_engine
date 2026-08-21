@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: astrology
 element: moon_signs
 reviewed: true
+curation: hand_authored
 source: >-
   Tropical zodiac, common contemporary synthesis of the Moon as the habitual,
   largely automatic style of emotional processing — how a feeling gets

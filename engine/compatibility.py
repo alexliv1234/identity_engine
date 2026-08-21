@@ -20,6 +20,28 @@ motion, comfortably inside every orb) and keep the Moon; using the looser
 not used. A pair contributes a given point only when it survives for BOTH
 people. `"ascendant"` already disappears on a missing time because `angles`
 is `None` on that same path, so no second guard is added for it.
+
+**Dimension split (fix round 1).** The 5x5 synastry grid is scored into TWO
+disjoint subsets, matching the brief's dimension rollup rather than one
+aggregate reused for both dimensions: `connection` sums only pairs among
+Sun/Moon/Venus/Mars (the "how do the two people relate" points), and
+`communication` sums only pairs involving the Ascendant (the "how do they
+present/read each other" point). Every pair still lands in `reasons`
+regardless of which dimension it feeds -- the reasons block stays complete,
+only the two numeric rollups are computed from disjoint inputs. Each subset
+is rescaled against its OWN theoretical range (16 pairs for connection, 9
+for communication), not the old 25-pair range, since reusing the 25-pair
+range for a 9- or 16-pair subset would silently compress or inflate it.
+
+A missing birth time drops a person's Ascendant entirely (see `_points`),
+so when BOTH people lack a birth time, `communication`'s astrology subset
+has zero *possible* pairs to check -- not zero matched aspects, zero
+candidates. That is absent evidence, not negative evidence: summing zero
+and rescaling it would land on a specific, low-but-not-bottom number that
+reads as "measured near-incompatibility" when what actually happened is
+"nothing to compare." So in that case `communication` falls back to the
+numerology score alone (mirroring `connection`'s existing fallback to
+astrology alone when Human Design is unavailable), and a note says so.
 """
 
 from __future__ import annotations
@@ -40,7 +62,17 @@ ASPECT_SCORES: dict[str, int] = {
 }
 HARD_ASPECTS = frozenset({"square", "opposition"})
 
-ASTRO_MIN, ASTRO_MAX = -50.0, 150.0
+# Theoretical [min, max] for each disjoint astrology subset (score * pair
+# count at the extremes), used to rescale that subset's raw sum onto 0..100
+# independently -- reusing one 25-pair range for a 9- or 16-pair subset would
+# silently compress or inflate it.
+#
+# `connection`: Sun/Moon/Venus/Mars on both sides -> 4x4 = 16 ordered pairs.
+CONNECTION_ASTRO_MIN, CONNECTION_ASTRO_MAX = -32.0, 96.0
+# `communication`: any pair involving the Ascendant on either side -> the 25
+# total minus the 16 above = 9 ordered pairs (asc-asc, asc-X x4, X-asc x4).
+COMMUNICATION_ASTRO_MIN, COMMUNICATION_ASTRO_MAX = -18.0, 54.0
+
 CHANNEL_POINTS = 4
 CHANNEL_CAP = 40
 NEUTRAL_HARMONY = 5
@@ -102,16 +134,26 @@ def _aspect_for(separation: float) -> tuple[str, float] | None:
     return best
 
 
-def astrology_synastry(a: dict, b: dict) -> tuple[float, int, list[dict]]:
-    """Returns (raw score, hard-aspect count, reasons).
+def astrology_synastry(a: dict, b: dict) -> tuple[float, float, bool, int, list[dict]]:
+    """Returns (connection_raw, communication_raw, communication_astro_possible,
+    hard-aspect count, reasons).
 
     Point sets are built per person (`_points`), so a pair contributes a
     point only when it survives for both A and B -- which is exactly how a
-    person's missing-time Moon exclusion propagates into the grid without
-    any extra bookkeeping here.
+    person's missing-time Moon/Ascendant exclusion propagates into the grid
+    without any extra bookkeeping here. Every checked pair, from either
+    subset, is appended to `reasons` -- the split only affects which raw
+    total a pair's score feeds, never whether it is reported.
+
+    `communication_astro_possible` is `True` when at least one of the two
+    people has an Ascendant to compare (i.e. this is a question about
+    whether communication's astrology subset has any CANDIDATE pairs at
+    all, not whether any of them happened to match an aspect within orb).
     """
     points_a, points_b = _points(a), _points(b)
-    total, hard = 0.0, 0
+    communication_astro_possible = "ascendant" in points_a or "ascendant" in points_b
+    connection_raw, communication_raw = 0.0, 0.0
+    hard = 0
     reasons: list[dict] = []
 
     for name_a in SYNASTRY_POINTS:
@@ -122,7 +164,11 @@ def astrology_synastry(a: dict, b: dict) -> tuple[float, int, list[dict]]:
             if found is None:
                 continue
             aspect, _orb = found
-            total += ASPECT_SCORES[aspect]
+            score = ASPECT_SCORES[aspect]
+            if name_a == "ascendant" or name_b == "ascendant":
+                communication_raw += score
+            else:
+                connection_raw += score
             if aspect in HARD_ASPECTS:
                 hard += 1
             reasons.append(
@@ -134,7 +180,7 @@ def astrology_synastry(a: dict, b: dict) -> tuple[float, int, list[dict]]:
             )
 
     reasons.sort(key=lambda r: r["detail"])
-    return total, hard, reasons
+    return connection_raw, communication_raw, communication_astro_possible, hard, reasons
 
 
 def _moon_excluded_note(quality_a: str, quality_b: str) -> str | None:
@@ -154,6 +200,15 @@ def _moon_excluded_note(quality_a: str, quality_b: str) -> str | None:
         "day), wider than every orb in ASPECTS, so a moon synastry aspect built on "
         "it would be scoring noise and calling it a fact."
     )
+
+
+_COMMUNICATION_ASTRO_EXCLUDED_NOTE = (
+    "communication astrology signal excluded: A and B have no birth time, so "
+    "neither chart has an ascendant to compare. That is an absence of evidence, "
+    "not evidence of a mismatch, so communication reflects the numerology matrix "
+    "alone rather than a zero-pair astrology score standing in for measured "
+    "incompatibility."
+)
 
 
 def hd_connection_channels(a: dict, b: dict) -> tuple[int, list[dict], list[str]]:
@@ -219,16 +274,33 @@ def _rescale(value: float, low: float, high: float) -> int:
 
 
 def compare(profile_a: dict, profile_b: dict) -> dict:
-    astro_raw, hard_count, astro_reasons = astrology_synastry(profile_a, profile_b)
+    (
+        connection_astro_raw,
+        communication_astro_raw,
+        communication_astro_possible,
+        hard_count,
+        astro_reasons,
+    ) = astrology_synastry(profile_a, profile_b)
     hd_raw, hd_reasons, hd_notes = hd_connection_channels(profile_a, profile_b)
     numerology_raw, numerology_reasons = numerology_harmony(profile_a, profile_b)
 
-    astro_score = _rescale(astro_raw, ASTRO_MIN, ASTRO_MAX)
+    connection_astro_score = _rescale(
+        connection_astro_raw, CONNECTION_ASTRO_MIN, CONNECTION_ASTRO_MAX
+    )
+    communication_astro_score = _rescale(
+        communication_astro_raw, COMMUNICATION_ASTRO_MIN, COMMUNICATION_ASTRO_MAX
+    )
     hd_score = min(100, 50 + hd_raw)
     numerology_score = numerology_raw * 10
 
-    connection = round((astro_score + hd_score) / 2) if not hd_notes else astro_score
-    communication = round((astro_score + numerology_score) / 2)
+    connection = (
+        round((connection_astro_score + hd_score) / 2) if not hd_notes else connection_astro_score
+    )
+    communication = (
+        round((communication_astro_score + numerology_score) / 2)
+        if communication_astro_possible
+        else numerology_score
+    )
     # More hard aspects means more friction to work with -- reported as growth.
     growth = _rescale(hard_count, 0, 8)
 
@@ -243,6 +315,8 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
     moon_note = _moon_excluded_note(quality_a, quality_b)
     if moon_note:
         notes.append(moon_note)
+    if not communication_astro_possible:
+        notes.append(_COMMUNICATION_ASTRO_EXCLUDED_NOTE)
 
     return {
         "score": round(sum(dimensions.values()) / 3),

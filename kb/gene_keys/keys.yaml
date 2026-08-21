@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: gene_keys
 element: keys
 reviewed: true
+curation: hand_authored
 source: >-
   Shadow / Gift / Siddhi keywords per Richard Rudd's published Gene Keys
   system ("The Gene Keys: Embracing Your Higher Purpose", first published

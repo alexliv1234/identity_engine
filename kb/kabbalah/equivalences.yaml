@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: kabbalah
 element: equivalences
 reviewed: true
+curation: hand_authored
 source: >-
   A small curated set of widely-cited gematria equivalences (mispar hechrechi):
   two words that happen to share a numeric value, traditionally read as a

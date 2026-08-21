@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from engine.kb.facets import load_taxonomy
-from engine.kb.loader import load_kb
+from engine.kb.loader import CURATION_VALUES, load_kb
 
 # Anchored on this file, not on the cwd: a relative Path("kb") resolves to
 # nothing when pytest is invoked from anywhere but the repo root, and every
@@ -37,6 +37,32 @@ def test_every_shipped_kb_file_is_reviewed():
     for path in kb_files():
         doc = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert doc.get("reviewed") is True, f"{path} is not marked reviewed"
+
+
+def test_every_shipped_kb_file_declares_a_valid_curation_value():
+    """R67/R70: `reviewed: true` alone says a file is allowed to ship, not
+    how its content was produced -- see engine/kb/loader.py's module
+    docstring. This is the file-level counterpart of
+    test_kb_loader.py's `test_missing_curation_is_rejected`: that test
+    proves the loader rejects an absent/invalid value on a throwaway
+    fixture; this one proves every file actually shipped in kb/ declares
+    one."""
+    for path in kb_files():
+        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        assert doc.get("curation") in CURATION_VALUES, f"{path} has no valid curation value"
+
+
+def test_only_life_path_pairs_is_derived_pending_review():
+    """Every shipped KB file except the heuristically generated compatibility
+    matrix is hand-authored. Pinned as an absolute set, not just "at least
+    one file is derived", so this also catches a future generated file
+    shipping silently marked hand-authored, or life_path_pairs.yaml losing
+    its marker on an edit that forgets it."""
+    kb = load_kb()
+    derived = {
+        key for key, kb_file in kb.files.items() if kb_file.curation == "derived_pending_review"
+    }
+    assert derived == {("compatibility", "life_path_pairs")}
 
 
 def test_every_tag_references_a_known_facet():

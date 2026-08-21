@@ -2,6 +2,7 @@ import pytest
 
 from engine.compatibility import ASPECT_SCORES, SYNASTRY_POINTS, compare
 from engine.orchestrator import build_profile
+from engine.systems.astrology import SIGNS
 from tests.fixtures.people import FIXTURES
 
 
@@ -113,16 +114,18 @@ def test_ambiguous_birth_time_keeps_the_moon():
     assert any("moon" in r["detail"].lower() for r in report["reasons"])
 
 
-def test_missing_birth_time_pair_score_is_pinned():
-    """Freezes the actual score `compare` emits for a missing-time pair as an
-    absolute number, not a structural shape -- a structural assertion (\"moon
-    not in reasons\") would not catch the score silently including the moon's
-    contribution anyway (e.g. via a stray fallback path)."""
+def test_missing_birth_time_pair_dimensions_and_score_are_pinned():
+    """Freezes the actual dimensions and score `compare` emits for a
+    missing-time pair as absolute numbers, not a structural shape -- a
+    structural assertion ("moon not in reasons") would not catch the score
+    silently including the moon's contribution anyway (e.g. via a stray
+    fallback path), nor would it catch the connection/communication split
+    (fix round 1) silently collapsing back into one shared number."""
     a = build_profile(FIXTURES["standard"])
     b = build_profile(FIXTURES["no_birth_time"])
     report = compare(a, b)
+    assert report["dimensions"] == {"connection": 47, "communication": 42, "growth": 0}
     assert report["score"] == 30
-    assert report["dimensions"] == {"connection": 39, "communication": 50, "growth": 0}
 
 
 def test_moon_excluded_note_names_both_when_both_are_missing():
@@ -132,3 +135,106 @@ def test_moon_excluded_note_names_both_when_both_are_missing():
     moon_notes = [n for n in report["notes"] if "moon" in n.lower()]
     assert len(moon_notes) == 1
     assert "A and B" in moon_notes[0]
+
+
+# --- FIX ROUND 1, item 1: dimension rollup must use disjoint astrology
+# subsets. --------------------------------------------------------------
+#
+# The brief requires `connection` to be driven by Sun/Moon/Venus/Mars pairs
+# and `communication` by Ascendant-involving pairs. The first version of this
+# module computed one aggregate over all 25 pairs and used it for both
+# dimensions, so every existing test above (which only asserts bounds, key
+# sets, symmetry and determinism) passed while the two dimensions moved in
+# lockstep. These tests are built to catch that specific regression.
+
+
+def _synthetic_profile(sun: float, moon: float, venus: float, mars: float, ascendant, life_path):
+    """A minimal profile-shaped dict, bypassing the ephemeris entirely, so a
+    test can pin exact longitudes and isolate the connection/communication
+    split instead of hoping a real birth chart happens to produce the
+    contrast it needs. Human Design is marked unavailable so `connection`
+    reduces to its astrology subset alone -- no gate data to fabricate."""
+
+    def placement(body: str, lon: float) -> dict:
+        index = int(lon // 30) % 12
+        return {"body": body, "sign": SIGNS[index], "degree": lon % 30, "retrograde": False}
+
+    angles = None
+    if ascendant is not None:
+        index = int(ascendant // 30) % 12
+        angles = {"ascendant": {"sign": SIGNS[index], "degree": ascendant % 30}}
+
+    return {
+        "input_quality": {"birth_time": "exact"},
+        "raw": {
+            "astrology": {
+                "placements": [
+                    placement("sun", sun),
+                    placement("moon", moon),
+                    placement("venus", venus),
+                    placement("mars", mars),
+                ],
+                "angles": angles,
+            },
+            "human_design": {"available": False},
+            "numerology": {"life_path": life_path},
+        },
+    }
+
+
+def test_connection_and_communication_move_in_opposite_directions():
+    """Case 1: the two Ascendants sit in exact conjunction (67 deg both) and
+    every Sun/Moon/Venus/Mars cross-pair is chosen (by construction, verified
+    by a brute-force search) to land outside every aspect orb -- a strong
+    Ascendant signal, zero planetary signal. Case 2: the Sun/Moon/Venus/Mars
+    positions are identical between A and B (six conjunctions across the
+    4x4 grid), while the Ascendants sit far enough apart to draw no aspect
+    of their own -- a strong planetary signal, near-zero Ascendant signal.
+
+    If `connection` and `communication` were still driven by the same
+    aggregate (the bug fix round 1 corrects), both dimensions would rise
+    together from case 1 to case 2, because the total astrology signal rises
+    in absolute terms in both cases. With the correct disjoint split,
+    `connection` must rise (it gains six conjunctions) while `communication`
+    must fall (it loses its one conjunction and gains two hard aspects) --
+    opposite directions.
+    """
+    a1 = _synthetic_profile(264.0, 226.0, 278.0, 265.0, 67.0, 1)
+    b1 = _synthetic_profile(120.0, 16.0, 197.0, 293.0, 67.0, 1)
+    case1 = compare(a1, b1)["dimensions"]
+
+    a2 = _synthetic_profile(264.0, 226.0, 278.0, 265.0, 10.0, 1)
+    b2 = _synthetic_profile(264.0, 226.0, 278.0, 265.0, 50.0, 1)
+    case2 = compare(a2, b2)["dimensions"]
+
+    assert case2["connection"] > case1["connection"]
+    assert case2["communication"] < case1["communication"]
+
+    # Pinned exact values, so a change to the rescale ranges or the split
+    # itself is caught even if it happened to preserve direction.
+    assert case1 == {"connection": 25, "communication": 46, "growth": 0}
+    assert case2 == {"connection": 53, "communication": 42, "growth": 25}
+
+
+def test_communication_falls_back_to_numerology_when_neither_has_an_ascendant():
+    """When both people are missing a birth time, `communication`'s
+    astrology subset has zero POSSIBLE pairs (neither chart has an
+    Ascendant) -- absent evidence, not a measured zero. `communication`
+    must equal the numerology score alone, not a blend that silently reads
+    the missing subset as 0 and rescales it into "measured incompatibility".
+    """
+    from engine.compatibility import life_path_harmony
+
+    a = build_profile(FIXTURES["no_birth_time"])
+    b = build_profile(FIXTURES["no_birth_time"])
+    report = compare(a, b)
+
+    lp_a = a["raw"]["numerology"]["life_path"]
+    lp_b = b["raw"]["numerology"]["life_path"]
+    expected_numerology_score = life_path_harmony(lp_a, lp_b) * 10
+
+    assert report["dimensions"]["communication"] == expected_numerology_score
+    assert any(
+        "communication" in n and "ascendant" in n.lower() and "numerology" in n
+        for n in report["notes"]
+    )

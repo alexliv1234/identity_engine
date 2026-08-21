@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: kabbalah
 element: hebrew_months
 reviewed: true
+curation: hand_authored
 source: >-
   Traditional Jewish associations for each month of the Hebrew calendar, drawn
   from classical sources (Sefer Yetzirah's month correspondences, the Talmud's

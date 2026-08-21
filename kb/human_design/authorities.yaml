@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: human_design
 element: authorities
 reviewed: true
+curation: hand_authored
 source: >-
   Human Design as taught in the mainstream Jovian-derived lineage. Authority
   is the decision-making hierarchy: which internal signal, if any, is

@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: human_design
 element: profiles
 reviewed: true
+curation: hand_authored
 source: >-
   Human Design as taught in the mainstream Jovian-derived lineage. Profile
   combines the personality (conscious) Sun's line with the design

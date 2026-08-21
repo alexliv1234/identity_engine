@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: kabbalah
 element: sefirot
 reviewed: true
+curation: hand_authored
 source: >-
   Lurianic-derived popular Kabbalah as commonly presented in contemporary
   English-language sources. This is the least standardized of the six systems;

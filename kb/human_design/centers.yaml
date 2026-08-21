@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: human_design
 element: centers
 reviewed: true
+curation: hand_authored
 source: >-
   Human Design as taught in the mainstream Jovian-derived lineage. Each of
   the nine centers, when defined (consistently colored in, as opposed to
