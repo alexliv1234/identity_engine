@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identity Engine — Playground</title>
+<style>
+  :root {
+    --bg: #faf6ef;
+    --card: #fffdf8;
+    --line: #e3d8c5;
+    --line-soft: #ece3d2;
+    --ink: #2c241d;
+    --ink-soft: #40342a;
+    --dim: #8a7d6c;
+    --accent: #b5502e;
+    --accent-dark: #8f3d21;
+    --accent-tint: #f3e2d3;
+    --tension-bg: #f8ead8;
+    --tension-border: #a8461f;
+    --notice-bg: #f7ead9;
+    --notice-border: #b5814a;
+    --error: #b3402c;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem 4rem;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.6 var(--sans);
+  }
+  main { max-width: 52rem; margin: 0 auto; display: grid; gap: 1.75rem; }
+
+  header.masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 1.1rem;
+  }
+  header.masthead h1 {
+    font: 400 1.3rem/1.1 var(--serif);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header.masthead .tagline {
+    font: italic 0.9rem var(--serif);
+    color: var(--dim);
+  }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.5rem 1.6rem;
+  }
+  h2 {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+  h3 {
+    font: 400 1.15rem var(--serif);
+    margin: 0 0 0.6rem;
+    color: var(--ink);
+  }
+
+  label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .hint { font-size: 0.76rem; color: var(--dim); line-height: 1.5; margin-top: 0.3rem; }
+
+  input, select, button, textarea {
+    font: inherit;
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.5rem 0.6rem;
+  }
+  input[dir="rtl"] { font-size: 1.05rem; }
+  input:disabled { background: var(--line-soft); color: var(--dim); }
+
+  button {
+    background: var(--accent-dark);
+    color: #fdf6ee;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.6rem 1.3rem;
+  }
+  button:hover { background: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: progress; }
+
+  .grid {
+    display: grid;
+    gap: 1.1rem 1.4rem;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+  .field-wide { grid-column: 1 / -1; }
+  .field input { width: 100%; }
+
+  .checkline {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1.1rem;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .checkline input { width: auto; padding: 0; accent-color: var(--accent-dark); }
+
+  .actions { display: flex; align-items: center; gap: 1rem; margin-top: 1.2rem; }
+  .error { color: var(--error); font-size: 0.82rem; }
+
+  .hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 1.3rem;
+    margin-bottom: 0.3rem;
+  }
+  .hero-claim {
+    font: 400 1.7rem/1.28 var(--serif);
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .hero-sub { font-size: 0.85rem; color: var(--dim); margin-top: 0.5rem; }
+
+  .notice {
+    background: var(--notice-bg);
+    border-left: 3px solid var(--notice-border);
+    padding: 0.9rem 1.1rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .dimension { border-top: 1px dotted var(--line); padding-top: 1rem; margin-top: 1rem; }
+  .dimension:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .facet { margin-bottom: 0.85rem; }
+  .facet-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: 0.88rem;
+  }
+  .facet-name { color: var(--ink-soft); }
+  .convergence { color: var(--dim); font-size: 0.76rem; white-space: nowrap; }
+  .bar {
+    height: 4px;
+    background: var(--line-soft);
+    border-radius: 2px;
+    margin: 0.35rem 0;
+    overflow: hidden;
+  }
+  .bar > i { display: block; height: 100%; background: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+  .chip {
+    font-size: 0.68rem;
+    color: var(--dim);
+    background: var(--line-soft);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+  }
+
+  .tension {
+    border-left: 3px solid var(--tension-border);
+    background: var(--tension-bg);
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 4px 4px 0;
+    margin-top: 0.6rem;
+    font-size: 0.83rem;
+    color: var(--ink-soft);
+  }
+  .tension b { color: var(--tension-border); }
+
+  #tensionsSummary {
+    background: var(--tension-bg);
+    border-top: 2px solid var(--tension-border);
+    padding: 1.2rem 1.4rem;
+    border-radius: 4px;
+    margin-top: 0.3rem;
+  }
+  #tensionsSummary h2 { color: var(--accent-dark); }
+  .dim-note { font-size: 0.85rem; color: var(--dim); }
+
+  details.raw-row { border-top: 1px solid var(--line-soft); padding: 0.5rem 0; }
+  details.raw-row summary {
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .raw-note { font-size: 0.78rem; color: var(--notice-border); margin: 0.4rem 0 0; }
+
+  pre {
+    white-space: pre-wrap;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    margin: 0 0 0.9rem;
+    font-family: var(--sans);
+  }
+
+  .score { font: 400 2.6rem/1 var(--serif); }
+  .score-of { font-size: 0.78rem; color: var(--dim); }
+  .compat-dims { display: flex; flex-wrap: wrap; gap: 0.9rem 1.6rem; margin: 0.6rem 0 1.1rem; }
+  .compat-dim { font-size: 0.85rem; color: var(--ink-soft); }
+  .compat-dim b { color: var(--accent-dark); }
+  .reasons { list-style: none; margin: 0; padding: 0; font-size: 0.85rem; display: grid; gap: 0.5rem; }
+  .reasons li { padding-left: 0.9rem; border-left: 2px solid var(--line); }
+  .reasons li.challenging { border-left-color: var(--tension-border); color: var(--accent-dark); }
+
+  footer {
+    color: var(--dim);
+    font-size: 0.78rem;
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header class="masthead">
+  <h1>Identity Engine</h1>
+  <span class="tagline">A mirror, not a diagnosis.</span>
+</header>
+
+<section>
+  <h2>Connection</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="apiKey">API key</label>
+      <input id="apiKey" type="password" placeholder="paste the key printed by create_app_key.py" autocomplete="off">
+      <p class="hint">Kept only in this tab's session storage. Never written into this page.</p>
+    </div>
+    <div class="field">
+      <label for="apiBase">API base URL</label>
+      <input id="apiBase" type="text" placeholder="leave blank if this page is served by the API">
+      <p class="hint">Leave blank when this page is served by the API itself. Set this only when the playground and the API live on different origins.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Build a profile</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="fullName">Full name</label>
+      <input id="fullName" value="Ada Lovelace">
+      <p class="hint">Numerology reads the letters.</p>
+    </div>
+    <div class="field">
+      <label for="birthDate">Born on</label>
+      <input id="birthDate" type="date" value="1815-12-10">
+      <p class="hint">All six systems need this.</p>
+    </div>
+    <div class="field">
+      <label for="birthTime">At</label>
+      <input id="birthTime" type="time" value="13:00">
+      <p class="hint" id="birthTimeHint">Unlocks Human Design, Gene Keys and your houses.</p>
+    </div>
+    <div class="field">
+      <label for="birthPlace">In</label>
+      <input id="birthPlace" value="London, GB">
+      <p class="hint">Looked up offline — nothing leaves the server.</p>
+    </div>
+    <div class="field field-wide">
+      <label for="hebrewName">Hebrew name <span style="text-transform:none;font-weight:400;font-style:italic">(optional)</span></label>
+      <input id="hebrewName" dir="rtl" placeholder="optional">
+      <p class="hint">Leave it blank and the Latin name is transliterated instead — that still works, but Kabbalah lowers its own confidence rather than pretending it read the letters directly.</p>
+    </div>
+  </div>
+
+  <label class="checkline" for="noBirthTime">
+    <input id="noBirthTime" type="checkbox">
+    I don't know my birth time
+  </label>
+
+  <div class="actions">
+    <button id="buildProfile">Read the profile</button>
+    <span id="buildError" class="error"></span>
+  </div>
+</section>
+
+<section id="profileSection" hidden>
+  <div class="hero">
+    <div id="heroClaim"></div>
+  </div>
+  <div id="noTimeNotice" class="notice" hidden></div>
+  <h2 id="traitsHeading" style="margin-top:1.4rem"></h2>
+  <div id="dimensions"></div>
+</section>
+
+<section id="tensionsSummary" hidden></section>
+
+<section id="rawSection" hidden>
+  <h2>Raw systems</h2>
+  <div id="rawLayer"></div>
+</section>
+
+<section id="contextSection" hidden>
+  <h2>LLM context block</h2>
+  <div class="grid" style="margin-bottom:0.9rem">
+    <div class="field">
+      <label for="contextVocabulary">Vocabulary</label>
+      <select id="contextVocabulary">
+        <option value="plain" selected>Plain</option>
+        <option value="esoteric">Esoteric</option>
+      </select>
+    </div>
+  </div>
+  <pre id="contextBlock"></pre>
+  <button id="copyContext">Copy to clipboard</button>
+  <span id="copyStatus" class="hint" style="margin-left:0.6rem"></span>
+</section>
+
+<section id="compareSection" hidden>
+  <h2>Compare two people</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="personA">Person A</label>
+      <select id="personA"></select>
+    </div>
+    <div class="field">
+      <label for="personB">Person B</label>
+      <select id="personB"></select>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="runCompare">Compare</button>
+    <span id="compareError" class="error"></span>
+  </div>
+  <div id="compatReport"></div>
+</section>
+
+<footer>
+  Reflective and entertainment insight; not medical, psychological, or financial advice.
+</footer>
+
+</main>
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const people = [];           // {id, name} created in this browser session
+let currentPersonId = null;
+
+/* ---------- API paths ----------
+   Every literal here is written in FastAPI's own path-template syntax
+   ("{person_id}", not a JS placeholder), so it is byte-identical to that
+   route's real `route.path` on the deployed app -- the same string a test
+   can look up directly in `app.routes` rather than hand-maintaining a
+   second, driftable list. */
+const ROUTES = {
+  createPerson: "/v1/persons",
+  profile: "/v1/persons/{person_id}/profile",
+  context: "/v1/persons/{person_id}/context",
+  compatibility: "/v1/compatibility",
+};
+
+function fillTemplate(template, params) {
+  let out = template;
+  for (const key of Object.keys(params)) {
+    out = out.replace("{" + key + "}", encodeURIComponent(params[key]));
+  }
+  return out;
+}
+
+/* >>> PURE_PROFILE_HELPERS_START -- extracted verbatim by
+   tests/test_playground.py to execute under Node without a DOM. Nothing in
+   this block may reference `document`, `window`, or `$`; it may only read
+   from a `profile` (or `report`) object and return plain values. */
+
+// kb/facets.yaml defines a fixed taxonomy: nine dimensions, 32 facets in
+// total, regardless of what any single profile actually has data for.
+const TOTAL_DIMENSIONS = 9;
+const TOTAL_FACETS = 32;
+
+function applicableSystemCount(profile) {
+  return Object.values(profile.raw || {}).filter((p) => p && p.confidence > 0).length;
+}
+
+function allFacets(profile) {
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+  const out = [];
+  for (const dim of Object.values(dims)) {
+    for (const facet of dim.facets) out.push(facet);
+  }
+  return out;
+}
+
+// fix round 1 (finding 2): a profile only carries a synthesised facet when
+// at least one applicable system actually tagged it (engine/synthesis.py
+// skips a facet whose accumulated weight is zero) -- so the number of
+// facets a real profile renders is routinely less than the taxonomy's
+// fixed 32, and that is correct engine behaviour, not a bug. The heading
+// must say what was actually rendered and name the gap, never claim "all
+// 32" while showing fewer -- on a product whose whole pitch is reporting
+// what the systems actually said rather than smoothing it, that mismatch
+// is the worst kind of copy error.
+function traitsHeadingText(profile) {
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+  const dimensionCount = Object.keys(dims).length;
+  const facetCount = allFacets(profile).length;
+  const missing = TOTAL_FACETS - facetCount;
+
+  const dimensionPart =
+    dimensionCount === TOTAL_DIMENSIONS
+      ? "all nine dimensions"
+      : dimensionCount + " of " + TOTAL_DIMENSIONS + " dimensions";
+
+  if (missing <= 0) {
+    return dimensionPart + ", all " + TOTAL_FACETS + " traits";
+  }
+
+  const gapNote =
+    missing === 1 ? "one had no system speak to it" : missing + " had no system speak to them";
+  return dimensionPart + ", " + facetCount + " of " + TOTAL_FACETS + " traits — " + gapNote;
+}
+
+/* <<< PURE_PROFILE_HELPERS_END */
+
+/* ---------- API base + key resolution (R73) ----------
+   Precedence: (1) the API base URL field, which reflects whatever was
+   persisted to sessionStorage on a previous visit; (2) a build/host
+   injected global; (3) empty string, meaning same-origin relative URLs --
+   which is what keeps the API-served /playground/ route working exactly
+   as before with zero configuration. */
+function apiBase() {
+  const typed = $("apiBase").value.trim();
+  if (typed) return typed.replace(/\/+$/, "");
+  if (typeof window.IDENTITY_ENGINE_API_BASE === "string" && window.IDENTITY_ENGINE_API_BASE.trim()) {
+    return window.IDENTITY_ENGINE_API_BASE.trim().replace(/\/+$/, "");
+  }
+  return "";
+}
+
+function apiKey() {
+  return $("apiKey").value.trim();
+}
+
+function headers() {
+  return {
+    "Authorization": "Bearer " + apiKey(),
+    "Content-Type": "application/json",
+  };
+}
+
+async function api(pathAndQuery, options = {}) {
+  const res = await fetch(apiBase() + pathAndQuery, { headers: headers(), ...options });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ? body.error.message : "request failed (" + res.status + ")");
+  }
+  return res;
+}
+
+/* ---------- session persistence ---------- */
+
+window.addEventListener("DOMContentLoaded", () => {
+  const savedKey = sessionStorage.getItem("ie_key");
+  if (savedKey) $("apiKey").value = savedKey;
+  const savedBase = sessionStorage.getItem("ie_api_base");
+  if (savedBase) $("apiBase").value = savedBase;
+});
+$("apiKey").addEventListener("input", () => {
+  sessionStorage.setItem("ie_key", $("apiKey").value.trim());
+});
+$("apiBase").addEventListener("input", () => {
+  sessionStorage.setItem("ie_api_base", $("apiBase").value.trim());
+});
+
+/* ---------- entry form behaviour ---------- */
+
+$("noBirthTime").addEventListener("change", () => {
+  const noTime = $("noBirthTime").checked;
+  $("birthTime").disabled = noTime;
+  $("birthTimeHint").textContent = noTime
+    ? "Two systems sit this one out: Human Design and Gene Keys both need the exact minute, so they are excluded rather than guessed at. Astrology still reads your placements, just not your houses."
+    : "Unlocks Human Design, Gene Keys and your houses.";
+});
+
+/* ---------- rendering: profile ---------- */
+
+function renderHero(profile) {
+  const target = $("heroClaim");
+  target.textContent = "";
+  const facets = allFacets(profile);
+  if (!facets.length) return;
+
+  const applicable = applicableSystemCount(profile);
+  let best = facets[0];
+  for (const facet of facets) {
+    if (
+      facet.convergence > best.convergence ||
+      (facet.convergence === best.convergence && facet.score > best.score)
+    ) {
+      best = facet;
+    }
+  }
+
+  const claim = document.createElement("div");
+  claim.className = "hero-claim";
+  claim.textContent = best.label + ": " + best.direction + ".";
+
+  const sub = document.createElement("div");
+  sub.className = "hero-sub";
+  const agreeing = Math.round(best.convergence * applicable);
+  sub.textContent =
+    agreeing + " of " + applicable +
+    " systems agree — the widest agreement anywhere in this profile.";
+
+  target.append(claim, sub);
+}
+
+function renderTraitsHeading(profile) {
+  $("traitsHeading").textContent = traitsHeadingText(profile);
+}
+
+function renderNoTimeNotice(profile) {
+  const el = $("noTimeNotice");
+  const quality = profile.input_quality && profile.input_quality.birth_time;
+  if (quality === "missing") {
+    el.hidden = false;
+    el.textContent =
+      "Without a birth time, two of six systems can't speak. Human Design and " +
+      "Gene Keys both depend on the exact minute, so they've been left out " +
+      "rather than guessed at. Astrology still reads your placements, but not " +
+      "your houses. The other three don't need the time at all.";
+  } else {
+    el.hidden = true;
+    el.textContent = "";
+  }
+}
+
+function renderDimensions(profile) {
+  const target = $("dimensions");
+  target.textContent = "";
+  const applicable = applicableSystemCount(profile);
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+
+  for (const dim of Object.values(dims)) {
+    const block = document.createElement("div");
+    block.className = "dimension";
+
+    const heading = document.createElement("h3");
+    heading.textContent = dim.label;
+    block.append(heading);
+
+    for (const facet of dim.facets) {
+      const row = document.createElement("div");
+      row.className = "facet";
+
+      const head = document.createElement("div");
+      head.className = "facet-head";
+      const name = document.createElement("span");
+      name.className = "facet-name";
+      name.textContent = facet.label + ": " + facet.direction;
+      const conv = document.createElement("span");
+      conv.className = "convergence";
+      const agreeing = Math.round(facet.convergence * applicable);
+      conv.textContent =
+        agreeing + " of " + applicable + " (" + Math.round(facet.convergence * 100) + "% convergence)";
+      head.append(name, conv);
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("i");
+      fill.style.width = Math.round(facet.convergence * 100) + "%";
+      bar.append(fill);
+
+      const chips = document.createElement("div");
+      chips.className = "chips";
+      const seen = new Set();
+      for (const source of facet.provenance) {
+        if (seen.has(source.system)) continue;
+        seen.add(source.system);
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = source.system.replace(/_/g, " ");
+        chips.append(chip);
+      }
+
+      row.append(head, bar, chips);
+      block.append(row);
+    }
+
+    for (const tension of dim.tensions) {
+      const callout = document.createElement("div");
+      callout.className = "tension";
+      const tag = document.createElement("b");
+      tag.textContent = "Tension — ";
+      callout.append(tag, document.createTextNode(tension.text));
+      block.append(callout);
+    }
+
+    target.append(block);
+  }
+}
+
+function renderTensionsSummary(profile) {
+  const section = $("tensionsSummary");
+  section.textContent = "";
+  section.hidden = false;
+
+  const dims = (profile.synthesis && profile.synthesis.dimensions) || {};
+  let facetCount = 0;
+  const tensions = [];
+  for (const dim of Object.values(dims)) {
+    facetCount += dim.facets.length;
+    for (const tension of dim.tensions) tensions.push(tension);
+  }
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Where they disagree — " + tensions.length + " of " + facetCount + " traits";
+  section.append(heading);
+
+  if (!tensions.length) {
+    const note = document.createElement("p");
+    note.className = "dim-note";
+    note.textContent = "No cross-system disagreement reached the tension threshold for this profile.";
+    section.append(note);
+    return;
+  }
+
+  for (const tension of tensions) {
+    const row = document.createElement("div");
+    row.className = "tension";
+    row.textContent = tension.text;
+    section.append(row);
+  }
+
+  const footnote = document.createElement("p");
+  footnote.className = "dim-note";
+  footnote.style.marginTop = "0.9rem";
+  footnote.textContent =
+    "A single-system reading cannot produce these lines, because it has nothing to disagree with.";
+  section.append(footnote);
+}
+
+function renderRaw(profile) {
+  const section = $("rawSection");
+  const target = $("rawLayer");
+  target.textContent = "";
+  for (const [system, payload] of Object.entries(profile.raw || {})) {
+    const row = document.createElement("details");
+    row.className = "raw-row";
+    const summary = document.createElement("summary");
+    const excluded = payload.available === false;
+    summary.textContent =
+      system.replace(/_/g, " ") + (excluded ? " — excluded" : "") +
+      "  ·  confidence " + payload.confidence;
+    row.append(summary);
+    for (const note of payload.notes || []) {
+      const p = document.createElement("p");
+      p.className = "raw-note";
+      p.textContent = note;
+      row.append(p);
+    }
+    target.append(row);
+  }
+  section.hidden = false;
+}
+
+/* ---------- rendering: compatibility ---------- */
+
+function renderCompatibility(report) {
+  const target = $("compatReport");
+  target.textContent = "";
+
+  const score = document.createElement("div");
+  score.className = "score";
+  score.textContent = report.score;
+  const scoreOf = document.createElement("div");
+  scoreOf.className = "score-of";
+  scoreOf.textContent = "out of 100, across all systems";
+  target.append(score, scoreOf);
+
+  const dims = document.createElement("div");
+  dims.className = "compat-dims";
+  for (const [dimension, value] of Object.entries(report.dimensions)) {
+    const item = document.createElement("span");
+    item.className = "compat-dim";
+    const b = document.createElement("b");
+    b.textContent = String(value);
+    item.append(dimension.replace(/_/g, " ") + " ", b);
+    dims.append(item);
+  }
+  target.append(dims);
+
+  for (const note of report.notes || []) {
+    const line = document.createElement("div");
+    line.className = "tension";
+    line.textContent = note;
+    target.append(line);
+  }
+
+  const list = document.createElement("ul");
+  list.className = "reasons";
+  for (const reason of report.reasons) {
+    const item = document.createElement("li");
+    if (reason.effect === "challenging") item.className = "challenging";
+    item.textContent = "[" + reason.system + "] " + reason.detail;
+    list.append(item);
+  }
+  target.append(list);
+}
+
+function refreshPeopleSelects() {
+  for (const id of ["personA", "personB"]) {
+    const select = $(id);
+    select.textContent = "";
+    for (const person of people) {
+      const option = document.createElement("option");
+      option.value = person.id;
+      option.textContent = person.name;
+      select.append(option);
+    }
+  }
+  if (people.length >= 2) {
+    $("personB").selectedIndex = people.length - 1;
+    $("compareSection").hidden = false;
+  }
+}
+
+/* ---------- LLM context block ---------- */
+
+async function loadContext(personId) {
+  currentPersonId = personId;
+  const vocabulary = $("contextVocabulary").value;
+  const text = await (
+    await api(fillTemplate(ROUTES.context, { person_id: personId }) + "?vocabulary=" + encodeURIComponent(vocabulary))
+  ).text();
+  $("contextBlock").textContent = text;
+  $("contextSection").hidden = false;
+}
+
+$("contextVocabulary").addEventListener("change", () => {
+  if (!currentPersonId) return;
+  loadContext(currentPersonId).catch((err) => {
+    $("contextBlock").textContent = "Error: " + err.message;
+  });
+});
+
+$("copyContext").addEventListener("click", async () => {
+  const status = $("copyStatus");
+  try {
+    await navigator.clipboard.writeText($("contextBlock").textContent);
+    status.textContent = "Copied.";
+  } catch (err) {
+    status.textContent = "Copy failed — select the text and copy manually.";
+  }
+  setTimeout(() => { status.textContent = ""; }, 1800);
+});
+
+/* ---------- actions ---------- */
+
+$("buildProfile").addEventListener("click", async () => {
+  const button = $("buildProfile");
+  const errorSlot = $("buildError");
+  errorSlot.textContent = "";
+  button.disabled = true;
+
+  try {
+    const noTime = $("noBirthTime").checked;
+    const payload = {
+      full_name: $("fullName").value,
+      birth_date: $("birthDate").value,
+      birth_time: noTime ? null : ($("birthTime").value || null),
+      birth_place: $("birthPlace").value,
+      hebrew_name: $("hebrewName").value || null,
+    };
+
+    const created = await (
+      await api(ROUTES.createPerson, { method: "POST", body: JSON.stringify(payload) })
+    ).json();
+    const profile = created.profile;
+
+    renderHero(profile);
+    renderTraitsHeading(profile);
+    renderNoTimeNotice(profile);
+    renderDimensions(profile);
+    renderTensionsSummary(profile);
+    renderRaw(profile);
+    $("profileSection").hidden = false;
+
+    await loadContext(created.person_id);
+
+    people.push({ id: created.person_id, name: payload.full_name });
+    refreshPeopleSelects();
+  } catch (err) {
+    errorSlot.textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("runCompare").addEventListener("click", async () => {
+  const errorSlot = $("compareError");
+  errorSlot.textContent = "";
+  try {
+    const a = $("personA").value;
+    const b = $("personB").value;
+    const report = await (
+      await api(ROUTES.compatibility + "?a=" + encodeURIComponent(a) + "&b=" + encodeURIComponent(b))
+    ).json();
+    renderCompatibility(report);
+  } catch (err) {
+    errorSlot.textContent = err.message;
+  }
+});
+</script>
+</body>
+</html>

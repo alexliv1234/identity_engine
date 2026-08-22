@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: human_design
 element: types
 reviewed: true
+curation: hand_authored
 source: >-
   Human Design as taught in the mainstream Jovian-derived lineage (Ra Uru
   Hu's original synthesis and its common contemporary teaching). Interpretive

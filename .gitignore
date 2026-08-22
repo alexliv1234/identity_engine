@@ -10,3 +10,13 @@ venv/
 # Vendored JPL ephemeris kernel (~300 MB). Fetched by kb_tools/fetch_ephemeris.py,
 # never committed. See README "Ephemeris data" section.
 engine/ephemeris/data/
+
+# Default dev sqlite database (api/settings.py Settings.database_url). Every
+# app boot's startup lifespan calls api.db.create_all() against it, so it
+# reappears locally on the first `client`-fixture test run or `uvicorn`
+# invocation; never meant to be committed.
+*.db
+
+# Playwright MCP scratch output
+.playwright-mcp/
+design/playground/identity-engine-playground.html

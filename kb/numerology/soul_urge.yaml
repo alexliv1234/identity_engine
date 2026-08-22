@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: numerology
 element: soul_urge
 reviewed: true
+curation: hand_authored
 source: >-
   Pythagorean tradition, common contemporary synthesis. Interpretive choice:
   the Soul Urge (Heart's Desire) number sums the Pythagorean letter values of

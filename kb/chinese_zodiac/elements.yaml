@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: chinese_zodiac
 element: elements
 reviewed: true
+curation: hand_authored
 source: >-
   Common contemporary synthesis of the five wuxing (five-phase) elements as
   popularly applied to the Chinese zodiac, cycling every two years within the

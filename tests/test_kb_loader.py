@@ -9,6 +9,7 @@ schema: kb.mapping.v1
 system: demo
 element: demo_element
 reviewed: true
+curation: hand_authored
 source: "Test fixture"
 entries:
   alpha:
@@ -43,6 +44,15 @@ def test_loads_entries_and_tags(tmp_path):
     assert "pioneering" in tags[0].text
 
 
+def test_loaded_file_carries_its_curation_value(tmp_path):
+    """R67/R70: `curation` must actually reach `KBFile`, not just pass
+    validation and get discarded -- a validated-but-dropped field would be
+    just as invisible to code as no field at all."""
+    root = write_kb(tmp_path, "demo.yaml", VALID)
+    kb = load_kb(root)
+    assert kb.files[("demo", "demo_element")].curation == "hand_authored"
+
+
 def test_unknown_entry_key_returns_no_tags_not_an_error(tmp_path):
     root = write_kb(tmp_path, "demo.yaml", VALID)
     kb = load_kb(root)
@@ -62,6 +72,35 @@ def test_reviewed_false_is_rejected(tmp_path):
     root = write_kb(tmp_path, "demo.yaml", body)
     with pytest.raises(KBValidationError, match="reviewed"):
         load_kb(root)
+
+
+def test_missing_curation_is_rejected(tmp_path):
+    """R67/R70: a bare-missing `curation` key must hard-fail, exactly like a
+    missing `reviewed` flag -- not silently default to "hand-authored"
+    (this is the specific gap `kb/compatibility/life_path_pairs.yaml`
+    slipped through: `reviewed: true` alone said nothing about provenance)."""
+    body = VALID.replace("curation: hand_authored\n", "")
+    assert "curation:" not in body  # sanity: the replace actually matched
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="curation"):
+        load_kb(root)
+
+
+def test_unknown_curation_value_is_rejected(tmp_path):
+    body = VALID.replace("curation: hand_authored", "curation: made_it_up")
+    root = write_kb(tmp_path, "demo.yaml", body)
+    with pytest.raises(KBValidationError, match="curation"):
+        load_kb(root)
+
+
+def test_derived_pending_review_is_an_accepted_curation_value(tmp_path):
+    """The other half of the enum: `hand_authored` alone being accepted
+    would not prove the loader recognises the value real generated content
+    (life_path_pairs.yaml) actually ships with."""
+    body = VALID.replace("curation: hand_authored", "curation: derived_pending_review")
+    root = write_kb(tmp_path, "demo.yaml", body)
+    kb = load_kb(root)
+    assert kb.files[("demo", "demo_element")].curation == "derived_pending_review"
 
 
 def test_unknown_facet_is_rejected(tmp_path):
@@ -160,6 +199,7 @@ schema: kb.mapping.v1
 system: demo
 element: demo_element
 reviewed: true
+curation: hand_authored
 source: "Test fixture"
 entries:
   alpha:

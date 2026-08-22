@@ -5,6 +5,20 @@ Every KB file is data, reviewed by a human and frozen (spec §4.3). Loading is
 strict on purpose: an unreviewed or malformed file must fail the build, not
 silently degrade a profile. Lookup at runtime is the opposite: an unmapped
 system element must never crash a profile — see `KnowledgeBase.tags_for`.
+
+**Curation provenance (R67/R70).** `reviewed: true` only says a file is
+allowed to ship; it says nothing about *how* the content was produced, and a
+generated file can set `reviewed: true` just as easily as a hand-authored
+one — which is exactly what let `kb/compatibility/life_path_pairs.yaml` ship
+a machine-derived matrix under a "Curated" label with no gate catching it.
+`curation` closes that gap: every mapping file must declare it explicitly
+(`CURATION_VALUES`), with no default, so a file can never rely on omission
+to imply "hand-authored" — the loader would previously accept a bare unknown
+key like this silently (unknown top-level keys are otherwise ignored), which
+is the same failure mode as an unchallenged `reviewed: true`. This is a
+provenance record, not a second review gate: it does not block a load the
+way `reviewed` does; it just makes "this still needs a human read" visible
+to code, not only to a comment.
 """
 
 from __future__ import annotations
@@ -20,6 +34,16 @@ from engine.kb.version import KB_ROOT
 from engine.types import TraitTag
 
 SCHEMA = "kb.mapping.v1"
+
+#: `curation` provenance values. `HAND_AUTHORED` is a human-written file:
+#: every entry's prose and label were chosen by a person. `DERIVED_PENDING_REVIEW`
+#: is machine-generated content -- from a documented, re-runnable rule -- that
+#: has not yet had every entry individually read and signed off by a human.
+#: `reviewed: true` still gates shipping either kind; `curation` says which
+#: kind it is, so that fact is never lost to an assumption.
+CURATION_HAND_AUTHORED = "hand_authored"
+CURATION_DERIVED_PENDING_REVIEW = "derived_pending_review"
+CURATION_VALUES = frozenset({CURATION_HAND_AUTHORED, CURATION_DERIVED_PENDING_REVIEW})
 
 
 class KBValidationError(Exception):
@@ -46,6 +70,7 @@ class KBFile:
     system: str
     element: str
     source: str | None
+    curation: str
     entries: dict[str, KBEntry]
 
 
@@ -86,6 +111,13 @@ def _validate_and_build(path: Path, doc: dict, taxonomy) -> KBFile:
         fail(f"expected schema {SCHEMA}, got {doc.get('schema')!r}")
     if doc.get("reviewed") is not True:
         fail("reviewed must be true — unreviewed KB drafts must not ship")
+    curation = doc.get("curation")
+    if curation not in CURATION_VALUES:
+        fail(
+            f"curation must be one of {sorted(CURATION_VALUES)} (got {curation!r}) — "
+            "every file must declare its provenance explicitly, hand-authored files "
+            "included, rather than leaving it to be inferred from an absent key"
+        )
     system, element = doc.get("system"), doc.get("element")
     if not system or not element:
         fail("system and element are required")
@@ -126,7 +158,9 @@ def _validate_and_build(path: Path, doc: dict, taxonomy) -> KBFile:
             specs.append(TagSpec(facet=facet, weight=weight, direction=direction))
         entries[key] = KBEntry(key=key, label=label, text=text, tags=tuple(specs))
 
-    return KBFile(system=system, element=element, source=doc.get("source"), entries=entries)
+    return KBFile(
+        system=system, element=element, source=doc.get("source"), curation=curation, entries=entries
+    )
 
 
 @functools.cache

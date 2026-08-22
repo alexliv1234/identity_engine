@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: astrology
 element: sun_signs
 reviewed: true
+curation: hand_authored
 source: >-
   Tropical zodiac, common contemporary synthesis of the twelve solar
   archetypes (element x modality: cardinal/fixed/mutable crossed with

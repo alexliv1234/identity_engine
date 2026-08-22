@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: astrology
 element: ascendants
 reviewed: true
+curation: hand_authored
 source: >-
   Tropical zodiac, common contemporary synthesis of the Ascendant (rising
   sign) as the style someone leads with in a first encounter, before anyone

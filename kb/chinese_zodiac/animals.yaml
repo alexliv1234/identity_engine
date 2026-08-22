@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: chinese_zodiac
 element: animals
 reviewed: true
+curation: hand_authored
 source: >-
   Common contemporary synthesis of the twelve earthly-branch animal signs as
   popularly interpreted in Chinese zodiac tradition. The year boundary is

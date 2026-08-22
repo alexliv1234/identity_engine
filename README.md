@@ -11,6 +11,86 @@ python3.12 -m venv .venv
 .venv/bin/pytest                      # Windows: .venv\Scripts\pytest
 ```
 
+Spec §6: Postgres in production, SQLite for dev and tests. `pip install .[postgres]`
+(or `.[dev]`, which already includes it) is required whenever `IDENTITY_DATABASE_URL`
+points at Postgres — a base install alone has no Postgres driver.
+
+### Required environment
+
+| Variable | Default | Notes |
+|---|---|---|
+| `IDENTITY_ENVIRONMENT` | `production` | Set to `development` to run locally. Only that exact value unlocks the SQLite default and the localhost CORS allowance. |
+| `IDENTITY_DATABASE_URL` | `sqlite:///./identity_engine.db` | **Required in any non-development process.** |
+| `IDENTITY_CORS_ALLOWED_ORIGINS` | *(empty)* | Comma-separated explicit origins. A literal `*` is refused at startup. |
+
+The service **refuses to start** when `IDENTITY_ENVIRONMENT` is anything but
+`development` and `IDENTITY_DATABASE_URL` is unset or points at SQLite
+(`api/settings.py`). That is deliberate: a SQLite file lives inside the
+container, so a deploy that forgets the variable would boot cleanly, pass
+`/health`, accept writes, and destroy every tenant's data on the next deploy
+without emitting anything. Failing at boot is the loud version of that.
+`pytest` declares itself development in `tests/__init__.py`.
+
+## Quickstart: run the API and the playground
+
+With the venv set up and the ephemeris kernel fetched (above), provision a
+per-app API key and start the server:
+
+```bash
+export IDENTITY_ENVIRONMENT=development   # Windows: $env:IDENTITY_ENVIRONMENT="development"
+.venv/bin/python kb_tools/create_app_key.py "Local Dev"   # Windows: .venv\Scripts\python
+.venv/bin/uvicorn api.main:app --reload                    # Windows: .venv\Scripts\uvicorn
+```
+
+`create_app_key.py` prints the key once, in plaintext — only its SHA-256 hash
+is stored (`api/models.py::App.api_key_hash`), so save it now. Then open
+<http://127.0.0.1:8000/playground/> and paste the key in: it drives the same
+`/v1/*` routes below, entirely client-side, with no bundler or external asset
+(`tests/test_playground.py` enforces the no-external-asset property).
+
+## API endpoints
+
+Every route below requires `Authorization: Bearer <api_key>`, except
+`/playground/`, which serves static HTML with no auth. Persons are scoped to
+the app that created them: another app's person id resolves to `404`, never
+`403` — existence of another tenant's person is not disclosed either way
+(`api/service.py::load_person`).
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/v1/persons` | Create a person; computes and stores the six-system profile |
+| GET | `/v1/persons/{id}/profile` | Cached profile. `?layers=raw,synthesis` and `?systems=astrology,...` narrow the response |
+| GET | `/v1/persons/{id}/context` | Token-budgeted LLM bundle. `?format=text\|json`, `?vocabulary=plain\|esoteric` |
+| GET | `/v1/persons/{id}/timing` | Numerology personal year/month. `?year=&month=` default to the current UTC date |
+| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall `score` (plus `score_partial: true` when one or more dimensions had nothing measurable and were excluded from it), three dimension scores, `reasons` (each row's `effect` is one of `positive`, `challenging`, or `unmeasured` — the third marks a row reporting an absent input, not a measured agreement or conflict), notes |
+| DELETE | `/v1/persons/{id}` | Full erasure, cascades to every derived profile row |
+| GET | `/v1/meta/versions` | Engine version, KB version, registered system list |
+
+See `docs/superpowers/specs/2026-08-19-identity-engine-design.md` §5 for
+response shapes, and `tests/test_acceptance.py` for one passing test per
+v1 acceptance criterion (spec §12).
+
+## Positioning & ethics
+
+Every `/profile`, `/timing`, `/compatibility` and `/context?format=json`
+response carries a `disclaimer` field, verbatim, regardless of which
+`?layers=` filter was requested. `/context?format=text` is a `text/plain`
+body rather than a JSON object, so it has no fields at all — ask for the
+JSON form when the disclaimer has to travel with the bundle:
+
+> Reflective and entertainment insight; not medical, psychological, or
+> financial advice.
+
+The API makes no claim of scientific validity for any of the six systems it
+layers together (Western astrology, Human Design, Gene Keys, Pythagorean
+numerology, Jewish numerology/Kabbalah, the Chinese zodiac). Honesty about
+*convergence* — how many applicable systems agree on a facet — and
+*tension* — where they disagree — is part of the product, not a caveat
+bolted on afterward; see `engine/synthesis.py` and spec §4.2. Birth data and
+names are PII: `DELETE /v1/persons/{id}` is a full, cascading erasure (spec
+§6), and only the minimum PII needed to recompute a profile is stored
+(`api/models.py`).
+
 ## Determinism guarantee
 
 Identical input plus identical engine/system versions produce byte-identical

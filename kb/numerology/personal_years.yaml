@@ -1,0 +1,133 @@
+schema: kb.mapping.v1
+system: numerology
+element: personal_years
+reviewed: true
+curation: hand_authored
+source: >-
+  Pythagorean tradition, common contemporary synthesis. Interpretive choice:
+  the personal year sums the birth month and birth day (each reduced
+  separately, preserving 11/22/33) with the calendar year's digit sum (also
+  reduced, preserving masters), then reduces that total once more. Entries
+  describe the texture a year with this number tends to have, not a
+  prediction of events.
+entries:
+  "1":
+    label: "Personal Year 1"
+    text: >-
+      A year that rewards starting something rather than perfecting a plan
+      for it. Momentum favors the first mover; the cost is committing before
+      the full picture is visible.
+    tags:
+      - {facet: drive.initiative, weight: 0.8, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.5, direction: high}
+  "2":
+    label: "Personal Year 2"
+    text: >-
+      A year for building alongside others rather than out ahead of them.
+      Patience compounds; the cost is a pace that can feel too slow when
+      urgency is real.
+    tags:
+      - {facet: relational.bonding, weight: 0.7, direction: high}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.5, direction: low}
+  "3":
+    label: "Personal Year 3"
+    text: >-
+      A year where being seen and heard does real work — pitches land,
+      introductions matter. The cost is scattering effort across too many
+      audiences at once.
+    tags:
+      - {facet: communication.register, weight: 0.8, direction: high}
+      - {facet: core_essence.visibility, weight: 0.6, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.5, direction: high}
+  "4":
+    label: "Personal Year 4"
+    text: >-
+      A year for laying groundwork that won't show results immediately.
+      Discipline pays off later; the cost is a grind that can feel
+      unrewarded in the moment.
+    tags:
+      - {facet: work_energy.structure, weight: 0.8, direction: high}
+      - {facet: work_energy.endurance, weight: 0.6, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: low}
+  "5":
+    label: "Personal Year 5"
+    text: >-
+      A year where circumstances shift underfoot more than usual. Adapting
+      quickly is rewarded; the cost is instability in plans that need a
+      full year to mature.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.9, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.5, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.6, direction: high}
+  "6":
+    label: "Personal Year 6"
+    text: >-
+      A year centered on home, family, and obligations already taken on.
+      Care given returns loyalty; the cost is over-committing to
+      responsibilities that crowd out everything else.
+    tags:
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: high}
+  "7":
+    label: "Personal Year 7"
+    text: >-
+      A year that asks for less noise and more reflection. Answers arrive
+      through study and solitude rather than through activity; the cost is
+      an isolation that others read as withdrawal.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.6, direction: low}
+      - {facet: emotional.processing, weight: 0.6, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.5, direction: low}
+  "8":
+    label: "Personal Year 8"
+    text: >-
+      A year where effort and its material return are unusually aligned —
+      what's built tends to compound. The cost is measuring the year's worth
+      by output alone.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.7, direction: high}
+      - {facet: drive.recognition, weight: 0.6, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.5, direction: high}
+  "9":
+    label: "Personal Year 9"
+    text: >-
+      A year for finishing chapters rather than opening new ones. Letting go
+      cleanly matters more than acquiring; the cost is grieving endings that
+      arrive before the person feels ready.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.7, direction: high}
+      - {facet: life_themes.seeking, weight: 0.6, direction: high}
+      - {facet: relational.bonding, weight: 0.5, direction: low}
+  "11":
+    label: "Personal Year 11 (master)"
+    text: >-
+      A master year of heightened perception, where intuition runs ahead of
+      evidence more often than usual. The cost is a nervous-system load that
+      needs deliberate pacing rather than being pushed through.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.8, direction: high}
+      - {facet: emotional.volatility, weight: 0.6, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.5, direction: high}
+  "22":
+    label: "Personal Year 22 (master)"
+    text: >-
+      A master year for turning a long-held vision into something concrete
+      and large-scale. The cost is a self-imposed pressure for the year to
+      justify the vision entirely.
+    tags:
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: work_energy.endurance, weight: 0.6, direction: high}
+      - {facet: growth_edges.control, weight: 0.5, direction: high}
+  "33":
+    label: "Personal Year 33 (master)"
+    text: >-
+      A master year of devoted care extended well past the immediate circle.
+      The cost is neglecting personal needs while attending to everyone
+      else's for twelve straight months.
+    tags:
+      - {facet: life_themes.service, weight: 0.8, direction: high}
+      - {facet: relational.loyalty, weight: 0.6, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.5, direction: low}

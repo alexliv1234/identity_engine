@@ -2,6 +2,7 @@ schema: kb.mapping.v1
 system: numerology
 element: life_path
 reviewed: true
+curation: hand_authored
 source: >-
   Pythagorean tradition, common contemporary synthesis. Interpretive choices:
   month, day, and year are each reduced separately (preserving 11/22/33) before

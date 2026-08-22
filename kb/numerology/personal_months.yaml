@@ -1,0 +1,132 @@
+schema: kb.mapping.v1
+system: numerology
+element: personal_months
+reviewed: true
+curation: hand_authored
+source: >-
+  Pythagorean tradition, common contemporary synthesis. Interpretive choice:
+  the personal month reduces the sum of the personal year number and the
+  calendar month number, preserving 11/22/33. Entries describe the texture a
+  month with this number tends to have, read as a short-range inflection
+  within the personal year, not a prediction of events.
+entries:
+  "1":
+    label: "Personal Month 1"
+    text: >-
+      A month for making the first move on something the year has been
+      building toward. Momentum favors acting early; the cost is committing
+      before the month's information is fully in.
+    tags:
+      - {facet: drive.initiative, weight: 0.7, direction: high}
+      - {facet: decision_making.timing, weight: 0.6, direction: high}
+      - {facet: work_energy.role_shape, weight: 0.4, direction: high}
+  "2":
+    label: "Personal Month 2"
+    text: >-
+      A month for coordinating with someone else rather than moving solo.
+      Small, patient steps land; the cost is a pace that can feel too slow
+      against the month's short window.
+    tags:
+      - {facet: relational.bonding, weight: 0.6, direction: high}
+      - {facet: communication.listening, weight: 0.6, direction: high}
+      - {facet: growth_edges.patience, weight: 0.4, direction: low}
+  "3":
+    label: "Personal Month 3"
+    text: >-
+      A month where a conversation, pitch, or introduction does
+      disproportionate work. The cost is spreading attention across too many
+      people to follow any one thread deeply.
+    tags:
+      - {facet: communication.register, weight: 0.7, direction: high}
+      - {facet: core_essence.visibility, weight: 0.5, direction: high}
+      - {facet: drive.novelty_seeking, weight: 0.4, direction: high}
+  "4":
+    label: "Personal Month 4"
+    text: >-
+      A month for the unglamorous task list — the one that has been
+      deferred. Clearing it steadies the rest of the year; the cost is a
+      grind that feels heavier than a single month should.
+    tags:
+      - {facet: work_energy.structure, weight: 0.7, direction: high}
+      - {facet: work_energy.endurance, weight: 0.5, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.4, direction: low}
+  "5":
+    label: "Personal Month 5"
+    text: >-
+      A month where plans shift on short notice more than usual. Staying
+      loose pays off; the cost is a commitment made this month proving
+      unstable by the next.
+    tags:
+      - {facet: drive.novelty_seeking, weight: 0.8, direction: high}
+      - {facet: work_energy.rhythm, weight: 0.4, direction: high}
+      - {facet: decision_making.risk_appetite, weight: 0.5, direction: high}
+  "6":
+    label: "Personal Month 6"
+    text: >-
+      A month pulled toward home, family, or a commitment already made.
+      Showing up for it is noticed; the cost is letting it crowd out
+      everything else scheduled this month.
+    tags:
+      - {facet: life_themes.service, weight: 0.7, direction: high}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: high}
+  "7":
+    label: "Personal Month 7"
+    text: >-
+      A month better spent studying or thinking than announcing. Quiet
+      focus produces the month's real progress; the cost is a withdrawal
+      that others notice and misread.
+    tags:
+      - {facet: core_essence.visibility, weight: 0.5, direction: low}
+      - {facet: emotional.processing, weight: 0.5, direction: low}
+      - {facet: decision_making.gut_vs_deliberation, weight: 0.4, direction: low}
+  "8":
+    label: "Personal Month 8"
+    text: >-
+      A month where effort and its payoff line up unusually well. What gets
+      pushed this month tends to show results; the cost is judging the
+      month solely by what it produced.
+    tags:
+      - {facet: work_energy.role_shape, weight: 0.6, direction: high}
+      - {facet: drive.recognition, weight: 0.5, direction: high}
+      - {facet: decision_making.pressure_response, weight: 0.4, direction: high}
+  "9":
+    label: "Personal Month 9"
+    text: >-
+      A month for closing something out rather than opening it. A clean
+      ending this month clears space for what the year still has coming;
+      the cost is an ending that arrives before it feels finished.
+    tags:
+      - {facet: life_themes.transformation, weight: 0.6, direction: high}
+      - {facet: life_themes.seeking, weight: 0.5, direction: high}
+      - {facet: relational.bonding, weight: 0.4, direction: low}
+  "11":
+    label: "Personal Month 11 (master)"
+    text: >-
+      A master month of heightened perception compressed into a short
+      window. Intuition runs ahead of evidence; the cost is a spike in
+      nervous-system load that a single month makes harder to pace.
+    tags:
+      - {facet: emotional.sensitivity, weight: 0.7, direction: high}
+      - {facet: emotional.volatility, weight: 0.5, direction: high}
+      - {facet: core_essence.archetype_force, weight: 0.4, direction: high}
+  "22":
+    label: "Personal Month 22 (master)"
+    text: >-
+      A master month for making concrete progress on something built at
+      scale. The cost is a self-imposed pressure for one month to carry the
+      whole vision forward.
+    tags:
+      - {facet: work_energy.structure, weight: 0.6, direction: high}
+      - {facet: work_energy.endurance, weight: 0.5, direction: high}
+      - {facet: growth_edges.control, weight: 0.4, direction: high}
+  "33":
+    label: "Personal Month 33 (master)"
+    text: >-
+      A master month of devoted care given to people outside the immediate
+      circle. The cost is neglecting personal needs for the month spent
+      attending to everyone else's.
+    tags:
+      - {facet: life_themes.service, weight: 0.7, direction: high}
+      - {facet: relational.loyalty, weight: 0.5, direction: high}
+      - {facet: growth_edges.self_worth, weight: 0.4, direction: low}
