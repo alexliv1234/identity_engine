@@ -25,14 +25,23 @@ from pydantic import ValidationError
 from api.main import create_app
 from api.settings import Settings
 
+# A syntactically valid database URL that is never connected to: these tests
+# build a Settings for environment="production" (the default, and the mode
+# whose CORS behaviour they are about), and fix round 2 makes production
+# refuse a SQLite URL outright. Nothing here opens a connection -- none of
+# these clients enter the app's lifespan, so `create_all()` never runs.
+UNUSED_DATABASE_URL = "postgresql+psycopg://unused:unused@unused.invalid:5432/unused"
+
 
 def _build(**overrides) -> TestClient:
-    settings = Settings(
-        database_url="sqlite:///./unused.db",
-        playground_enabled=False,
-        eager_ephemeris_load=False,
-        **overrides,
-    )
+    kwargs = {
+        "database_url": UNUSED_DATABASE_URL,
+        "playground_enabled": False,
+        "eager_ephemeris_load": False,
+        "environment": "production",
+    }
+    kwargs.update(overrides)
+    settings = Settings(**kwargs)
 
     import api.main as api_main
 
@@ -103,7 +112,7 @@ def test_wildcard_cors_origin_is_rejected_at_settings_construction():
     even construct with a literal "*" in the allowlist."""
     with pytest.raises(ValidationError, match="cors_allowed_origins"):
         Settings(
-            database_url="sqlite:///./unused.db",
+            database_url=UNUSED_DATABASE_URL,
             playground_enabled=False,
             eager_ephemeris_load=False,
             cors_allowed_origins="*",
@@ -116,7 +125,7 @@ def test_wildcard_cors_origin_is_rejected_even_mixed_with_a_real_origin():
     setting a wildcard."""
     with pytest.raises(ValidationError):
         Settings(
-            database_url="sqlite:///./unused.db",
+            database_url=UNUSED_DATABASE_URL,
             playground_enabled=False,
             eager_ephemeris_load=False,
             cors_allowed_origins="https://real.example,*",
@@ -130,7 +139,7 @@ def test_wildcard_cors_origin_env_var_is_rejected_at_settings_construction(monke
     monkeypatch.setenv("IDENTITY_CORS_ALLOWED_ORIGINS", "*")
     with pytest.raises(ValidationError):
         Settings(
-            database_url="sqlite:///./unused.db",
+            database_url=UNUSED_DATABASE_URL,
             playground_enabled=False,
             eager_ephemeris_load=False,
         )

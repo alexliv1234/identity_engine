@@ -3,14 +3,24 @@
 from __future__ import annotations
 
 import functools
+from urllib.parse import urlsplit
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+#: Only this exact value opts a process out of the production database guard
+#: below. Anything else -- "prod", "staging", a typo, or nothing at all --
+#: is treated as a deployment, because the failure this guard prevents is
+#: silent and total.
+DEVELOPMENT = "development"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="IDENTITY_", env_file=".env")
 
+    # SQLite by default so `pytest` and a fresh clone work with no
+    # configuration at all. That default is a data-loss footgun in a
+    # deployment, and is refused there -- see `_refuse_sqlite_outside_development`.
     database_url: str = "sqlite:///./identity_engine.db"
     playground_enabled: bool = True
     # Construct the ephemeris during app startup rather than lazily on first
@@ -52,6 +62,10 @@ class Settings(BaseSettings):
     # "development" additionally allows any localhost/127.0.0.1 origin (any
     # port), for running the playground against a locally running API during
     # development. Must never be "development" in a production deploy.
+    #
+    # It is also what opts a process out of the SQLite guard below, so the
+    # two loosenings this field grants are named by one value: a deploy that
+    # forgets to set it gets the strict behaviour on both.
     environment: str = "production"
 
     @field_validator("cors_allowed_origins")
@@ -65,6 +79,45 @@ class Settings(BaseSettings):
                 "call this API cross-origin instead."
             )
         return value
+
+    @model_validator(mode="after")
+    def _refuse_sqlite_outside_development(self) -> Settings:
+        """Every other footgun on this service fails loudly at startup. This
+        one used to be silent, and its consequence is total.
+
+        `database_url` defaults to a SQLite file and `environment` defaults
+        to "production", so a Railway deploy that simply forgets to set
+        IDENTITY_DATABASE_URL boots cleanly, passes /health, creates a
+        SQLite file *inside the ephemeral container*, and returns real 201s
+        to paying customers -- until the next deploy replaces the container
+        and every tenant, person and profile in it is gone. Nothing in the
+        logs, no failed request, no alert: the first symptom is a customer
+        reporting that their data vanished.
+
+        So a non-development process refuses to construct with a SQLite (or
+        empty) database URL. Development and the test suite keep the SQLite
+        default by naming themselves: IDENTITY_ENVIRONMENT=development.
+
+        Deliberately fail-closed on the environment name: only the exact
+        string "development" opts out. "prod", "staging", "dev" or a typo
+        all keep the guard on, because an unrecognised environment name is
+        not evidence that losing the database is acceptable there.
+        """
+        if self.environment == DEVELOPMENT:
+            return self
+        scheme = urlsplit(self.database_url).scheme
+        if self.database_url.strip() and not scheme.startswith("sqlite"):
+            return self
+        raise ValueError(
+            "IDENTITY_DATABASE_URL is unset or points at SQLite "
+            f"({self.database_url!r}) while IDENTITY_ENVIRONMENT is "
+            f"{self.environment!r}. A SQLite file lives inside the container: "
+            "the service would boot, pass /health, accept writes, and lose "
+            "every tenant's data on the next deploy, silently. Set "
+            "IDENTITY_DATABASE_URL to this deployment's postgresql:// URL, or "
+            f"set IDENTITY_ENVIRONMENT={DEVELOPMENT} if this really is a local "
+            "or test process that wants the SQLite default."
+        )
 
     @property
     def cors_allow_origins(self) -> list[str]:

@@ -13,7 +13,7 @@ from engine.context import (
     build_context,
     estimate_tokens,
 )
-from engine.orchestrator import build_profile
+from engine.orchestrator import DISCLAIMER, build_profile
 from tests.fixtures.people import FIXTURES
 
 
@@ -55,6 +55,75 @@ def test_plain_vocabulary_contains_no_esoteric_terminology_for_every_fixture():
         lowered = build_context(build_profile(inp))["text"].lower()
         match = ESOTERIC_PATTERN.search(lowered)
         assert match is None, f"{name}: {match.group() if match else None}"
+
+
+def test_no_facet_direction_label_in_the_kb_is_esoteric():
+    """The scan that closes the actual gap (fix round 2, item 3).
+
+    `ESOTERIC_PATTERN` is never called by `engine/context.py` -- it is a
+    build-time check, and until now the only thing that ran it was the
+    fixture sweep above, which sees only the facets those eleven profiles
+    happen to resolve. A `kb/facets.yaml` edit introducing a direction
+    labelled "Rising sign energy" on a facet no fixture reaches would have
+    shipped clean.
+
+    The plain vocabulary is assembled entirely from this taxonomy, so
+    scanning the taxonomy itself covers every string the plain block can
+    ever contain, whatever any one profile resolves -- at zero cost per
+    request, which is why this lives here and not in `build_context`.
+    """
+    from engine.kb.facets import load_taxonomy
+
+    taxonomy = load_taxonomy()
+    scanned: list[tuple[str, str]] = []
+    for dimension in taxonomy.dimensions.values():
+        scanned.append((dimension.id, dimension.label))
+        for facet in dimension.facets.values():
+            scanned.append((facet.id, facet.label))
+            scanned.append((f"{facet.id}.high", facet.high_label))
+            scanned.append((f"{facet.id}.low", facet.low_label))
+
+    # Guard against the scan silently covering nothing: the taxonomy has
+    # nine dimensions and 32 facets, i.e. 9 + 32 * 3 strings.
+    assert len(scanned) == 9 + 32 * 3
+    assert len(taxonomy.facets) == 32
+
+    offenders = [
+        (where, text, match.group())
+        for where, text in scanned
+        if (match := ESOTERIC_PATTERN.search(text.lower()))
+    ]
+    assert offenders == []
+
+
+def test_the_kb_wide_scan_would_catch_an_esoteric_direction_label():
+    """Proves the test above is not vacuous in the way its predecessor was:
+    the same pattern, run over the same shape of string, must fire on a
+    plausible bad KB edit."""
+    assert ESOTERIC_PATTERN.search("rising sign energy") is not None
+    assert ESOTERIC_PATTERN.search("sacral") is not None
+    # ...and must not fire on the ordinary English the real taxonomy uses.
+    assert ESOTERIC_PATTERN.search("self-questioning") is None
+
+
+def test_build_context_does_not_run_the_esoteric_scan_per_request(profile):
+    """The docstring correction, asserted. `engine/context.py` used to claim
+    ESOTERIC_TERMS was "the guard that keeps system names out of that
+    default path" -- a runtime guarantee it never made. The scan is
+    build-time by design (static inputs, zero per-request cost), and this
+    pins that so the comment and the code cannot drift apart again: swapping
+    in a pattern that matches everything must not change a single byte of
+    the bundle."""
+    import engine.context as context_module
+
+    baseline = build_context(profile)
+    monkey = re.compile(r".")
+    original = context_module.ESOTERIC_PATTERN
+    context_module.ESOTERIC_PATTERN = monkey
+    try:
+        assert build_context(profile) == baseline
+    finally:
+        context_module.ESOTERIC_PATTERN = original
 
 
 def test_esoteric_guard_would_catch_a_leak():
@@ -323,7 +392,7 @@ def test_empty_profile_returns_empty_bundle_but_warns(caplog):
     with caplog.at_level(logging.WARNING, logger="engine.context"):
         bundle = build_context(profile, person_id="empty-profile")
 
-    assert bundle == {"text": "", "json": {}, "tokens": 0}
+    assert bundle == {"text": "", "json": {}, "tokens": 0, "disclaimer": DISCLAIMER}
     assert len(caplog.records) == 1
     message = caplog.records[0].getMessage()
     assert "empty-profile" in message

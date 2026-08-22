@@ -15,12 +15,29 @@ Spec §6: Postgres in production, SQLite for dev and tests. `pip install .[postg
 (or `.[dev]`, which already includes it) is required whenever `IDENTITY_DATABASE_URL`
 points at Postgres — a base install alone has no Postgres driver.
 
+### Required environment
+
+| Variable | Default | Notes |
+|---|---|---|
+| `IDENTITY_ENVIRONMENT` | `production` | Set to `development` to run locally. Only that exact value unlocks the SQLite default and the localhost CORS allowance. |
+| `IDENTITY_DATABASE_URL` | `sqlite:///./identity_engine.db` | **Required in any non-development process.** |
+| `IDENTITY_CORS_ALLOWED_ORIGINS` | *(empty)* | Comma-separated explicit origins. A literal `*` is refused at startup. |
+
+The service **refuses to start** when `IDENTITY_ENVIRONMENT` is anything but
+`development` and `IDENTITY_DATABASE_URL` is unset or points at SQLite
+(`api/settings.py`). That is deliberate: a SQLite file lives inside the
+container, so a deploy that forgets the variable would boot cleanly, pass
+`/health`, accept writes, and destroy every tenant's data on the next deploy
+without emitting anything. Failing at boot is the loud version of that.
+`pytest` declares itself development in `tests/__init__.py`.
+
 ## Quickstart: run the API and the playground
 
 With the venv set up and the ephemeris kernel fetched (above), provision a
 per-app API key and start the server:
 
 ```bash
+export IDENTITY_ENVIRONMENT=development   # Windows: $env:IDENTITY_ENVIRONMENT="development"
 .venv/bin/python kb_tools/create_app_key.py "Local Dev"   # Windows: .venv\Scripts\python
 .venv/bin/uvicorn api.main:app --reload                    # Windows: .venv\Scripts\uvicorn
 ```
@@ -45,7 +62,7 @@ the app that created them: another app's person id resolves to `404`, never
 | GET | `/v1/persons/{id}/profile` | Cached profile. `?layers=raw,synthesis` and `?systems=astrology,...` narrow the response |
 | GET | `/v1/persons/{id}/context` | Token-budgeted LLM bundle. `?format=text\|json`, `?vocabulary=plain\|esoteric` |
 | GET | `/v1/persons/{id}/timing` | Numerology personal year/month. `?year=&month=` default to the current UTC date |
-| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall score, three dimension scores, reasons |
+| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall score, three dimension scores, reasons, notes |
 | DELETE | `/v1/persons/{id}` | Full erasure, cascades to every derived profile row |
 | GET | `/v1/meta/versions` | Engine version, KB version, registered system list |
 
@@ -55,8 +72,11 @@ v1 acceptance criterion (spec §12).
 
 ## Positioning & ethics
 
-Every `/profile`, `/context`, and `/timing` response carries a `disclaimer`
-field, verbatim, regardless of which `?layers=` filter was requested:
+Every `/profile`, `/timing`, `/compatibility` and `/context?format=json`
+response carries a `disclaimer` field, verbatim, regardless of which
+`?layers=` filter was requested. `/context?format=text` is a `text/plain`
+body rather than a JSON object, so it has no fields at all — ask for the
+JSON form when the disclaimer has to travel with the bundle:
 
 > Reflective and entertainment insight; not medical, psychological, or
 > financial advice.

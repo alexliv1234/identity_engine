@@ -21,33 +21,65 @@ not used. A pair contributes a given point only when it survives for BOTH
 people. `"ascendant"` already disappears on a missing time because `angles`
 is `None` on that same path, so no second guard is added for it.
 
-**Dimension split (fix round 1).** The 5x5 synastry grid is scored into TWO
-disjoint subsets, matching the brief's dimension rollup rather than one
-aggregate reused for both dimensions: `connection` sums only pairs among
+**Dimension split.** The 5x5 synastry grid is scored into TWO disjoint
+subsets, matching the brief's dimension rollup rather than one aggregate
+reused for both dimensions: `connection` sums only pairs among
 Sun/Moon/Venus/Mars (the "how do the two people relate" points), and
 `communication` sums only pairs involving the Ascendant (the "how do they
 present/read each other" point). Every pair still lands in `reasons`
 regardless of which dimension it feeds -- the reasons block stays complete,
-only the two numeric rollups are computed from disjoint inputs. Each subset
-is rescaled against its OWN theoretical range (16 pairs for connection, 9
-for communication), not the old 25-pair range, since reusing the 25-pair
-range for a 9- or 16-pair subset would silently compress or inflate it.
+only the two numeric rollups are computed from disjoint inputs.
 
-A missing birth time drops a person's Ascendant entirely (see `_points`),
-so when BOTH people lack a birth time, `communication`'s astrology subset
-has zero *possible* pairs to check -- not zero matched aspects, zero
-candidates. That is absent evidence, not negative evidence: summing zero
-and rescaling it would land on a specific, low-but-not-bottom number that
-reads as "measured near-incompatibility" when what actually happened is
-"nothing to compare." So in that case `communication` falls back to the
-numerology score alone (mirroring `connection`'s existing fallback to
-astrology alone when Human Design is unavailable), and a note says so.
+**Rescale ranges are derived, never assumed (fix round 2).** Each subset is
+rescaled onto 0..100 against its own range, and that range is computed from
+the pairs actually CHECKABLE for *this* pair of people -- `len(pairs) *
+MIN_ASPECT_SCORE` to `len(pairs) * MAX_ASPECT_SCORE` -- not from a constant
+that assumes both charts are complete. The full-grid pair counts below
+(16 for `connection`, 9 for `communication`) survive only as the totals a
+"grid reduced" note compares against.
+
+That distinction is the whole product. `_points` drops a person's Moon when
+their birth time is missing, and their Ascendant is already gone on that same
+path (and on a polar-latitude chart, where the time IS known but Placidus
+houses are undefined). The candidate grid shrinks. If the range does not
+shrink with it, every unavailable pair is scored as a measured zero: two
+people whose every checkable point sat in exact trine landed on 60/100 --
+lower than a fully-timed pair with a handful of ordinary aspects -- because
+seven pairs that were never looked at were quietly counted as "no aspect
+found". Absent evidence must never be presented as negative evidence, so:
+
+  * a reduced grid is rescaled against the reduced grid, and
+  * whenever the grid IS reduced, a note says so, naming which points were
+    unavailable -- including the asymmetric case (one person timed, one
+    not), which used to be scored against the full 9-pair `communication`
+    range and emitted with no note at all, and
+  * a subset with ZERO checkable pairs is not rescaled at all. It falls back
+    to the dimension's other input (Human Design for `connection`, the
+    numerology matrix for `communication`) with a note, because summing zero
+    and rescaling it would land on a specific, low-but-not-bottom number
+    that reads as "measured near-incompatibility" when what actually
+    happened is "nothing to compare". If a dimension's inputs are ALL
+    absent, it reports `NEUTRAL_DIMENSION` and says, in a note, that the
+    number is a placeholder for "nothing was measured" rather than a
+    measured midpoint.
+
+The same rule governs the numerology matrix (`numerology_harmony`): a
+missing Life Path on either side, or a Life Path pair the knowledge base has
+no curated entry for, falls back to `NEUTRAL_HARMONY` -- a reasonable
+fallback that was, until fix round 2, completely silent. A 50 out of 100
+reads as measured mid-compatibility. It now carries both a note and a
+`reasons` row whose `effect` is `"unmeasured"` -- a third effect alongside
+`"positive"` and `"challenging"`, because filing absent evidence under
+either of those two is precisely the error this module exists not to make.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 from engine.ephemeris.base import arc_between
 from engine.kb.loader import load_kb
+from engine.orchestrator import DISCLAIMER
 from engine.systems.astrology import ASPECTS
 from engine.systems.human_design import load_channels
 
@@ -62,20 +94,28 @@ ASPECT_SCORES: dict[str, int] = {
 }
 HARD_ASPECTS = frozenset({"square", "opposition"})
 
-# Theoretical [min, max] for each disjoint astrology subset (score * pair
-# count at the extremes), used to rescale that subset's raw sum onto 0..100
-# independently -- reusing one 25-pair range for a 9- or 16-pair subset would
-# silently compress or inflate it.
+# The per-pair extremes a subset's rescale range is built from: a subset of
+# N checkable pairs spans N * MIN_ASPECT_SCORE .. N * MAX_ASPECT_SCORE.
+MIN_ASPECT_SCORE = min(ASPECT_SCORES.values())
+MAX_ASPECT_SCORE = max(ASPECT_SCORES.values())
+
+# Full-grid pair counts, used ONLY by the "N of M pairs were checkable" note
+# -- never to rescale a subset (see the module docstring).
 #
 # `connection`: Sun/Moon/Venus/Mars on both sides -> 4x4 = 16 ordered pairs.
-CONNECTION_ASTRO_MIN, CONNECTION_ASTRO_MAX = -32.0, 96.0
+FULL_CONNECTION_PAIRS = 16
 # `communication`: any pair involving the Ascendant on either side -> the 25
 # total minus the 16 above = 9 ordered pairs (asc-asc, asc-X x4, X-asc x4).
-COMMUNICATION_ASTRO_MIN, COMMUNICATION_ASTRO_MAX = -18.0, 54.0
+FULL_COMMUNICATION_PAIRS = 9
 
 CHANNEL_POINTS = 4
 CHANNEL_CAP = 40
 NEUTRAL_HARMONY = 5
+
+#: What a dimension reports when *every* one of its inputs was unavailable.
+#: Always accompanied by a note saying it is a placeholder, never a measured
+#: midpoint.
+NEUTRAL_DIMENSION = 50
 
 _SIGNS = (
     "Aries",
@@ -134,25 +174,56 @@ def _aspect_for(separation: float) -> tuple[str, float] | None:
     return best
 
 
-def astrology_synastry(a: dict, b: dict) -> tuple[float, float, bool, int, list[dict]]:
-    """Returns (connection_raw, communication_raw, communication_astro_possible,
-    hard-aspect count, reasons).
+def _join(items: list[str]) -> str:
+    if len(items) == 1:
+        return items[0]
+    return ", ".join(items[:-1]) + " or " + items[-1]
 
-    Point sets are built per person (`_points`), so a pair contributes a
-    point only when it survives for both A and B -- which is exactly how a
+
+def _absent_points_phrase(points_a: dict[str, float], points_b: dict[str, float]) -> str:
+    """Which synastry points each person is missing, named rather than
+    inferred from a birth-time flag: a point can be absent for reasons other
+    than a missing time (a polar-latitude chart has an exact birth time and
+    still has no ascendant), so the note reports the observed gap."""
+    parts = []
+    for who, points in (("A", points_a), ("B", points_b)):
+        missing = [name for name in SYNASTRY_POINTS if name not in points]
+        if missing:
+            parts.append(f"{who} has no {_join(missing)}")
+    return "; ".join(parts) if parts else "no points were unavailable"
+
+
+@dataclass(frozen=True)
+class Synastry:
+    """What the inter-chart grid actually yielded for one pair of people.
+
+    `connection_pairs`/`communication_pairs` count the CHECKABLE ordered
+    pairs -- the candidate grid, not the pairs that happened to match an
+    aspect -- which is what each dimension's rescale range is derived from.
+    """
+
+    connection_raw: float = 0.0
+    communication_raw: float = 0.0
+    connection_pairs: int = 0
+    communication_pairs: int = 0
+    hard_count: int = 0
+    reasons: list[dict] = field(default_factory=list)
+    absent_points: str = ""
+
+
+def astrology_synastry(a: dict, b: dict) -> Synastry:
+    """Score the inter-chart grid, per dimension, over checkable pairs only.
+
+    Point sets are built per person (`_points`), so a pair is a candidate
+    only when the point survives for both A and B -- which is exactly how a
     person's missing-time Moon/Ascendant exclusion propagates into the grid
     without any extra bookkeeping here. Every checked pair, from either
     subset, is appended to `reasons` -- the split only affects which raw
     total a pair's score feeds, never whether it is reported.
-
-    `communication_astro_possible` is `True` when at least one of the two
-    people has an Ascendant to compare (i.e. this is a question about
-    whether communication's astrology subset has any CANDIDATE pairs at
-    all, not whether any of them happened to match an aspect within orb).
     """
     points_a, points_b = _points(a), _points(b)
-    communication_astro_possible = "ascendant" in points_a or "ascendant" in points_b
     connection_raw, communication_raw = 0.0, 0.0
+    connection_pairs, communication_pairs = 0, 0
     hard = 0
     reasons: list[dict] = []
 
@@ -160,12 +231,18 @@ def astrology_synastry(a: dict, b: dict) -> tuple[float, float, bool, int, list[
         for name_b in SYNASTRY_POINTS:
             if name_a not in points_a or name_b not in points_b:
                 continue
+            is_communication = name_a == "ascendant" or name_b == "ascendant"
+            if is_communication:
+                communication_pairs += 1
+            else:
+                connection_pairs += 1
+
             found = _aspect_for(arc_between(points_a[name_a], points_b[name_b]))
             if found is None:
                 continue
             aspect, _orb = found
             score = ASPECT_SCORES[aspect]
-            if name_a == "ascendant" or name_b == "ascendant":
+            if is_communication:
                 communication_raw += score
             else:
                 connection_raw += score
@@ -180,7 +257,15 @@ def astrology_synastry(a: dict, b: dict) -> tuple[float, float, bool, int, list[
             )
 
     reasons.sort(key=lambda r: r["detail"])
-    return connection_raw, communication_raw, communication_astro_possible, hard, reasons
+    return Synastry(
+        connection_raw=connection_raw,
+        communication_raw=communication_raw,
+        connection_pairs=connection_pairs,
+        communication_pairs=communication_pairs,
+        hard_count=hard,
+        reasons=reasons,
+        absent_points=_absent_points_phrase(points_a, points_b),
+    )
 
 
 def _moon_excluded_note(quality_a: str, quality_b: str) -> str | None:
@@ -202,12 +287,42 @@ def _moon_excluded_note(quality_a: str, quality_b: str) -> str | None:
     )
 
 
+def _grid_reduced_note(dimension: str, checkable: int, full: int, absent: str) -> str:
+    """Said whenever a dimension's candidate grid is smaller than the full
+    one. Same voice as `_moon_excluded_note`: name what was dropped, then say
+    why reporting it as a low score would have been a lie."""
+    return (
+        f"{dimension} astrology grid reduced: {checkable} of the {full} pairs this "
+        f"dimension scores were checkable for this pair ({absent}). The score is "
+        "rescaled against the pairs actually available rather than against a full "
+        "grid, because an unchecked pair is absent evidence, not evidence of a "
+        "mismatch -- scoring it as a zero would report silence as disagreement."
+    )
+
+
 _COMMUNICATION_ASTRO_EXCLUDED_NOTE = (
-    "communication astrology signal excluded: A and B have no birth time, so "
-    "neither chart has an ascendant to compare. That is an absence of evidence, "
+    "communication astrology signal excluded: neither chart has an ascendant to "
+    "compare, so this dimension's astrology grid has no checkable pairs at all -- "
+    "not zero matched aspects, zero candidates. That is an absence of evidence, "
     "not evidence of a mismatch, so communication reflects the numerology matrix "
     "alone rather than a zero-pair astrology score standing in for measured "
     "incompatibility."
+)
+
+_CONNECTION_ASTRO_EXCLUDED_NOTE = (
+    "connection astrology signal excluded: no sun/moon/venus/mars point is present "
+    "in both charts, so this dimension's astrology grid has no checkable pairs at "
+    "all -- not zero matched aspects, zero candidates. That is an absence of "
+    "evidence, not evidence of a mismatch, so connection reflects the human design "
+    "connection channels alone rather than a zero-pair astrology score standing in "
+    "for measured incompatibility."
+)
+
+_CONNECTION_UNMEASURABLE_NOTE = (
+    "connection could not be measured: its astrology grid has no checkable pairs "
+    "and human design is unavailable, so neither of this dimension's two inputs "
+    f"produced any evidence. The {NEUTRAL_DIMENSION} reported here is a placeholder "
+    "for 'nothing was measured', not a measured midpoint."
 )
 
 
@@ -241,31 +356,94 @@ def hd_connection_channels(a: dict, b: dict) -> tuple[int, list[dict], list[str]
     return min(len(reasons) * CHANNEL_POINTS, CHANNEL_CAP), reasons, []
 
 
+def _life_path_key(a: int, b: int) -> str:
+    return "-".join(str(n) for n in sorted((a, b)))
+
+
+def _life_path_entry(a: int, b: int):
+    return load_kb().entry("compatibility", "life_path_pairs", _life_path_key(a, b))
+
+
 def life_path_harmony(a: int, b: int) -> int:
-    key = "-".join(str(n) for n in sorted((a, b)))
-    entry = load_kb().entry("compatibility", "life_path_pairs", key)
+    """0..10 harmony for a Life Path pair, or `NEUTRAL_HARMONY` when the
+    knowledge base carries no usable entry for it. Callers that need to know
+    *which* of those two happened (so they can say so) should use
+    `numerology_harmony`, which reports the fallback instead of absorbing it
+    silently."""
+    entry = _life_path_entry(a, b)
     if entry is None or not entry.label.isdigit():
         return NEUTRAL_HARMONY
     return int(entry.label)
 
 
-def numerology_harmony(a: dict, b: dict) -> tuple[int, list[dict]]:
+def numerology_harmony(a: dict, b: dict) -> tuple[int, list[dict], list[str]]:
+    """Returns (harmony 0..10, reasons, notes).
+
+    The two fallback paths -- a missing Life Path on either side, and a Life
+    Path pair with no usable knowledge-base entry -- both land on
+    `NEUTRAL_HARMONY`, i.e. 50 out of 100 once scaled. That reads as a
+    measured middling compatibility when nothing was measured at all, so
+    each one now emits a note AND a `reasons` row (effect `"unmeasured"`)
+    rather than disappearing into the score.
+    """
     lp_a = a.get("raw", {}).get("numerology", {}).get("life_path")
     lp_b = b.get("raw", {}).get("numerology", {}).get("life_path")
+
     if not lp_a or not lp_b:
-        return NEUTRAL_HARMONY, []
-    harmony = life_path_harmony(lp_a, lp_b)
-    entry = load_kb().entry(
-        "compatibility", "life_path_pairs", "-".join(str(n) for n in sorted((lp_a, lp_b)))
+        if not lp_a and not lp_b:
+            who = "neither A nor B has"
+        else:
+            who = "A has" if not lp_a else "B has"
+        return (
+            NEUTRAL_HARMONY,
+            [
+                {
+                    "system": "numerology",
+                    "detail": f"life path comparison not possible: {who} no life path number",
+                    "effect": "unmeasured",
+                }
+            ],
+            [
+                f"numerology harmony not measured: {who} no life path number, so the "
+                f"life path matrix had nothing to look up. The {NEUTRAL_HARMONY * 10} "
+                f"numerology contributes to communication here is a placeholder for "
+                f"'nothing was measured', not a measured mid-compatibility."
+            ],
+        )
+
+    key = _life_path_key(lp_a, lp_b)
+    entry = _life_path_entry(lp_a, lp_b)
+    if entry is None or not entry.label.isdigit():
+        return (
+            NEUTRAL_HARMONY,
+            [
+                {
+                    "system": "numerology",
+                    "detail": f"no curated life path {key} pairing in the knowledge base",
+                    "effect": "unmeasured",
+                }
+            ],
+            [
+                f"numerology harmony not measured: the knowledge base carries no "
+                f"curated life path {key} pairing, so the matrix had nothing to look "
+                f"up. The {NEUTRAL_HARMONY * 10} numerology contributes to "
+                f"communication here is a placeholder for 'nothing was measured', not "
+                f"a measured mid-compatibility."
+            ],
+        )
+
+    harmony = int(entry.label)
+    return (
+        harmony,
+        [
+            {
+                "system": "numerology",
+                "detail": entry.text,
+                "effect": "positive" if harmony >= NEUTRAL_HARMONY else "challenging",
+            }
+        ],
+        [],
     )
-    detail = entry.text if entry else f"Life Path {lp_a} and {lp_b}"
-    return harmony, [
-        {
-            "system": "numerology",
-            "detail": detail,
-            "effect": "positive" if harmony >= NEUTRAL_HARMONY else "challenging",
-        }
-    ]
 
 
 def _rescale(value: float, low: float, high: float) -> int:
@@ -273,36 +451,80 @@ def _rescale(value: float, low: float, high: float) -> int:
     return round((clamped - low) / (high - low) * 100)
 
 
-def compare(profile_a: dict, profile_b: dict) -> dict:
-    (
-        connection_astro_raw,
-        communication_astro_raw,
-        communication_astro_possible,
-        hard_count,
-        astro_reasons,
-    ) = astrology_synastry(profile_a, profile_b)
-    hd_raw, hd_reasons, hd_notes = hd_connection_channels(profile_a, profile_b)
-    numerology_raw, numerology_reasons = numerology_harmony(profile_a, profile_b)
-
-    connection_astro_score = _rescale(
-        connection_astro_raw, CONNECTION_ASTRO_MIN, CONNECTION_ASTRO_MAX
+def _subset_score(raw: float, checkable_pairs: int) -> int | None:
+    """Rescale one astrology subset onto 0..100 against the range its own
+    checkable pairs actually span -- or `None` when there were no candidate
+    pairs at all, which is a question this function cannot answer and must
+    not pretend to."""
+    if checkable_pairs == 0:
+        return None
+    return _rescale(
+        raw,
+        checkable_pairs * MIN_ASPECT_SCORE,
+        checkable_pairs * MAX_ASPECT_SCORE,
     )
-    communication_astro_score = _rescale(
-        communication_astro_raw, COMMUNICATION_ASTRO_MIN, COMMUNICATION_ASTRO_MAX
+
+
+def compare(profile_a: dict, profile_b: dict) -> dict:
+    synastry = astrology_synastry(profile_a, profile_b)
+    hd_raw, hd_reasons, hd_notes = hd_connection_channels(profile_a, profile_b)
+    numerology_raw, numerology_reasons, numerology_notes = numerology_harmony(profile_a, profile_b)
+
+    connection_astro_score = _subset_score(synastry.connection_raw, synastry.connection_pairs)
+    communication_astro_score = _subset_score(
+        synastry.communication_raw, synastry.communication_pairs
     )
     hd_score = min(100, 50 + hd_raw)
     numerology_score = numerology_raw * 10
 
-    connection = (
-        round((connection_astro_score + hd_score) / 2) if not hd_notes else connection_astro_score
-    )
-    communication = (
-        round((communication_astro_score + numerology_score) / 2)
-        if communication_astro_possible
-        else numerology_score
-    )
+    notes = list(hd_notes)
+    quality_a, quality_b = _birth_time_quality(profile_a), _birth_time_quality(profile_b)
+    moon_note = _moon_excluded_note(quality_a, quality_b)
+    if moon_note:
+        notes.append(moon_note)
+
+    # --- connection: the planetary grid + Human Design connection channels
+    if connection_astro_score is None:
+        if hd_notes:
+            connection = NEUTRAL_DIMENSION
+            notes.append(_CONNECTION_UNMEASURABLE_NOTE)
+        else:
+            connection = hd_score
+            notes.append(_CONNECTION_ASTRO_EXCLUDED_NOTE)
+    else:
+        if synastry.connection_pairs < FULL_CONNECTION_PAIRS:
+            notes.append(
+                _grid_reduced_note(
+                    "connection",
+                    synastry.connection_pairs,
+                    FULL_CONNECTION_PAIRS,
+                    synastry.absent_points,
+                )
+            )
+        connection = (
+            connection_astro_score if hd_notes else round((connection_astro_score + hd_score) / 2)
+        )
+
+    # --- communication: the ascendant grid + the numerology life path matrix
+    if communication_astro_score is None:
+        communication = numerology_score
+        notes.append(_COMMUNICATION_ASTRO_EXCLUDED_NOTE)
+    else:
+        if synastry.communication_pairs < FULL_COMMUNICATION_PAIRS:
+            notes.append(
+                _grid_reduced_note(
+                    "communication",
+                    synastry.communication_pairs,
+                    FULL_COMMUNICATION_PAIRS,
+                    synastry.absent_points,
+                )
+            )
+        communication = round((communication_astro_score + numerology_score) / 2)
+
+    notes.extend(numerology_notes)
+
     # More hard aspects means more friction to work with -- reported as growth.
-    growth = _rescale(hard_count, 0, 8)
+    growth = _rescale(synastry.hard_count, 0, 8)
 
     dimensions = {
         "connection": connection,
@@ -310,17 +532,13 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
         "growth": growth,
     }
 
-    notes = list(hd_notes)
-    quality_a, quality_b = _birth_time_quality(profile_a), _birth_time_quality(profile_b)
-    moon_note = _moon_excluded_note(quality_a, quality_b)
-    if moon_note:
-        notes.append(moon_note)
-    if not communication_astro_possible:
-        notes.append(_COMMUNICATION_ASTRO_EXCLUDED_NOTE)
-
     return {
         "score": round(sum(dimensions.values()) / 3),
         "dimensions": dimensions,
-        "reasons": astro_reasons + hd_reasons + numerology_reasons,
+        "reasons": synastry.reasons + hd_reasons + numerology_reasons,
         "notes": notes,
+        # Spec §11: consuming apps inherit the disclaimer, and a pairwise
+        # compatibility score is exactly the output a reader is most likely
+        # to over-read.
+        "disclaimer": DISCLAIMER,
     }

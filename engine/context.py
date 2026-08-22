@@ -11,11 +11,27 @@ The reason that matters: a consuming app pastes this block into a system
 prompt for an assistant that may know nothing about astrology, Human Design,
 Gene Keys, numerology, the Chinese zodiac or Kabbalah. In the `plain`
 vocabulary the block tells the assistant what the person tends to be like --
-not which six-thousand-year-old tradition said so. `ESOTERIC_TERMS` is the
-guard that keeps system names and esoteric jargon out of that default path;
-`?vocabulary=esoteric` is the opt-in that adds the raw layer's headline
-values (Sun sign, Human Design type, Life Path) back in, for a consumer that
-wants the chart specifics.
+not which six-thousand-year-old tradition said so. `?vocabulary=esoteric` is
+the opt-in that adds the raw layer's headline values (Sun sign, Human Design
+type, Life Path) back in, for a consumer that wants the chart specifics.
+
+`ESOTERIC_TERMS`/`ESOTERIC_PATTERN` are NOT a runtime guard, and the earlier
+version of this paragraph -- which called them "the guard that keeps system
+names out of that default path" -- overstated a guarantee this module never
+made. `build_context` does not call them and never has. They are a
+BUILD-TIME check, run by `tests/test_context.py`, which scans every
+direction label in `kb/facets.yaml` (every `label`, `high` and `low` string,
+not merely the ones a fixture profile happens to reach) plus every fixture's
+rendered plain block.
+
+That placement is deliberate rather than an oversight to be corrected by
+adding a per-request scan: the inputs are static. The plain vocabulary is
+assembled entirely from `kb/facets.yaml`'s fixed taxonomy, so a leak can
+only enter through a KB edit -- a future facet direction reading "Rising
+sign energy" -- and a check over the whole KB catches that at the commit
+that introduces it, on every CI run, for zero cost per customer request. A
+runtime scan would re-derive the same answer on every call and, being
+limited to the facets one profile reached, would actually cover less.
 """
 
 from __future__ import annotations
@@ -24,18 +40,23 @@ import logging
 import math
 import re
 
+from engine.orchestrator import DISCLAIMER
 from engine.synthesis import ROUND
 
 logger = logging.getLogger(__name__)
 
 TOKEN_BUDGET = 350
 
-# Guards the plain vocabulary against leaking system names or esoteric jargon
-# (spec §5.2). Covers all six systems now live, not only the two that existed
-# when this module was first drafted -- astrology, Human Design, Gene Keys,
-# numerology, the Chinese zodiac and Kabbalah. `test_esoteric_guard_would_catch_a_leak`
-# in tests/test_context.py proves this list is not merely disjoint from
-# everything the generator could ever emit.
+# The vocabulary the plain block must never contain (spec §5.2): system names
+# and esoteric jargon, covering all six live systems -- astrology, Human
+# Design, Gene Keys, numerology, the Chinese zodiac and Kabbalah.
+#
+# Read by the test suite, not by build_context (see the module docstring).
+# `test_esoteric_guard_would_catch_a_leak` in tests/test_context.py proves
+# this list is not merely disjoint from everything the generator could ever
+# emit, and `test_no_facet_direction_label_in_the_kb_is_esoteric` runs it
+# over the entire facet taxonomy rather than over whatever the fixtures
+# reach.
 ESOTERIC_TERMS: frozenset[str] = frozenset(
     {
         # Astrology
@@ -134,9 +155,8 @@ ESOTERIC_TERMS: frozenset[str] = frozenset(
 
 # Word-boundary alternation over ESOTERIC_TERMS, with an optional trailing
 # "s" so a plural still trips it (e.g. "the Rats", "dragons"). Compiled once
-# at module import rather than once per term per call, since the guard runs
-# on every request. Case-insensitive: the plain block's casing is not a
-# defense.
+# at module import rather than once per term per scan. Case-insensitive: the
+# scanned text's casing is not a defense.
 #
 # `\b` treats hyphens, punctuation and string boundaries as word breaks, so
 # "dragon-like" and "Year of the Rat" both trip on the bare term, while
@@ -324,4 +344,11 @@ def build_context(
         "text": text,
         "json": {key: lines for _heading, key, lines in sections},
         "tokens": tokens,
+        # Spec §11: consuming apps inherit the disclaimer. This bundle is the
+        # artifact most likely to be pasted verbatim into an LLM system
+        # prompt, so it is the last response that should shed it -- and it
+        # was the one shedding it. `?format=text` returns `text` alone by
+        # definition (it is a text/plain body, not a JSON object); the JSON
+        # form is what carries the field, and README.md says so.
+        "disclaimer": DISCLAIMER,
     }

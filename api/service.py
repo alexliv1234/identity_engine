@@ -18,6 +18,19 @@ from engine.places.lookup import resolve
 ALWAYS_PRESENT = ("versions", "input_quality", "disclaimer")
 LAYERS = ("raw", "synthesis")
 
+#: The single key order every profile-shaped response uses, matching
+#: `engine.orchestrator.build_profile`'s own literal.
+#:
+#: There used to be two. `POST /v1/persons` returned the profile as stored
+#: (canonical JSON sorts keys, so: disclaimer, input_quality, raw, synthesis,
+#: versions) while `GET .../profile` returned `filter_profile`'s
+#: reconstruction (versions, input_quality, disclaimer, raw, synthesis). No
+#: test failed, because both carry identical values -- but byte-identical
+#: output is this product's core promise (spec §8), and one object with two
+#: serialisations quietly undercuts it for any consumer that hashes,
+#: diffs or golden-tests a response body.
+PROFILE_KEY_ORDER = ("versions", "input_quality", "raw", "synthesis", "disclaimer")
+
 _VERSIONS_HINT = "see /v1/meta/versions for the valid list"
 
 
@@ -75,7 +88,22 @@ def get_or_compute_profile(session: Session, person: Person) -> dict:
         )
         session.add(row)
         session.commit()
-    return json.loads(row.profile_json)
+    # Stored canonically (sorted keys, spec §8's determinism surface); handed
+    # back in the one order every response uses.
+    return order_profile(json.loads(row.profile_json))
+
+
+def order_profile(profile: dict) -> dict:
+    """Re-key a profile dict into `PROFILE_KEY_ORDER`.
+
+    Keys not in that tuple keep their relative order at the end rather than
+    being dropped: this is a reordering, never a filter (`filter_profile` is
+    the filter), so an added profile key still reaches the client even before
+    someone remembers to name it here.
+    """
+    ordered = {key: profile[key] for key in PROFILE_KEY_ORDER if key in profile}
+    ordered.update({key: value for key, value in profile.items() if key not in ordered})
+    return ordered
 
 
 def _parse_filter(raw_value: str | None, valid: frozenset[str], *, field: str) -> set[str]:
@@ -105,7 +133,9 @@ def filter_profile(profile: dict, layers: str | None, systems: str | None) -> di
 
     `versions`, `input_quality` and `disclaimer` are always present regardless
     of filters: a consumer must never lose the disclaimer by asking for one
-    layer.
+    layer. The result is re-keyed into `PROFILE_KEY_ORDER` so a filtered
+    profile is a subsequence of an unfiltered one rather than a second
+    ordering of the same object.
     """
     wanted_layers = _parse_filter(layers, frozenset(LAYERS), field="layers")
     # Validated unconditionally, even when `raw` was not requested: an unknown
@@ -119,4 +149,4 @@ def filter_profile(profile: dict, layers: str | None, systems: str | None) -> di
         result["raw"] = {key: value for key, value in raw.items() if key in wanted_systems}
     if "synthesis" in wanted_layers:
         result["synthesis"] = profile.get("synthesis", {})
-    return result
+    return order_profile(result)
