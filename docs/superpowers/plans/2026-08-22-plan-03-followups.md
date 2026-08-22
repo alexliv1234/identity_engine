@@ -73,3 +73,47 @@ untestable in CI.
 `lat`+`lon` without `tz` correctly falls to `UNKNOWN_PLACE`, but nothing pins that.
 
 **Stops being deferrable:** whenever place handling is next touched.
+
+## Carried from the whole-branch review
+
+### `communication`'s placeholder detection infers state from prose
+
+`engine/compatibility.py` decides whether `communication` is a placeholder with
+`if numerology_notes:` — truthiness on a list of note strings.
+
+This is correct **today**, and correct only by coincidence: `numerology_harmony` appends
+notes on exactly its two fallback paths, so a non-empty list happens to mean "numerology
+fell back". Add one informational numerology note that is not about a fallback, and
+`communication` is wrongly marked a placeholder and silently dropped from the headline
+`score`.
+
+**Fix:** have `numerology_harmony` return an explicit fallback flag rather than having the
+caller infer it from whether prose was emitted. Structured state should never be recovered
+from a message list.
+
+**Stops being deferrable:** the next time anyone adds a note to the numerology path.
+
+### `growth` and `score` — verify the class is actually closed
+
+The absent-evidence-as-negative-evidence defect was fixed three times on this branch, each
+time one level up from the last: R72 (one compatibility path), R81 (the rescale ranges),
+R89 (`growth`'s floor and the headline `score`). Each fix was correct and each left the
+same error alive one level up.
+
+**Worth doing once, deliberately:** walk every number the API emits and ask of each one
+"could this value mean *nothing was measured* as well as *this was measured*?" That sweep
+has never been done as a whole; three separate reviewers each found one instance.
+
+**Stops being deferrable:** before the API is described publicly as reporting convergence
+and tension honestly, since that is the claim this defect contradicts.
+
+### `score_partial` and `effect: "unmeasured"` are v1-additive
+
+Both were added late. Neither breaks an existing consumer — one is a new field, the other a
+new enum value — but a consumer switching exhaustively on `effect` gains a third case, and
+there is no version marker on the response contract.
+
+**Fix:** document both in the README endpoint table (the `effect` enum now is), and decide
+whether the v1 response needs an explicit version field before external customers integrate.
+
+**Stops being deferrable:** before the first external integration.
