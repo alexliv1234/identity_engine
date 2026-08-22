@@ -71,6 +71,38 @@ reads as measured mid-compatibility. It now carries both a note and a
 `reasons` row whose `effect` is `"unmeasured"` -- a third effect alongside
 `"positive"` and `"challenging"`, because filing absent evidence under
 either of those two is precisely the error this module exists not to make.
+
+**Fix round 3: the same rule, closed at the top level.** The first two fix
+rounds above chased this defect wherever it happened to have a name --
+`connection`'s zero-pairs case, the numerology matrix's silent fallback. Two
+more places still absorbed absent evidence as a measurement, both of them
+consequences of the same missing-grid state rather than new sources of data:
+
+  * `growth` has exactly one input -- `hard_count` from the synastry grid --
+    and never had a fallback of its own. When the candidate grid is entirely
+    empty (`connection_pairs` and `communication_pairs` both zero),
+    `hard_count` is necessarily zero too, and rescaling that zero produced a
+    reported 0 that reads as "no friction found" -- a confident claim of
+    harmony asserted from zero measurements. `growth`'s `0..8` range is not
+    the bug and is unchanged; the floor is. `growth` now takes the same
+    fallback `connection` already had: zero checkable pairs reports
+    `NEUTRAL_DIMENSION` with a note, not a measured 0.
+  * `score = round(sum(dimensions.values()) / 3)` averaged all three
+    dimensions unconditionally, including whichever ones had just reported a
+    placeholder rather than a measurement. `score` now averages only the
+    dimensions that were actually measured this call, and the response
+    carries `score_partial: true` whenever one or more were excluded --
+    additive to the v1 response shape, so a consumer can tell a
+    fully-measured score from a partly-placeholder one by reading a field,
+    not by parsing `notes`. A dimension counts as a placeholder here exactly
+    when it reported `NEUTRAL_DIMENSION` for having no input at all (this
+    applies to `connection` and, now, `growth`), or -- for `communication`,
+    which has no `NEUTRAL_DIMENSION` branch of its own -- when BOTH of its
+    inputs fell back: no checkable astrology pair AND the numerology matrix
+    itself returned `NEUTRAL_HARMONY` rather than a curated value. When
+    `communication` blends a real numerology measurement with an absent
+    astrology grid, that numerology number is real evidence, not a
+    placeholder, and stays in the mean.
 """
 
 from __future__ import annotations
@@ -325,6 +357,28 @@ _CONNECTION_UNMEASURABLE_NOTE = (
     "for 'nothing was measured', not a measured midpoint."
 )
 
+_GROWTH_UNMEASURABLE_NOTE = (
+    "growth could not be measured: the synastry grid has no checkable pairs at "
+    "all, so there is no hard-aspect count to rescale -- not zero friction found, "
+    f"zero pairs looked at. The {NEUTRAL_DIMENSION} reported here is a placeholder "
+    "for 'nothing was measured', not a measured absence of friction."
+)
+
+
+def _score_partial_note(placeholder_dimensions: set[str]) -> str:
+    """Said whenever the headline `score` excluded one or more dimensions
+    from its mean because they reported a placeholder rather than a
+    measurement. Same voice as the fallback notes above: name what was
+    dropped, then say why averaging it in would have been a lie."""
+    named = _join(sorted(placeholder_dimensions))
+    return (
+        f"score is partial: {named} reported a placeholder rather than a "
+        "measurement, so the headline score averages only the dimensions that "
+        "were actually measured this time. Averaging a placeholder in would let "
+        "silence pull the headline number toward NEUTRAL_DIMENSION as if it were "
+        "evidence -- see score_partial."
+    )
+
 
 def hd_connection_channels(a: dict, b: dict) -> tuple[int, list[dict], list[str]]:
     hd_a = a.get("raw", {}).get("human_design", {})
@@ -483,11 +537,18 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
     if moon_note:
         notes.append(moon_note)
 
+    # Dimensions that ended up reporting NEUTRAL_DIMENSION (or, for
+    # `communication`, a value built entirely from fallbacks) rather than an
+    # actual measurement -- tracked so the headline `score` below can average
+    # only what was measured (fix round 3).
+    placeholder_dimensions: set[str] = set()
+
     # --- connection: the planetary grid + Human Design connection channels
     if connection_astro_score is None:
         if hd_notes:
             connection = NEUTRAL_DIMENSION
             notes.append(_CONNECTION_UNMEASURABLE_NOTE)
+            placeholder_dimensions.add("connection")
         else:
             connection = hd_score
             notes.append(_CONNECTION_ASTRO_EXCLUDED_NOTE)
@@ -509,6 +570,12 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
     if communication_astro_score is None:
         communication = numerology_score
         notes.append(_COMMUNICATION_ASTRO_EXCLUDED_NOTE)
+        if numerology_notes:
+            # Both of communication's inputs are absent here -- no checkable
+            # ascendant pair AND the numerology matrix itself fell back to
+            # NEUTRAL_HARMONY -- so the number this dimension reports is a
+            # placeholder end to end, not a real measurement standing alone.
+            placeholder_dimensions.add("communication")
     else:
         if synastry.communication_pairs < FULL_COMMUNICATION_PAIRS:
             notes.append(
@@ -523,8 +590,18 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
 
     notes.extend(numerology_notes)
 
-    # More hard aspects means more friction to work with -- reported as growth.
-    growth = _rescale(synastry.hard_count, 0, 8)
+    # More hard aspects means more friction to work with -- reported as
+    # growth. A zero-pairs grid is absent evidence, not zero friction (fix
+    # round 3): `hard_count` can only be zero BY MEASUREMENT when at least
+    # one pair was actually checked, mirroring `connection`'s own zero-pairs
+    # fallback above.
+    total_synastry_pairs = synastry.connection_pairs + synastry.communication_pairs
+    if total_synastry_pairs == 0:
+        growth = NEUTRAL_DIMENSION
+        notes.append(_GROWTH_UNMEASURABLE_NOTE)
+        placeholder_dimensions.add("growth")
+    else:
+        growth = _rescale(synastry.hard_count, 0, 8)
 
     dimensions = {
         "connection": connection,
@@ -532,8 +609,30 @@ def compare(profile_a: dict, profile_b: dict) -> dict:
         "growth": growth,
     }
 
+    # The headline score averages only the dimensions that were actually
+    # measured -- a placeholder dimension does not get to pull the number it
+    # sits next to toward NEUTRAL_DIMENSION as if it were evidence.
+    measured = {
+        name: value for name, value in dimensions.items() if name not in placeholder_dimensions
+    }
+    score_partial = bool(placeholder_dimensions)
+    if measured:
+        score = round(sum(measured.values()) / len(measured))
+    else:
+        # All three dimensions were placeholders -- an extreme edge case, but
+        # the response still needs a number, and it must be the same
+        # placeholder the dimensions themselves already are, not a fabricated
+        # measurement dressed up as one.
+        score = NEUTRAL_DIMENSION
+    if score_partial:
+        notes.append(_score_partial_note(placeholder_dimensions))
+
     return {
-        "score": round(sum(dimensions.values()) / 3),
+        "score": score,
+        # v1-additive: true whenever `score` excluded a placeholder
+        # dimension from its mean, so a consumer can tell a fully-measured
+        # score from a partly-placeholder one without parsing `notes`.
+        "score_partial": score_partial,
         "dimensions": dimensions,
         "reasons": synastry.reasons + hd_reasons + numerology_reasons,
         "notes": notes,

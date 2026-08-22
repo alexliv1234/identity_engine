@@ -62,7 +62,7 @@ the app that created them: another app's person id resolves to `404`, never
 | GET | `/v1/persons/{id}/profile` | Cached profile. `?layers=raw,synthesis` and `?systems=astrology,...` narrow the response |
 | GET | `/v1/persons/{id}/context` | Token-budgeted LLM bundle. `?format=text\|json`, `?vocabulary=plain\|esoteric` |
 | GET | `/v1/persons/{id}/timing` | Numerology personal year/month. `?year=&month=` default to the current UTC date |
-| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall score, three dimension scores, reasons, notes |
+| GET | `/v1/compatibility?a={id}&b={id}` | Pairwise report: overall `score` (plus `score_partial: true` when one or more dimensions had nothing measurable and were excluded from it), three dimension scores, `reasons` (each row's `effect` is one of `positive`, `challenging`, or `unmeasured` — the third marks a row reporting an absent input, not a measured agreement or conflict), notes |
 | DELETE | `/v1/persons/{id}` | Full erasure, cascades to every derived profile row |
 | GET | `/v1/meta/versions` | Engine version, KB version, registered system list |
 

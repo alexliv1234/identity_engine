@@ -151,14 +151,20 @@ def test_missing_birth_time_pair_dimensions_and_score_are_pinned():
         = 25. Both people are the same fixture person, Life Path 1, and
         "1-1" is a curated pair at harmony 6 -> 60. round((25 + 60) / 2) =
         round(42.5) = 42 (banker's rounding to even).
-      growth: no hard aspects -> 0.
-      score: round((54 + 42 + 0) / 3) = 32.
+      growth: no hard aspects, and this pair HAS checkable synastry pairs
+        (12 + 3 = 15), so the fix-round-3 zero-pairs fallback does not apply
+        -- 0 here is a measured zero, not a placeholder -> 0.
+      score: none of the three dimensions above is a placeholder (connection
+        and communication are both real measurements, growth is a measured
+        0), so the fix-round-3 score change does not alter this number:
+        round((54 + 42 + 0) / 3) = 32.
     """
     a = build_profile(FIXTURES["standard"])
     b = build_profile(FIXTURES["no_birth_time"])
     report = compare(a, b)
     assert report["dimensions"] == {"connection": 54, "communication": 42, "growth": 0}
     assert report["score"] == 32
+    assert report["score_partial"] is False
 
 
 def test_moon_excluded_note_names_both_when_both_are_missing():
@@ -494,3 +500,90 @@ def test_connection_reports_a_placeholder_when_neither_of_its_inputs_exists():
     assert report["dimensions"]["connection"] == NEUTRAL_DIMENSION
     assert any(n.startswith("connection could not be measured") for n in report["notes"])
     assert any("placeholder" in n for n in report["notes"])
+
+
+# --- FIX ROUND 3, item 1: `growth` needs the same zero-checkable-pairs
+# fallback `connection` already has. -----------------------------------------
+#
+# `growth`'s only input is `hard_count` from the synastry grid, and it never
+# had a fallback of its own: when the candidate grid is entirely empty, the
+# grid contributed no measurements at all, and rescaling that zero reported a
+# measured-looking 0 -- "no friction found" -- from zero measurements.
+
+
+def test_growth_reports_a_placeholder_when_no_synastry_pairs_are_checkable():
+    """Both people contribute no synastry points at all (no placements, no
+    angles), so both `connection_pairs` and `communication_pairs` are zero --
+    `hard_count` cannot have been measured. `growth` must report
+    `NEUTRAL_DIMENSION`, not the old silent 0 (`_rescale(0, 0, 8)` also
+    equals 0, but 0 there means 'nothing checked', not 'checked, no
+    friction' -- indistinguishable only until this fix, which is exactly the
+    bug). Pinning `NEUTRAL_DIMENSION` (50) here is a real discriminator: a
+    reverted fix produces 0, not 50, so a silent regression cannot hide
+    behind this assertion."""
+    from engine.compatibility import NEUTRAL_DIMENSION
+
+    a = _no_astrology_profile(1, {"available": False})
+    b = _no_astrology_profile(1, {"available": False})
+    report = compare(a, b)
+
+    assert report["dimensions"]["growth"] == NEUTRAL_DIMENSION
+    assert any(n.startswith("growth could not be measured") for n in report["notes"])
+
+
+def test_growth_placeholder_note_does_not_fire_for_a_fully_measured_pair(pair):
+    """Discriminating companion: a fully-timed pair (the module-scoped
+    `pair` fixture, already proven elsewhere -- see
+    `test_a_complete_pair_carries_no_reduction_or_unmeasured_notes` -- to
+    have a full 25-pair grid and no reduction/unmeasured notes) has plenty of
+    checkable pairs, so the new fallback must not fire. A note that fired
+    unconditionally would satisfy the test above for the wrong reason."""
+    report = compare(*pair)
+    assert not any(n.startswith("growth could not be measured") for n in report["notes"])
+
+
+# --- FIX ROUND 3, item 2: the headline `score` must not average in a
+# dimension that reported a placeholder rather than a measurement. ----------
+
+
+def test_score_excludes_placeholder_dimensions_from_its_mean():
+    """Both people contribute no synastry points and no Human Design, but
+    they DO share a curated Life Path pair, so `communication` is a real
+    measurement while `connection` and `growth` are both placeholders.
+
+    Hand-derived expectations:
+      connection: no checkable astrology pair and Human Design unavailable ->
+        NEUTRAL_DIMENSION = 50 (placeholder).
+      growth: no checkable synastry pairs at all -> NEUTRAL_DIMENSION = 50
+        (placeholder, fix round 3 item 1 above).
+      communication: no ascendant on either side, so the astrology subset is
+        excluded, but Life Path 1-1 is curated at harmony 6 (see
+        kb/compatibility/life_path_pairs.yaml) -> 6 * 10 = 60. This is a real
+        measurement -- numerology found and used a curated entry, it did not
+        fall back to NEUTRAL_HARMONY -- so it is NOT a placeholder.
+      score: the mean of the ONE measured dimension, communication alone ->
+        round(60 / 1) = 60.
+
+    The old, unconditional mean would have been
+    round((50 + 60 + 50) / 3) = round(53.33) = 53 -- a different number, so
+    this is a real discriminator: a silent regression back to averaging all
+    three lands on 53, not 60.
+    """
+    a = _no_astrology_profile(1, {"available": False})
+    b = _no_astrology_profile(1, {"available": False})
+    report = compare(a, b)
+
+    assert report["dimensions"] == {"connection": 50, "communication": 60, "growth": 50}
+    assert report["score"] == 60
+    assert report["score_partial"] is True
+    assert any(n.startswith("score is partial") for n in report["notes"])
+
+
+def test_score_partial_is_false_and_score_is_the_plain_mean_for_a_fully_measured_pair(pair):
+    """Discriminating companion: the fully-timed, fully-curated `pair`
+    fixture has no placeholder dimensions at all, so `score_partial` must be
+    `False` and no 'score is partial' note may appear -- otherwise the
+    marker would fire unconditionally and prove nothing."""
+    report = compare(*pair)
+    assert report["score_partial"] is False
+    assert not any(n.startswith("score is partial") for n in report["notes"])
